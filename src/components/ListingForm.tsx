@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sparkles, AlertCircle } from "lucide-react";
 import { useState } from "react";
 
 const listingSchema = z.object({
@@ -38,18 +39,34 @@ interface ListingFormProps {
   onSubmit: (data: ListingFormData) => void;
   isLoading: boolean;
   isValid: boolean;
+  totalImages: number;
+  formErrors: string[];
 }
 
-export function ListingForm({ onSubmit, isLoading, isValid }: ListingFormProps) {
+export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErrors }: ListingFormProps) {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
   });
+
+  const formData = watch();
+  
+  const getValidationTooltip = () => {
+    const issues = [];
+    if (!formData?.title) issues.push("Naslov");
+    if (!formData?.price) issues.push("Cena");
+    if (!formData?.location) issues.push("Lokacija");
+    if (totalImages < 5) issues.push(`${5 - totalImages} više fotografija`);
+    
+    if (issues.length === 0) return "";
+    return `Potrebno: ${issues.join(", ")}`;
+  };
 
   const onFormSubmit = (data: ListingFormData) => {
     onSubmit({ ...data, extras: selectedExtras });
@@ -64,10 +81,12 @@ export function ListingForm({ onSubmit, isLoading, isValid }: ListingFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground mb-4">
-        Informacije o nekretnini
-      </h2>
+    <TooltipProvider>
+      <div className="backdrop-blur-sm bg-white/60 dark:bg-gray-800/40 rounded-xl border border-white/20 dark:border-gray-700/30 shadow-lg p-6">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
+            Informacije o nekretnini
+          </h2>
       
       <div className="space-y-4">
         <div>
@@ -188,24 +207,47 @@ export function ListingForm({ onSubmit, isLoading, isValid }: ListingFormProps) 
         </div>
       </div>
 
-      <Button
-        type="submit"
-        disabled={!isValid || isLoading}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-        size="lg"
-      >
-        {isLoading ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2" />
-            Generisanje u toku…
-          </>
-        ) : (
-          <>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Generiši profesionalni video
-          </>
-        )}
-      </Button>
-    </form>
+          {!isValid ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-full">
+                  <Button
+                    type="button"
+                    disabled={true}
+                    className="w-full bg-muted text-muted-foreground cursor-not-allowed"
+                    size="lg"
+                  >
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    Generiši profesionalni video
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-sm">{getValidationTooltip()}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+              size="lg"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2" />
+                  Generisanje u toku…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generiši profesionalni video
+                </>
+              )}
+            </Button>
+          )}
+        </form>
+      </div>
+    </TooltipProvider>
   );
 }

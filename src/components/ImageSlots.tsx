@@ -95,18 +95,23 @@ function SortableSlot({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative border-2 border-dashed rounded-lg p-4 min-h-[200px] transition-all",
+        "relative backdrop-blur-sm bg-gray-800/40 dark:bg-gray-200/10 border border-gray-200/20 dark:border-gray-700/30 rounded-xl p-6 min-h-[240px] transition-all duration-300 shadow-lg hover:shadow-xl",
         isDragging ? "opacity-50 scale-95" : "",
-        isComplete() ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-        "cursor-grab active:cursor-grabbing"
+        isComplete() ? "bg-primary/10 border-primary/30 shadow-primary/20" : "hover:bg-gray-800/50 dark:hover:bg-gray-200/20",
+        "cursor-grab active:cursor-grabbing hover:scale-105"
       )}
       {...attributes}
       {...listeners}
     >
-      <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline" className="text-xs">
-          Slot {index + 1}
-        </Badge>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
+            {index + 1}
+          </div>
+          <Badge variant="outline" className="text-xs backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
+            Slot {index + 1}
+          </Badge>
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -114,7 +119,7 @@ function SortableSlot({
             e.stopPropagation();
             onModeToggle(slot.id);
           }}
-          className="text-xs h-6 px-2"
+          className="text-xs h-7 px-3 rounded-full backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 hover:bg-white/80 dark:hover:bg-gray-800/80 border border-white/20"
         >
           {slot.mode === "image-to-video" ? (
             <>
@@ -133,7 +138,7 @@ function SortableSlot({
       <div className="space-y-2">
         {slot.images.map((file, imageIndex) => (
           <div key={imageIndex} className="relative group">
-            <div className="flex items-center justify-between p-2 bg-secondary rounded border">
+            <div className="flex items-center justify-between p-3 backdrop-blur-sm bg-white/60 dark:bg-gray-700/50 rounded-lg border border-white/20 dark:border-gray-600/30 shadow-sm">
               <div className="flex items-center space-x-2">
                 <ImageIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm truncate max-w-[120px]">
@@ -158,7 +163,7 @@ function SortableSlot({
         {slot.images.length < (slot.mode === "image-to-video" ? 1 : 2) && (
           <Button
             variant="ghost"
-            className="w-full h-16 border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 text-muted-foreground hover:text-primary"
+            className="w-full h-20 border-2 border-dashed border-white/30 dark:border-gray-500/30 hover:border-primary/50 text-muted-foreground hover:text-primary backdrop-blur-sm bg-white/20 dark:bg-gray-600/20 hover:bg-white/40 dark:hover:bg-gray-600/40 rounded-lg transition-all duration-300"
             onClick={(e) => {
               e.stopPropagation();
               fileInputRef.current?.click();
@@ -230,12 +235,15 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between p-4 backdrop-blur-sm bg-white/60 dark:bg-gray-800/40 rounded-xl border border-white/20 dark:border-gray-700/30 shadow-lg">
         <h2 className="text-xl font-semibold text-foreground">
           Fotografije ({totalImages}/5+)
         </h2>
-        <Badge variant={totalImages >= 5 ? "default" : "secondary"}>
+        <Badge 
+          variant={totalImages >= 5 ? "default" : "secondary"}
+          className="backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 shadow-sm"
+        >
           {totalImages >= 5 ? "Spremno" : "Potrebno još " + Math.max(0, 5 - totalImages)}
         </Badge>
       </div>
@@ -249,7 +257,7 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
           items={slots}
           strategy={rectSortingStrategy}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {slots.map((slot, index) => (
               <SortableSlot
                 key={slot.id}
@@ -263,9 +271,11 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
         </SortableContext>
       </DndContext>
       
-      <p className="text-sm text-muted-foreground">
-        Dovucite slike da promenite redosled. Kliknite na "Video"/"Frame" da promenite režim slota.
-      </p>
+      <div className="text-center p-4 backdrop-blur-sm bg-white/40 dark:bg-gray-800/30 rounded-xl border border-white/20 dark:border-gray-700/30">
+        <p className="text-sm text-muted-foreground">
+          Dovucite slike da promenite redosled. Kliknite na "Video"/"Frame" da promenite režim slota.
+        </p>
+      </div>
     </div>
   );
 }

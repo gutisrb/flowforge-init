@@ -19,6 +19,12 @@ const Index = () => {
 
   const totalImages = slots.reduce((sum, slot) => sum + slot.images.length, 0);
   const isFormValid = totalImages >= 5;
+  
+  const getFormErrors = () => {
+    const errors = [];
+    if (totalImages < 5) errors.push(`Potrebno još ${5 - totalImages} fotografija`);
+    return errors;
+  };
 
   const createMultipartFormData = (formData: any) => {
     const form = new FormData();
@@ -138,17 +144,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <ProgressBar value={progress} />
       
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
+      <header className="backdrop-blur-lg bg-white/60 dark:bg-gray-900/60 border-b border-white/20 dark:border-gray-700/30 shadow-lg">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Smartflow — Video oglasi
             </h1>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground backdrop-blur-sm bg-white/40 dark:bg-gray-800/40 px-3 py-1 rounded-full border border-white/20">
               Prijavljeni: —
             </div>
           </div>
@@ -156,7 +162,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Form */}
           <div className="space-y-6">
@@ -164,6 +170,8 @@ const Index = () => {
               onSubmit={handleSubmit}
               isLoading={isLoading}
               isValid={isFormValid}
+              totalImages={totalImages}
+              formErrors={getFormErrors()}
             />
           </div>
 
