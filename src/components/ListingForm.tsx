@@ -4,10 +4,9 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles, AlertCircle } from "lucide-react";
-import { useState } from "react";
 
 const listingSchema = z.object({
   title: z.string().min(1, "Naslov je obavezan"),
@@ -17,23 +16,11 @@ const listingSchema = z.object({
   beds: z.string().optional(),
   baths: z.string().optional(),
   sprat: z.string().optional(),
-  extras: z.array(z.string()).optional(),
+  extras: z.string().optional(),
 });
 
 type ListingFormData = z.infer<typeof listingSchema>;
 
-const extrasOptions = [
-  "Terasa",
-  "Balkon", 
-  "Parking",
-  "Lift",
-  "Klima",
-  "Centralno grejanje",
-  "Garaža",
-  "Podrum",
-  "Interfon",
-  "Video nadzor"
-];
 
 interface ListingFormProps {
   onSubmit: (data: ListingFormData) => void;
@@ -44,7 +31,6 @@ interface ListingFormProps {
 }
 
 export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErrors }: ListingFormProps) {
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
   const {
     register,
@@ -69,15 +55,7 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErr
   };
 
   const onFormSubmit = (data: ListingFormData) => {
-    onSubmit({ ...data, extras: selectedExtras });
-  };
-
-  const handleExtraToggle = (extra: string) => {
-    setSelectedExtras(prev => 
-      prev.includes(extra) 
-        ? prev.filter(e => e !== extra)
-        : [...prev, extra]
-    );
+    onSubmit(data);
   };
 
   return (
@@ -187,23 +165,15 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErr
         </div>
 
         <div>
-          <Label className="text-sm font-medium mb-3 block">
+          <Label htmlFor="extras" className="text-sm font-medium">
             Dodatno (opciono)
           </Label>
-          <div className="grid grid-cols-2 gap-3">
-            {extrasOptions.map((extra) => (
-              <div key={extra} className="flex items-center space-x-2">
-                <Checkbox
-                  id={extra}
-                  checked={selectedExtras.includes(extra)}
-                  onCheckedChange={() => handleExtraToggle(extra)}
-                />
-                <Label htmlFor={extra} className="text-sm">
-                  {extra}
-                </Label>
-              </div>
-            ))}
-          </div>
+          <Textarea
+            id="extras"
+            {...register("extras")}
+            placeholder="Opišite šta je posebno kod ovog stana (terasa, parking, lift, klima, itd.)"
+            className="mt-1 min-h-[80px]"
+          />
         </div>
       </div>
 

@@ -75,7 +75,7 @@ const Index = () => {
     form.append("beds", formData.beds || "");
     form.append("baths", formData.baths || "");
     form.append("sprat", formData.sprat || "");
-    form.append("extras", JSON.stringify(formData.extras || []));
+    form.append("extras", formData.extras || "");
     form.append("grouping", JSON.stringify(grouping));
     form.append("slot_mode_info", JSON.stringify(grouping));
     form.append("timestamp", new Date().toISOString());
