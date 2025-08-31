@@ -1,27 +1,27 @@
-import { useState, useRef } from "react";
-import { 
-  DndContext, 
+import React, { useRef } from "react";
+import {
+  DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  rectSortingStrategy
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  useSortable
+  useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, X, Image as ImageIcon, Video } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Upload, GripVertical, X, Image as ImageIcon } from "lucide-react";
 
 export interface SlotData {
   id: string;
@@ -29,32 +29,28 @@ export interface SlotData {
   images: File[];
 }
 
-interface ImageSlotsProps {
+export interface ImageSlotsProps {
   slots: SlotData[];
   onSlotsChange: (slots: SlotData[]) => void;
   totalImages: number;
 }
 
-function SortableSlot({ 
-  slot, 
-  index, 
-  onModeToggle, 
-  onImagesChange 
-}: { 
-  slot: SlotData; 
+interface SortableSlotProps {
+  slot: SlotData;
   index: number;
   onModeToggle: (id: string) => void;
-  onImagesChange: (id: string, files: File[]) => void;
-}) {
+  onImagesChange: (id: string, images: File[]) => void;
+}
+
+function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlotProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging
+    isDragging,
   } = useSortable({ id: slot.id });
 
   const style = {
@@ -62,130 +58,198 @@ function SortableSlot({
     transition,
   };
 
+  const maxImages = slot.mode === "image-to-video" ? 1 : 2;
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const maxFiles = slot.mode === "image-to-video" ? 1 : 2;
-    const selectedFiles = files.slice(0, maxFiles);
-    onImagesChange(slot.id, selectedFiles);
-  };
-
-  const handleRemoveImage = (imageIndex: number) => {
-    const newImages = slot.images.filter((_, idx) => idx !== imageIndex);
-    onImagesChange(slot.id, newImages);
-  };
-
-  const getSlotStatus = () => {
-    if (slot.mode === "image-to-video") {
-      return slot.images.length === 1 ? "Kompletno" : "Dodaj sliku";
-    } else {
-      if (slot.images.length === 0) return "Dodaj slike";
-      if (slot.images.length === 1) return "Dodaj drugu sliku";
-      return "Kompletno";
+    if (files.length > 0) {
+      const newImages = [...slot.images, ...files].slice(0, maxImages);
+      onImagesChange(slot.id, newImages);
+    }
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const isComplete = () => {
-    return slot.mode === "image-to-video" 
-      ? slot.images.length === 1 
-      : slot.images.length === 2;
+  const handleRemoveImage = (imageIndex: number) => {
+    const newImages = slot.images.filter((_, i) => i !== imageIndex);
+    onImagesChange(slot.id, newImages);
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+    if (files.length > 0) {
+      const newImages = [...slot.images, ...files].slice(0, maxImages);
+      onImagesChange(slot.id, newImages);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const canAddMore = slot.images.length < maxImages;
+
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "relative backdrop-blur-sm bg-gray-800/40 dark:bg-gray-200/10 border border-gray-200/20 dark:border-gray-700/30 rounded-xl p-6 min-h-[240px] transition-all duration-300 shadow-lg hover:shadow-xl",
-        isDragging ? "opacity-50 scale-95" : "",
-        isComplete() ? "bg-primary/10 border-primary/30 shadow-primary/20" : "hover:bg-gray-800/50 dark:hover:bg-gray-200/20",
-        "cursor-grab active:cursor-grabbing hover:scale-105"
-      )}
-      {...attributes}
-      {...listeners}
+      className={`relative p-6 border-2 border-dashed transition-all duration-200 bg-white hover:shadow-md ${
+        isDragging 
+          ? 'opacity-50 rotate-1 shadow-lg scale-105' 
+          : 'hover:border-primary/50'
+      } ${
+        slot.images.length > 0 
+          ? 'border-primary/30 shadow-sm' 
+          : 'border-gray-200 hover:border-primary/30'
+      }`}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
-            {index + 1}
-          </div>
-          <Badge variant="outline" className="text-xs backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
-            Slot {index + 1}
-          </Badge>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onModeToggle(slot.id);
-          }}
-          className="text-xs h-7 px-3 rounded-full backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 hover:bg-white/80 dark:hover:bg-gray-800/80 border border-white/20"
-        >
-          {slot.mode === "image-to-video" ? (
-            <>
-              <Video className="w-3 h-3 mr-1" />
-              Video
-            </>
-          ) : (
-            <>
-              <ImageIcon className="w-3 h-3 mr-1" />
-              Frame
-            </>
-          )}
-        </Button>
+      {/* Drag Handle */}
+      <div
+        className="absolute top-3 right-3 cursor-grab hover:cursor-grabbing opacity-30 hover:opacity-60 transition-opacity"
+        {...listeners}
+        {...attributes}
+      >
+        <GripVertical className="h-4 w-4 text-gray-400" />
       </div>
 
-      <div className="space-y-2">
-        {slot.images.map((file, imageIndex) => (
-          <div key={imageIndex} className="relative group">
-            <div className="flex items-center justify-between p-3 backdrop-blur-sm bg-white/60 dark:bg-gray-700/50 rounded-lg border border-white/20 dark:border-gray-600/30 shadow-sm">
-              <div className="flex items-center space-x-2">
-                <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm truncate max-w-[120px]">
-                  {file.name}
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveImage(imageIndex);
-                }}
-                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-        ))}
+      {/* Slot Badge */}
+      <Badge 
+        variant="default"
+        className="absolute -top-3 -left-3 h-7 w-7 rounded-full p-0 flex items-center justify-center text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+      >
+        {index + 1}
+      </Badge>
 
-        {slot.images.length < (slot.mode === "image-to-video" ? 1 : 2) && (
+      <div className="space-y-4">
+        {/* Mode Toggle */}
+        <div className="flex gap-2">
           <Button
-            variant="ghost"
-            className="w-full h-20 border-2 border-dashed border-white/30 dark:border-gray-500/30 hover:border-primary/50 text-muted-foreground hover:text-primary backdrop-blur-sm bg-white/20 dark:bg-gray-600/20 hover:bg-white/40 dark:hover:bg-gray-600/40 rounded-lg transition-all duration-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              fileInputRef.current?.click();
-            }}
+            size="sm"
+            variant={slot.mode === "image-to-video" ? "default" : "outline"}
+            onClick={() => onModeToggle(slot.id)}
+            className="text-xs font-medium"
           >
-            <div className="text-center">
-              <Upload className="w-5 h-5 mx-auto mb-1" />
-              <div className="text-xs">{getSlotStatus()}</div>
-            </div>
+            Slika (1)
           </Button>
+          <Button
+            size="sm"
+            variant={slot.mode === "frame-to-frame" ? "default" : "outline"}
+            onClick={() => onModeToggle(slot.id)}
+            className="text-xs font-medium"
+          >
+            Kadrovi (2)
+          </Button>
+        </div>
+
+        {/* Image Display Area */}
+        <div className="space-y-3">
+          {slot.mode === "image-to-video" ? (
+            // Single image mode
+            <div className="space-y-2">
+              {slot.images[0] ? (
+                <div className="relative group">
+                  <img
+                    src={URL.createObjectURL(slot.images[0])}
+                    alt="Uploaded"
+                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                  />
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    onClick={() => handleRemoveImage(0)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  <div className="absolute bottom-2 left-2 text-xs bg-white/90 px-2 py-1 rounded text-gray-700 shadow-sm">
+                    {slot.images[0].name.length > 15 
+                      ? slot.images[0].name.substring(0, 15) + "..." 
+                      : slot.images[0].name}
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-200 rounded-lg h-32 flex items-center justify-center bg-gray-50/50">
+                  <div className="text-center text-gray-500">
+                    <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">Dodaj sliku</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Frame-to-frame mode
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1].map((imageIndex) => (
+                <div key={imageIndex} className="space-y-1">
+                  <div className="text-xs text-gray-600 font-medium">
+                    {imageIndex === 0 ? "Prvi" : "Drugi"}
+                  </div>
+                  {slot.images[imageIndex] ? (
+                    <div className="relative group">
+                      <img
+                        src={URL.createObjectURL(slot.images[imageIndex])}
+                        alt={`Frame ${imageIndex + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                      />
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        className="absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveImage(imageIndex)}
+                      >
+                        <X className="h-2 w-2" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg h-24 flex items-center justify-center bg-gray-50/50">
+                      <div className="text-center text-gray-500">
+                        <ImageIcon className="h-4 w-4 mx-auto mb-1" />
+                        <p className="text-xs">Dodaj</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Add Button */}
+        {canAddMore && (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple={slot.mode === "frame-to-frame"}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              size="sm"
+              className="w-full border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 transition-colors"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Dodaj sliku
+            </Button>
+          </div>
         )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple={slot.mode === "frame-to-frame"}
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+        {/* Status */}
+        <div className="text-xs text-gray-500 text-center font-medium">
+          {slot.images.length}/{maxImages} {slot.images.length === 1 ? 'slika' : 'slika'}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -200,64 +264,60 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = slots.findIndex(slot => slot.id === active.id);
-      const newIndex = slots.findIndex(slot => slot.id === over.id);
-      
+    if (active.id !== over?.id) {
+      const oldIndex = slots.findIndex((slot) => slot.id === active.id);
+      const newIndex = slots.findIndex((slot) => slot.id === over?.id);
+
       onSlotsChange(arrayMove(slots, oldIndex, newIndex));
     }
   };
 
-  const handleModeToggle = (slotId: string) => {
-    const newSlots = slots.map(slot => {
-      if (slot.id === slotId) {
-        const newMode: "image-to-video" | "frame-to-frame" = 
-          slot.mode === "image-to-video" ? "frame-to-frame" : "image-to-video";
-        return {
-          ...slot,
-          mode: newMode,
-          images: [] // Clear images when switching modes
-        };
-      }
-      return slot;
-    });
+  const handleModeToggle = (id: string) => {
+    const newSlots = slots.map((slot) =>
+      slot.id === id
+        ? {
+            ...slot,
+            mode: slot.mode === "image-to-video" ? "frame-to-frame" as const : "image-to-video" as const,
+            images: [], // Clear images when switching modes
+          }
+        : slot
+    );
     onSlotsChange(newSlots);
   };
 
-  const handleImagesChange = (slotId: string, files: File[]) => {
-    const newSlots = slots.map(slot => {
-      if (slot.id === slotId) {
-        return { ...slot, images: files };
-      }
-      return slot;
-    });
+  const handleImagesChange = (id: string, images: File[]) => {
+    const newSlots = slots.map((slot) =>
+      slot.id === id ? { ...slot, images } : slot
+    );
     onSlotsChange(newSlots);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between p-4 backdrop-blur-sm bg-white/60 dark:bg-gray-800/40 rounded-xl border border-white/20 dark:border-gray-700/30 shadow-lg">
-        <h2 className="text-xl font-semibold text-foreground">
-          Fotografije ({totalImages}/5+)
-        </h2>
-        <Badge 
-          variant={totalImages >= 5 ? "default" : "secondary"}
-          className="backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 shadow-sm"
-        >
-          {totalImages >= 5 ? "Spremno" : "Potrebno još " + Math.max(0, 5 - totalImages)}
-        </Badge>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-3">
+          <h2 className="text-xl font-semibold text-gray-900">Fotografije</h2>
+          <Badge 
+            variant={totalImages >= 5 ? "default" : "secondary"}
+            className="px-3 py-1 font-medium"
+          >
+            {totalImages}/5+
+          </Badge>
+        </div>
+        <p className="text-sm text-gray-600">
+          Organizujte fotografije u slotove • Prevucite za reorder
+        </p>
       </div>
-      
-      <DndContext 
+
+      {/* Slots */}
+      <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext 
-          items={slots}
-          strategy={rectSortingStrategy}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <SortableContext items={slots.map(slot => slot.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
             {slots.map((slot, index) => (
               <SortableSlot
                 key={slot.id}
@@ -270,10 +330,11 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
           </div>
         </SortableContext>
       </DndContext>
-      
-      <div className="text-center p-4 backdrop-blur-sm bg-white/40 dark:bg-gray-800/30 rounded-xl border border-white/20 dark:border-gray-700/30">
-        <p className="text-sm text-muted-foreground">
-          Dovucite slike da promenite redosled. Kliknite na "Video"/"Frame" da promenite režim slota.
+
+      {/* Instructions */}
+      <div className="text-center p-4 bg-gray-50 rounded-lg border">
+        <p className="text-sm text-gray-600">
+          💡 <strong>Saveti:</strong> Koristite "Slika" za statičke fotografije ili "Kadrovi" za animaciju između dve fotografije
         </p>
       </div>
     </div>

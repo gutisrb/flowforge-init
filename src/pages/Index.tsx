@@ -189,17 +189,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       <ProgressBar value={progress} />
       
       {/* Header */}
-      <header className="backdrop-blur-lg bg-white/60 dark:bg-gray-900/60 border-b border-white/20 dark:border-gray-700/30 shadow-lg">
-        <div className="container mx-auto px-4 py-6">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border shadow-sm">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Smartflow — Video oglasi
-            </h1>
-            <div className="text-sm text-muted-foreground backdrop-blur-sm bg-white/40 dark:bg-gray-800/40 px-3 py-1 rounded-full border border-white/20">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <div className="text-white font-bold text-lg">S</div>
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Smartflow
+                <span className="text-sm font-normal text-muted-foreground ml-2">Video oglasi</span>
+              </h1>
+            </div>
+            <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full border">
               Prijavljeni: —
             </div>
           </div>
@@ -207,26 +213,30 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 min-h-screen">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <main className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Form */}
           <div className="space-y-6">
-            <ListingForm
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-              isValid={isFormValid}
-              totalImages={totalImages}
-              formErrors={getFormErrors()}
-            />
+            <div className="bg-white rounded-xl border shadow-sm p-6">
+              <ListingForm
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                isValid={isFormValid}
+                totalImages={totalImages}
+                formErrors={getFormErrors()}
+              />
+            </div>
           </div>
 
           {/* Right Column - Image Slots */}
           <div className="space-y-6">
-            <ImageSlots
-              slots={slots}
-              onSlotsChange={setSlots}
-              totalImages={totalImages}
-            />
+            <div className="bg-white rounded-xl border shadow-sm p-6">
+              <ImageSlots
+                slots={slots}
+                onSlotsChange={setSlots}
+                totalImages={totalImages}
+              />
+            </div>
           </div>
         </div>
       </main>
