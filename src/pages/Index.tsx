@@ -88,7 +88,7 @@ const Index = () => {
     if (!isFormValid) {
       toast({
         title: "Greška",
-        description: "Otpremite 5 fotografija i popunite obavezna polja.",
+        description: "Otpremite najmanje 5 fotografija i popunite Naslov, Cenu i Lokaciju.",
         variant: "destructive",
       });
       return;
@@ -105,6 +105,51 @@ const Index = () => {
       }
 
       const multipartData = createMultipartFormData(formData);
+      
+      // Console logging for testing
+      console.log("=== SMARTFLOW SUBMISSION DEBUG ===");
+      console.log("Total images:", totalImages);
+      console.log("Slot order and images:");
+      slots.forEach((slot, index) => {
+        console.log(`Slot ${index + 1} (${slot.mode}):`, slot.images.map(img => img.name));
+      });
+      
+      // Log the grouping info
+      let imageIndex = 0;
+      const grouping: any[] = [];
+      slots.forEach((slot, slotIndex) => {
+        if (slot.images.length > 0) {
+          if (slot.mode === "image-to-video") {
+            grouping.push({
+              type: "image-to-video",
+              first_index: imageIndex,
+              second_index: null
+            });
+            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, image-to-video)`);
+            imageIndex++;
+          } else if (slot.mode === "frame-to-frame" && slot.images.length >= 2) {
+            const firstIndex = imageIndex;
+            grouping.push({
+              type: "frame-to-frame",
+              first_index: firstIndex,
+              second_index: imageIndex + 1
+            });
+            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, frame-to-frame first)`);
+            console.log(`Image ${imageIndex + 1}: ${slot.images[1].name} (slot ${slotIndex + 1}, frame-to-frame second)`);
+            imageIndex += 2;
+          } else if (slot.mode === "frame-to-frame" && slot.images.length === 1) {
+            grouping.push({
+              type: "image-to-video",
+              first_index: imageIndex,
+              second_index: null
+            });
+            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, frame-to-frame fallback)`);
+            imageIndex++;
+          }
+        }
+      });
+      console.log("Grouping array:", grouping);
+      console.log("===============================");
       
       setProgress(50);
 
