@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
+import { User, Session } from '@supabase/supabase-js';
 import { ListingForm } from "@/components/ListingForm";
 import { ImageSlots, SlotData } from "@/components/ImageSlots";
 import { ProgressBar } from "@/components/ProgressBar";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 // Initialize 5 empty slots
 const initialSlots: SlotData[] = Array.from({ length: 5 }, (_, i) => ({
@@ -11,11 +15,17 @@ const initialSlots: SlotData[] = Array.from({ length: 5 }, (_, i) => ({
   images: []
 }));
 
-const Index = () => {
+interface IndexProps {
+  user: User;
+  session: Session;
+}
+
+const Index = ({ user, session }: IndexProps) => {
   const [slots, setSlots] = useState<SlotData[]>(initialSlots);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+  const { profile, loading: profileLoading } = useProfile(user);
 
   const totalImages = slots.reduce((sum, slot) => sum + slot.images.length, 0);
   const isFormValid = totalImages >= 5;
@@ -98,10 +108,19 @@ const Index = () => {
     setProgress(10);
 
     try {
-      const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+      // Use profile webhook_url if available, otherwise fall back to env var
+      const webhookUrl = profile?.webhook_url || import.meta.env.VITE_WEBHOOK_URL;
       
       if (!webhookUrl) {
-        throw new Error("VITE_WEBHOOK_URL environment variable is not set");
+        if (!profile?.webhook_url) {
+          toast({
+            title: "Greška",
+            description: "Vašem nalogu još nije dodeljen webhook.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw new Error("No webhook URL available");
       }
 
       const multipartData = createMultipartFormData(formData);
@@ -205,12 +224,40 @@ const Index = () => {
                 <span className="text-sm font-normal text-muted-foreground ml-2">Video oglasi</span>
               </h1>
             </div>
-            <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full border">
-              Prijavljeni: —
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full border">
+                Prijavljeni: {profile?.org_name || user.email}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => supabase.auth.signOut()}
+              >
+                Odjavi se
+              </Button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Profile Loading or Missing Webhook Warning */}
+      {profileLoading && (
+        <div className="bg-muted/50 border-b">
+          <div className="container mx-auto px-6 py-3">
+            <p className="text-sm text-muted-foreground">Učitavam profil...</p>
+          </div>
+        </div>
+      )}
+      
+      {!profileLoading && !profile?.webhook_url && (
+        <div className="bg-yellow-50 border-yellow-200 border-b">
+          <div className="container mx-auto px-6 py-3">
+            <p className="text-sm text-yellow-800">
+              ⚠️ Vašem nalogu još nije dodeljen webhook. Kontaktirajte administratora.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
