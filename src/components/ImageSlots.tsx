@@ -334,7 +334,7 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
       {/* Instructions */}
       <div className="text-center p-4 bg-gray-50 rounded-lg border">
         <p className="text-sm text-gray-600">
-          💡 <strong>Saveti:</strong> Koristite "Slika" za statičke fotografije ili "Kadrovi" za animaciju između dve fotografije
+          💡 <strong>Savet:</strong> Koristite "Slika" za jedan kadar ili "Prelaz" za animaciju između dve fotografije
         </p>
       </div>
     </div>
