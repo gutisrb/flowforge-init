@@ -94,7 +94,7 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErr
           <Input
             id="price"
             {...register("price")}
-            placeholder="Unesite cenu (€ ili RSD)"
+            placeholder="Unesite cenu (€)"
             className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
           />
           {errors.price && (
