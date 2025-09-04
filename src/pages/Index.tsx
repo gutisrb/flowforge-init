@@ -48,9 +48,10 @@ const Index = ({ user, session }: IndexProps) => {
         if (slot.mode === "image-to-video") {
           form.append(`image_${imageIndex}`, slot.images[0]);
           grouping.push({
-            type: "image-to-video",
+            type: "single",
+            files: [imageIndex],
             first_index: imageIndex,
-            second_index: null
+            second_index: ""
           });
           imageIndex++;
         } else if (slot.mode === "frame-to-frame" && slot.images.length >= 2) {
@@ -60,6 +61,7 @@ const Index = ({ user, session }: IndexProps) => {
           form.append(`image_${imageIndex}`, slot.images[1]);
           grouping.push({
             type: "frame-to-frame",
+            files: [firstIndex, imageIndex],
             first_index: firstIndex,
             second_index: imageIndex
           });
@@ -67,17 +69,17 @@ const Index = ({ user, session }: IndexProps) => {
         } else if (slot.mode === "frame-to-frame" && slot.images.length === 1) {
           form.append(`image_${imageIndex}`, slot.images[0]);
           grouping.push({
-            type: "image-to-video", // Fallback to single image
+            type: "single",
+            files: [imageIndex],
             first_index: imageIndex,
-            second_index: null
+            second_index: ""
           });
           imageIndex++;
         }
       }
     });
 
-    // Add meta fields
-    form.append("layout", "standard");
+    // Add required text fields
     form.append("title", formData.title);
     form.append("price", formData.price);
     form.append("location", formData.location);
@@ -86,9 +88,10 @@ const Index = ({ user, session }: IndexProps) => {
     form.append("baths", formData.baths || "");
     form.append("sprat", formData.sprat || "");
     form.append("extras", formData.extras || "");
+
+    // Grouping and additional metadata (as specified)
     form.append("grouping", JSON.stringify(grouping));
     form.append("slot_mode_info", JSON.stringify(grouping));
-    form.append("timestamp", new Date().toISOString());
     form.append("total_images", imageIndex.toString());
 
     return form;
@@ -133,36 +136,39 @@ const Index = ({ user, session }: IndexProps) => {
         console.log(`Slot ${index + 1} (${slot.mode}):`, slot.images.map(img => img.name));
       });
       
-      // Log the grouping info
+      // Log the grouping info (schema-aligned)
       let imageIndex = 0;
       const grouping: any[] = [];
       slots.forEach((slot, slotIndex) => {
         if (slot.images.length > 0) {
           if (slot.mode === "image-to-video") {
             grouping.push({
-              type: "image-to-video",
+              type: "single",
+              files: [imageIndex],
               first_index: imageIndex,
-              second_index: null
+              second_index: ""
             });
-            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, image-to-video)`);
+            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex}, single)`);
             imageIndex++;
           } else if (slot.mode === "frame-to-frame" && slot.images.length >= 2) {
             const firstIndex = imageIndex;
             grouping.push({
               type: "frame-to-frame",
+              files: [firstIndex, firstIndex + 1],
               first_index: firstIndex,
-              second_index: imageIndex + 1
+              second_index: firstIndex + 1
             });
-            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, frame-to-frame first)`);
-            console.log(`Image ${imageIndex + 1}: ${slot.images[1].name} (slot ${slotIndex + 1}, frame-to-frame second)`);
+            console.log(`Image ${firstIndex}: ${slot.images[0].name} (slot ${slotIndex}, frame-to-frame first)`);
+            console.log(`Image ${firstIndex + 1}: ${slot.images[1].name} (slot ${slotIndex}, frame-to-frame second)`);
             imageIndex += 2;
           } else if (slot.mode === "frame-to-frame" && slot.images.length === 1) {
             grouping.push({
-              type: "image-to-video",
+              type: "single",
+              files: [imageIndex],
               first_index: imageIndex,
-              second_index: null
+              second_index: ""
             });
-            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex + 1}, frame-to-frame fallback)`);
+            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex}, frame-to-frame fallback to single)`);
             imageIndex++;
           }
         }
