@@ -7,6 +7,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
+  rectIntersection,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -21,7 +23,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Upload, GripVertical, X, Image as ImageIcon } from "lucide-react";
+import { Upload, GripVertical, X, Image as ImageIcon, Shuffle, Trash2 } from "lucide-react";
+import { PhotoItem } from "./PhotoItem";
+import { PhotoDropZone } from "./PhotoDropZone";
+import { BulkUpload } from "./BulkUpload";
 
 export interface SlotData {
   id: string;
@@ -40,9 +45,11 @@ interface SortableSlotProps {
   index: number;
   onModeToggle: (id: string) => void;
   onImagesChange: (id: string, images: File[]) => void;
+  onPhotoCrossSlotMove: (fromSlotId: string, photoIndex: number, toSlotId: string, toPhotoIndex?: number) => void;
+  onPhotoDuplicate: (slotId: string, photoIndex: number) => void;
 }
 
-function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlotProps) {
+function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossSlotMove, onPhotoDuplicate }: SortableSlotProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     attributes,
@@ -63,8 +70,18 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlo
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length > 0) {
-      const newImages = [...slot.images, ...files].slice(0, maxImages);
-      onImagesChange(slot.id, newImages);
+      const replaceIndex = fileInputRef.current?.getAttribute('data-replace-index');
+      if (replaceIndex !== null && replaceIndex !== undefined) {
+        // Replace specific image
+        const newImages = [...slot.images];
+        newImages[parseInt(replaceIndex)] = files[0];
+        onImagesChange(slot.id, newImages);
+        fileInputRef.current?.removeAttribute('data-replace-index');
+      } else {
+        // Add new images
+        const newImages = [...slot.images, ...files].slice(0, maxImages);
+        onImagesChange(slot.id, newImages);
+      }
     }
     // Reset input
     if (fileInputRef.current) {
@@ -74,6 +91,24 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlo
 
   const handleRemoveImage = (imageIndex: number) => {
     const newImages = slot.images.filter((_, i) => i !== imageIndex);
+    onImagesChange(slot.id, newImages);
+  };
+
+  const handleReplaceImage = (imageIndex: number) => {
+    fileInputRef.current?.click();
+    // Store which image to replace
+    fileInputRef.current?.setAttribute('data-replace-index', imageIndex.toString());
+  };
+
+  const handlePhotoDuplicate = (imageIndex: number) => {
+    onPhotoDuplicate(slot.id, imageIndex);
+  };
+
+  const handlePhotoReorder = (oldIndex: number, newIndex: number) => {
+    if (oldIndex === newIndex) return;
+    const newImages = [...slot.images];
+    const [movedImage] = newImages.splice(oldIndex, 1);
+    newImages.splice(newIndex, 0, movedImage);
     onImagesChange(slot.id, newImages);
   };
 
@@ -154,66 +189,46 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlo
             // Single image mode
             <div className="space-y-2">
               {slot.images[0] ? (
-                <div className="relative group">
-                  <img
-                    src={URL.createObjectURL(slot.images[0])}
-                    alt="Uploaded"
-                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                  />
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                    onClick={() => handleRemoveImage(0)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                  <div className="absolute bottom-2 left-2 text-xs bg-white/90 px-2 py-1 rounded text-gray-700 shadow-sm">
-                    {slot.images[0].name.length > 15 
-                      ? slot.images[0].name.substring(0, 15) + "..." 
-                      : slot.images[0].name}
-                  </div>
-                </div>
+                <PhotoItem
+                  id={`${slot.id}-photo-0`}
+                  file={slot.images[0]}
+                  index={0}
+                  onRemove={() => handleRemoveImage(0)}
+                  onReplace={() => handleReplaceImage(0)}
+                  onDuplicate={() => handlePhotoDuplicate(0)}
+                  className="h-32"
+                />
               ) : (
-                <div className="border-2 border-dashed border-gray-200 rounded-lg h-32 flex items-center justify-center bg-gray-50/50">
-                  <div className="text-center text-gray-500">
-                    <ImageIcon className="h-8 w-8 mx-auto mb-2" />
-                    <p className="text-sm">Dodaj sliku</p>
-                  </div>
-                </div>
+                <PhotoDropZone
+                  id={`${slot.id}-drop-0`}
+                  onDrop={() => fileInputRef.current?.click()}
+                  className="h-32"
+                />
               )}
             </div>
           ) : (
             // Frame-to-frame mode
             <div className="grid grid-cols-2 gap-2">
               {[0, 1].map((imageIndex) => (
-                <div key={imageIndex} className="space-y-1">
-                  <div className="text-xs text-gray-600 font-medium">
-                    {imageIndex === 0 ? "Prvi" : "Drugi"}
-                  </div>
+                <div key={imageIndex}>
                   {slot.images[imageIndex] ? (
-                    <div className="relative group">
-                      <img
-                        src={URL.createObjectURL(slot.images[imageIndex])}
-                        alt={`Frame ${imageIndex + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                      />
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        className="absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveImage(imageIndex)}
-                      >
-                        <X className="h-2 w-2" />
-                      </Button>
-                    </div>
+                    <PhotoItem
+                      id={`${slot.id}-photo-${imageIndex}`}
+                      file={slot.images[imageIndex]}
+                      index={imageIndex}
+                      label={imageIndex === 0 ? "Prvi" : "Drugi"}
+                      onRemove={() => handleRemoveImage(imageIndex)}
+                      onReplace={() => handleReplaceImage(imageIndex)}
+                      onDuplicate={() => handlePhotoDuplicate(imageIndex)}
+                      className="h-24"
+                    />
                   ) : (
-                    <div className="border-2 border-dashed border-gray-200 rounded-lg h-24 flex items-center justify-center bg-gray-50/50">
-                      <div className="text-center text-gray-500">
-                        <ImageIcon className="h-4 w-4 mx-auto mb-1" />
-                        <p className="text-xs">Dodaj</p>
-                      </div>
-                    </div>
+                    <PhotoDropZone
+                      id={`${slot.id}-drop-${imageIndex}`}
+                      onDrop={() => fileInputRef.current?.click()}
+                      label={imageIndex === 0 ? "Prvi" : "Drugi"}
+                      className="h-24"
+                    />
                   )}
                 </div>
               ))}
@@ -221,17 +236,18 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlo
           )}
         </div>
 
-        {/* Add Button */}
-        {canAddMore && (
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple={slot.mode === "frame-to-frame"}
-              onChange={handleFileSelect}
-              className="hidden"
-            />
+        {/* Add Button and Slot Actions */}
+        <div className="space-y-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple={slot.mode === "frame-to-frame"}
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          
+          {canAddMore && (
             <Button
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
@@ -241,8 +257,34 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange }: SortableSlo
               <Upload className="h-4 w-4 mr-2" />
               Dodaj sliku
             </Button>
-          </div>
-        )}
+          )}
+
+          {/* Slot Actions */}
+          {slot.images.length > 0 && (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => onImagesChange(slot.id, [])}
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs border-red-200 text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                Clear
+              </Button>
+              {slot.mode === "frame-to-frame" && slot.images.length === 2 && (
+                <Button
+                  onClick={() => handlePhotoReorder(0, 1)}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                >
+                  <Shuffle className="h-3 w-3 mr-1" />
+                  Swap
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Status */}
         <div className="text-xs text-gray-500 text-center font-medium">
@@ -264,11 +306,34 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      const oldIndex = slots.findIndex((slot) => slot.id === active.id);
-      const newIndex = slots.findIndex((slot) => slot.id === over?.id);
+    if (!over) return;
 
-      onSlotsChange(arrayMove(slots, oldIndex, newIndex));
+    // Handle slot reordering
+    if (active.id !== over.id && !active.id.toString().includes('photo')) {
+      const oldIndex = slots.findIndex((slot) => slot.id === active.id);
+      const newIndex = slots.findIndex((slot) => slot.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onSlotsChange(arrayMove(slots, oldIndex, newIndex));
+      }
+    }
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+
+    // Handle photo cross-slot movement
+    if (active.id.toString().includes('photo') && over.id.toString().includes('drop')) {
+      const activeId = active.id.toString();
+      const overId = over.id.toString();
+      
+      const [activeSlotId, , activePhotoIndex] = activeId.split('-');
+      const [overSlotId] = overId.split('-');
+      
+      if (activeSlotId !== overSlotId) {
+        handlePhotoCrossSlotMove(activeSlotId, parseInt(activePhotoIndex), overSlotId);
+      }
     }
   };
 
@@ -292,6 +357,75 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
     onSlotsChange(newSlots);
   };
 
+  const handlePhotoCrossSlotMove = (fromSlotId: string, photoIndex: number, toSlotId: string, toPhotoIndex?: number) => {
+    const fromSlot = slots.find(s => s.id === fromSlotId);
+    const toSlot = slots.find(s => s.id === toSlotId);
+    
+    if (!fromSlot || !toSlot || !fromSlot.images[photoIndex]) return;
+
+    const photo = fromSlot.images[photoIndex];
+    const maxImages = toSlot.mode === "image-to-video" ? 1 : 2;
+    
+    // Check if target slot has space
+    if (toSlot.images.length >= maxImages) return;
+
+    const newSlots = slots.map((slot) => {
+      if (slot.id === fromSlotId) {
+        return { ...slot, images: slot.images.filter((_, i) => i !== photoIndex) };
+      }
+      if (slot.id === toSlotId) {
+        const newImages = [...slot.images];
+        if (toPhotoIndex !== undefined && toPhotoIndex < newImages.length) {
+          newImages.splice(toPhotoIndex, 0, photo);
+        } else {
+          newImages.push(photo);
+        }
+        return { ...slot, images: newImages };
+      }
+      return slot;
+    });
+    
+    onSlotsChange(newSlots);
+  };
+
+  const handlePhotoDuplicate = (slotId: string, photoIndex: number) => {
+    const sourceSlot = slots.find(s => s.id === slotId);
+    if (!sourceSlot || !sourceSlot.images[photoIndex]) return;
+
+    const photo = sourceSlot.images[photoIndex];
+    
+    // Find next available slot
+    const availableSlot = slots.find(slot => {
+      const maxImages = slot.mode === "image-to-video" ? 1 : 2;
+      return slot.images.length < maxImages;
+    });
+
+    if (availableSlot) {
+      handleImagesChange(availableSlot.id, [...availableSlot.images, photo]);
+    }
+  };
+
+  const handleBulkUpload = (files: File[]) => {
+    let fileIndex = 0;
+    const newSlots = slots.map(slot => {
+      const maxImages = slot.mode === "image-to-video" ? 1 : 2;
+      const available = maxImages - slot.images.length;
+      
+      if (available > 0 && fileIndex < files.length) {
+        const newImages = [...slot.images];
+        for (let i = 0; i < available && fileIndex < files.length; i++) {
+          newImages.push(files[fileIndex]);
+          fileIndex++;
+        }
+        return { ...slot, images: newImages };
+      }
+      
+      return slot;
+    });
+    
+    onSlotsChange(newSlots);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -306,15 +440,19 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
           </Badge>
         </div>
         <p className="text-sm text-gray-600">
-          Organizujte fotografije u slotove • Prevucite za reorder
+          Organizujte fotografije u slotove • Prevucite za reorder • Click photos to replace
         </p>
       </div>
+
+      {/* Bulk Upload */}
+      <BulkUpload onFilesSelected={handleBulkUpload} slots={slots} />
 
       {/* Slots */}
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={rectIntersection}
         onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
       >
         <SortableContext items={slots.map(slot => slot.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
@@ -325,6 +463,8 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
                 index={index}
                 onModeToggle={handleModeToggle}
                 onImagesChange={handleImagesChange}
+                onPhotoCrossSlotMove={handlePhotoCrossSlotMove}
+                onPhotoDuplicate={handlePhotoDuplicate}
               />
             ))}
           </div>
@@ -333,9 +473,17 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
 
       {/* Instructions */}
       <div className="text-center p-4 bg-gray-50 rounded-lg border">
-        <p className="text-sm text-gray-600">
-          💡 <strong>Savet:</strong> Koristite "Slika" za jedan kadar ili "Prelaz" za animaciju između dve fotografije
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-gray-600">
+            💡 <strong>Savet:</strong> Koristite "Slika" za jedan kadar ili "Prelaz" za animaciju između dve fotografije
+          </p>
+          <div className="text-xs text-gray-500 space-y-1">
+            <p>• Click on photos to replace them</p>
+            <p>• Drag photos between slots to move them</p>
+            <p>• Use bulk upload to add multiple photos at once</p>
+            <p>• Duplicate photos using the copy button</p>
+          </div>
+        </div>
       </div>
     </div>
   );
