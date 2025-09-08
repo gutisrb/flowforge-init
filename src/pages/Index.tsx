@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 // Initialize 5 empty slots
-const initialSlots: SlotData[] = Array.from({ length: 5 }, (_, i) => ({
+const initialSlots: SlotData[] = Array.from({ length: 6 }, (_, i) => ({
   id: `slot-${i}`,
   mode: "image-to-video",
   images: []
@@ -28,7 +28,7 @@ const Index = ({ user, session }: IndexProps) => {
   const { profile, loading: profileLoading } = useProfile(user);
 
   const totalImages = slots.reduce((sum, slot) => sum + slot.images.length, 0);
-  const isFormValid = totalImages >= 5;
+  const isFormValid = totalImages >= 6;
   
   const getFormErrors = () => {
     const errors = [];

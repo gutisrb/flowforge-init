@@ -48,7 +48,7 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErr
     if (!formData?.title) issues.push("Naslov");
     if (!formData?.price) issues.push("Cena");
     if (!formData?.location) issues.push("Lokacija");
-    if (totalImages < 5) issues.push(`${5 - totalImages} više fotografija`);
+    if (totalImages < 6) issues.push(`${6 - totalImages} više fotografija`);
     
     if (issues.length === 0) return "";
     return `Potrebno: ${issues.join(", ")}`;

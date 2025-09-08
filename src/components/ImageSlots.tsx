@@ -433,7 +433,7 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
         <div className="flex items-center justify-center gap-3">
           <h2 className="text-xl font-semibold text-gray-900">Fotografije</h2>
           <Badge 
-            variant={totalImages >= 5 ? "default" : "secondary"}
+            variant={totalImages >= 6 ? "default" : "secondary"}
             className="px-3 py-1 font-medium"
           >
             {totalImages}/5+
