@@ -27,10 +27,12 @@ interface ListingFormProps {
   isLoading: boolean;
   isValid: boolean;
   totalImages: number;
+  clipCount: number;
+  validGroups: number;
   formErrors: string[];
 }
 
-export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErrors }: ListingFormProps) {
+export function ListingForm({ onSubmit, isLoading, isValid, totalImages, clipCount, validGroups, formErrors }: ListingFormProps) {
 
   const {
     register,
@@ -48,7 +50,8 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, formErr
     if (!formData?.title) issues.push("Naslov");
     if (!formData?.price) issues.push("Cena");
     if (!formData?.location) issues.push("Lokacija");
-    if (totalImages < 6) issues.push(`${6 - totalImages} više fotografija`);
+    const neededGroups = clipCount - validGroups;
+    if (neededGroups > 0) issues.push(`${neededGroups} više ${neededGroups === 1 ? 'grupa' : 'grupa'}`);
     
     if (issues.length === 0) return "";
     return `Potrebno: ${issues.join(", ")}`;

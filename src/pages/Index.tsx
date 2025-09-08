@@ -8,12 +8,13 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-// Initialize 6 empty slots
-const initialSlots: SlotData[] = Array.from({ length: 6 }, (_, i) => ({
-  id: `slot-${i}`,
-  mode: "image-to-video",
-  images: []
-}));
+// Initialize N empty slots based on clip count
+const createInitialSlots = (clipCount: number): SlotData[] => 
+  Array.from({ length: clipCount }, (_, i) => ({
+    id: `slot-${i}`,
+    mode: "image-to-video",
+    images: []
+  }));
 
 interface IndexProps {
   user: User;
@@ -21,29 +22,38 @@ interface IndexProps {
 }
 
 const Index = ({ user, session }: IndexProps) => {
-  const [slots, setSlots] = useState<SlotData[]>(initialSlots);
+  const [clipCount, setClipCount] = useState(6);
+  const [slots, setSlots] = useState<SlotData[]>(() => createInitialSlots(6));
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile(user);
 
   const totalImages = slots.reduce((sum, slot) => sum + slot.images.length, 0);
-  const isFormValid = totalImages >= 6;
+  
+  // Count valid groups (slots with required images)
+  const validGroups = slots.filter(slot => {
+    const minRequired = slot.mode === "frame-to-frame" ? 1 : 1; // frame-to-frame needs at least 1 for fallback
+    return slot.images.length >= minRequired;
+  }).length;
+  
+  const isFormValid = validGroups >= clipCount;
   
   const getFormErrors = () => {
     const errors = [];
-    if (totalImages < 5) errors.push(`Potrebno još ${5 - totalImages} fotografija`);
+    const needed = clipCount - validGroups;
+    if (needed > 0) errors.push(`Potrebno još ${needed} ${needed === 1 ? 'grupa' : 'grupa'}`);
     return errors;
   };
 
-  const createMultipartFormData = (formData: any) => {
+  const createMultipartFormData = (formData: any, validSlots: SlotData[]) => {
     const form = new FormData();
     
     // Add images in slot order
     let imageIndex = 0;
     const grouping: any[] = [];
     
-    slots.forEach((slot) => {
+    validSlots.forEach((slot) => {
       if (slot.images.length > 0) {
         if (slot.mode === "image-to-video") {
           form.append(`image_${imageIndex}`, slot.images[0]);
@@ -126,7 +136,13 @@ const Index = ({ user, session }: IndexProps) => {
         throw new Error("No webhook URL available");
       }
 
-      const multipartData = createMultipartFormData(formData);
+      // Only process first clipCount valid groups
+      const validSlots = slots.filter(slot => {
+        const minRequired = slot.mode === "frame-to-frame" ? 1 : 1;
+        return slot.images.length >= minRequired;
+      }).slice(0, clipCount);
+
+      const multipartData = createMultipartFormData(formData, validSlots);
       
       // Console logging for testing
       console.log("=== SMARTFLOW SUBMISSION DEBUG ===");
@@ -139,7 +155,7 @@ const Index = ({ user, session }: IndexProps) => {
       // Log the grouping info (schema-aligned)
       let imageIndex = 0;
       const grouping: any[] = [];
-      slots.forEach((slot, slotIndex) => {
+      validSlots.forEach((slot, slotIndex) => {
         if (slot.images.length > 0) {
           if (slot.mode === "image-to-video") {
             grouping.push({
@@ -194,7 +210,7 @@ const Index = ({ user, session }: IndexProps) => {
         
         // Reset form after success
         setTimeout(() => {
-          setSlots(initialSlots);
+          setSlots(createInitialSlots(clipCount));
           setProgress(0);
         }, 2000);
       } else {
@@ -270,12 +286,53 @@ const Index = ({ user, session }: IndexProps) => {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Form */}
           <div className="space-y-6">
+            {/* Clip Count Selector */}
+            <div className="bg-white rounded-xl border shadow-sm p-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Broj klipova</h3>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="clipCount"
+                      value={5}
+                      checked={clipCount === 5}
+                      onChange={(e) => {
+                        const newCount = parseInt(e.target.value);
+                        setClipCount(newCount);
+                        setSlots(createInitialSlots(newCount));
+                      }}
+                      className="text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium">5 klipova</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="clipCount"
+                      value={6}
+                      checked={clipCount === 6}
+                      onChange={(e) => {
+                        const newCount = parseInt(e.target.value);
+                        setClipCount(newCount);
+                        setSlots(createInitialSlots(newCount));
+                      }}
+                      className="text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium">6 klipova</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
             <div className="bg-white rounded-xl border shadow-sm p-6">
               <ListingForm
                 onSubmit={handleSubmit}
                 isLoading={isLoading}
                 isValid={isFormValid}
                 totalImages={totalImages}
+                clipCount={clipCount}
+                validGroups={validGroups}
                 formErrors={getFormErrors()}
               />
             </div>
@@ -288,6 +345,7 @@ const Index = ({ user, session }: IndexProps) => {
                 slots={slots}
                 onSlotsChange={setSlots}
                 totalImages={totalImages}
+                clipCount={clipCount}
               />
             </div>
           </div>

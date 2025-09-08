@@ -38,6 +38,7 @@ export interface ImageSlotsProps {
   slots: SlotData[];
   onSlotsChange: (slots: SlotData[]) => void;
   totalImages: number;
+  clipCount: number;
 }
 
 interface SortableSlotProps {
@@ -295,7 +296,7 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
   );
 }
 
-export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProps) {
+export function ImageSlots({ slots, onSlotsChange, totalImages, clipCount }: ImageSlotsProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -433,10 +434,10 @@ export function ImageSlots({ slots, onSlotsChange, totalImages }: ImageSlotsProp
         <div className="flex items-center justify-center gap-3">
           <h2 className="text-xl font-semibold text-gray-900">Fotografije</h2>
           <Badge 
-            variant={totalImages >= 6 ? "default" : "secondary"}
+            variant={totalImages >= clipCount ? "default" : "secondary"}
             className="px-3 py-1 font-medium"
           >
-            {totalImages}/5+
+            {totalImages}/{clipCount}+
           </Badge>
         </div>
         <p className="text-sm text-gray-600">
