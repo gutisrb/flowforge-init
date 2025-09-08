@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-// Initialize 5 empty slots
+// Initialize 6 empty slots
 const initialSlots: SlotData[] = Array.from({ length: 6 }, (_, i) => ({
   id: `slot-${i}`,
   mode: "image-to-video",
