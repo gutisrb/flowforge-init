@@ -64,125 +64,125 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, clipCou
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6" id="listing-form">
-          <div className="text-center space-y-3">
-            <h2 className="text-2xl font-bold text-foreground">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-semibold text-gray-900">
               Informacije o nekretnini
             </h2>
-            <p className="text-base text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Popunite osnovne informacije o vašoj nekretnini
             </p>
           </div>
       
       <div className="space-y-4">
         <div>
-          <Label htmlFor="title" className="text-base font-semibold text-foreground">
-            Naslov <span className="text-destructive">*</span>
+          <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+            Naslov <span className="text-red-500">*</span>
           </Label>
           <Input
             id="title"
             {...register("title")}
             placeholder="Unesite naslov oglasa"
-            className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
           />
           {errors.title && (
-            <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
+            <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="price" className="text-base font-semibold text-foreground">
-            Cena <span className="text-destructive">*</span>
+          <Label htmlFor="price" className="text-sm font-medium text-gray-700">
+            Cena <span className="text-red-500">*</span>
           </Label>
           <Input
             id="price"
             {...register("price")}
             placeholder="Unesite cenu (€)"
-            className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
           />
           {errors.price && (
-            <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
+            <p className="text-sm text-red-500 mt-1">{errors.price.message}</p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="location" className="text-base font-semibold text-foreground">
-            Lokacija <span className="text-destructive">*</span>
+          <Label htmlFor="location" className="text-sm font-medium text-gray-700">
+            Lokacija <span className="text-red-500">*</span>
           </Label>
           <Input
             id="location"
             {...register("location")}
             placeholder="Unesite lokaciju"
-            className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
           />
           {errors.location && (
-            <p className="text-sm text-destructive mt-1">{errors.location.message}</p>
+            <p className="text-sm text-red-500 mt-1">{errors.location.message}</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="size" className="text-base font-semibold text-foreground">
+            <Label htmlFor="size" className="text-sm font-medium text-gray-700">
               Površina m²
             </Label>
             <Input
               id="size"
               {...register("size")}
               placeholder="Unesite površinu"
-              className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
           
           <div>
-            <Label htmlFor="beds" className="text-base font-semibold text-foreground">
+            <Label htmlFor="beds" className="text-sm font-medium text-gray-700">
               Sobe
             </Label>
             <Input
               id="beds"
               {...register("beds")}
               placeholder="Broj soba"
-              className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="baths" className="text-base font-semibold text-foreground">
+            <Label htmlFor="baths" className="text-sm font-medium text-gray-700">
               Kupatila
             </Label>
             <Input
               id="baths"
               {...register("baths")}
               placeholder="Broj kupatila"
-              className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
           
           <div>
-            <Label htmlFor="sprat" className="text-base font-semibold text-foreground">
+            <Label htmlFor="sprat" className="text-sm font-medium text-gray-700">
               Sprat
             </Label>
             <Input
               id="sprat"
               {...register("sprat")}
               placeholder="Na kom spratu"
-              className="mt-2 min-h-[44px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-1 border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
 
         <div>
-          <Label htmlFor="extras" className="text-base font-semibold text-foreground">
+          <Label htmlFor="extras" className="text-sm font-medium text-gray-700">
             Šta je posebno kod ovog stana?
           </Label>
           <Textarea
             id="extras"
             {...register("extras")}
             placeholder="Opišite šta čini ovaj stan posebnim: terasa sa pogledom, parking, lift, klima, renoviran, itd."
-            className="mt-2 min-h-[100px] text-base border-border focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 resize-none"
+            className="mt-1 min-h-[100px] resize-none"
           />
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             Izdvojite detalje koji će privući pažnju kupaca
           </p>
         </div>
@@ -195,22 +195,24 @@ export function ListingForm({ onSubmit, isLoading, isValid, totalImages, clipCou
                   <Button
                     type="button"
                     disabled={true}
-                    className="w-full min-h-[44px] text-base bg-muted text-muted-foreground cursor-not-allowed border border-border"
+                    className="w-full bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                    size="lg"
                   >
                     <AlertCircle className="mr-2 h-4 w-4" />
                     Generiši
                   </Button>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="top" className="bg-background border border-border text-foreground shadow-lg">
-                <p className="text-base">{getValidationTooltip()}</p>
+              <TooltipContent side="top" className="bg-white border border-gray-200 text-gray-700 shadow-lg">
+                <p className="text-sm">{getValidationTooltip()}</p>
               </TooltipContent>
             </Tooltip>
           ) : (
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full min-h-[44px] text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 font-semibold"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 font-medium"
+              size="lg"
             >
               {isLoading ? (
                 <>
