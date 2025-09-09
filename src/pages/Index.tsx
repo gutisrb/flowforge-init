@@ -145,7 +145,7 @@ const Index = ({ user }: IndexProps) => {
             <div className="text-muted-foreground ml-2">Video oglasi</div>
           </div>
           <div className="flex items-center gap-4">
-            <ProgressBar progress={progress} />
+            <ProgressBar value={progress} />
             <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
               Odjavi se
             </Button>
@@ -169,9 +169,11 @@ const Index = ({ user }: IndexProps) => {
             <ListingForm
               clipCount={clipCount}
               validGroups={validGroups}
-              getFormErrors={() => []}
+              formErrors={[]}
               onSubmit={handleSubmit}
               isLoading={isLoading}
+              isValid={isFormValid}
+              totalImages={totalImages}
             />
           </div>
 
