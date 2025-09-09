@@ -282,7 +282,7 @@ const Index = ({ user, session }: IndexProps) => {
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8 pb-24 sm:pb-8">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Form - Sticky on desktop */}
           <div className="xl:sticky xl:top-8 xl:h-fit space-y-6">
