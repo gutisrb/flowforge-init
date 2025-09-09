@@ -41,7 +41,7 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {slots.map((slot, index) => (
         <div
           key={slot.id}
@@ -61,7 +61,7 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
               return;
             }
           }}
-          className="rounded-xl border bg-white p-0"
+          className="cursor-move"
         >
           <SlotCard
             slotIndex={index}
