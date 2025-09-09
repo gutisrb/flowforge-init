@@ -9,7 +9,7 @@ const MAX_PER_SLOT = 2;
 const MAX_TOTAL = 12; // your Make scenario can accept up to 12 files
 
 const WEBHOOK_URL =
-  process.env.NEXT_PUBLIC_MAKE_WEBHOOK_URL ||
+  import.meta.env.VITE_MAKE_WEBHOOK_URL ||
   "https://hook.integromat.com/REPLACE_WITH_YOUR_MAKE_WEBHOOK"; // <-- set .env
 
 function uid() {
