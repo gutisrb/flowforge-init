@@ -44,24 +44,24 @@ export function BulkUpload({ onFilesSelected, slots }: BulkUploadProps) {
 
   return (
     <Card 
-      className="p-6 border-2 border-dashed border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors"
+      className="p-8 border-2 border-dashed border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-6">
         <div className="flex items-center justify-center">
-          <div className="bg-primary/10 p-3 rounded-full">
-            <Zap className="h-8 w-8 text-primary" />
+          <div className="bg-primary/10 p-4 rounded-full">
+            <Zap className="h-10 w-10 text-primary" />
           </div>
         </div>
         
         <div>
-          <h3 className="font-semibold text-gray-900 mb-2">Bulk Upload</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Upload multiple photos at once and auto-distribute them across available slots
+          <h3 className="font-bold text-xl text-foreground mb-3">Masovno učitavanje</h3>
+          <p className="text-base text-muted-foreground mb-4 leading-relaxed">
+            Učitajte više fotografija odjednom i automatski ih distribuirajte u dostupne slotove
           </p>
-          <div className="text-xs text-gray-500">
-            Available slots: {availableSlots}
+          <div className="text-base text-muted-foreground font-medium">
+            Dostupno slotova: {availableSlots}
           </div>
         </div>
 
@@ -74,20 +74,20 @@ export function BulkUpload({ onFilesSelected, slots }: BulkUploadProps) {
           className="hidden"
         />
         
-        <div className="flex gap-3 justify-center">
+        <div className="flex gap-4 justify-center">
           <Button
             onClick={() => fileInputRef.current?.click()}
             variant="default"
-            size="sm"
-            className="flex-1 max-w-48"
+            size="lg"
+            className="min-h-[44px] px-8 text-base font-semibold focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
-            <Folder className="h-4 w-4 mr-2" />
-            Select Files
+            <Folder className="h-5 w-5 mr-3" />
+            Izaberi fotografije
           </Button>
         </div>
 
-        <div className="text-xs text-gray-500">
-          or drag and drop multiple files here
+        <div className="text-base text-muted-foreground">
+          ili prevucite više fotografija ovde
         </div>
       </div>
     </Card>

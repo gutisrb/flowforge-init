@@ -158,29 +158,29 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
       {/* Slot Badge */}
       <Badge 
         variant="default"
-        className="absolute -top-3 -left-3 h-7 w-7 rounded-full p-0 flex items-center justify-center text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        className="absolute -top-4 -left-4 h-10 w-10 rounded-full p-0 flex items-center justify-center text-lg font-bold bg-primary text-primary-foreground shadow-md"
       >
         {index + 1}
       </Badge>
 
       <div className="space-y-4">
         {/* Mode Toggle */}
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
-            size="sm"
+            size="default"
             variant={slot.mode === "image-to-video" ? "default" : "outline"}
             onClick={() => onModeToggle(slot.id)}
-            className="text-xs font-medium"
+            className="text-base font-semibold min-h-[44px] px-6 focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
-            Slika (1)
+            Jedna slika
           </Button>
           <Button
-            size="sm"
+            size="default"
             variant={slot.mode === "frame-to-frame" ? "default" : "outline"}
             onClick={() => onModeToggle(slot.id)}
-            className="text-xs font-medium"
+            className="text-base font-semibold min-h-[44px] px-6 focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
-            Kadrovi (2)
+            Dva kadra
           </Button>
         </div>
 
@@ -217,7 +217,7 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
                       id={`${slot.id}-photo-${imageIndex}`}
                       file={slot.images[imageIndex]}
                       index={imageIndex}
-                      label={imageIndex === 0 ? "Prvi" : "Drugi"}
+                      label={imageIndex === 0 ? "Prva fotografija" : "Druga fotografija"}
                       onRemove={() => handleRemoveImage(imageIndex)}
                       onReplace={() => handleReplaceImage(imageIndex)}
                       onDuplicate={() => handlePhotoDuplicate(imageIndex)}
@@ -227,7 +227,7 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
                     <PhotoDropZone
                       id={`${slot.id}-drop-${imageIndex}`}
                       onDrop={() => fileInputRef.current?.click()}
-                      label={imageIndex === 0 ? "Prvi" : "Drugi"}
+                      label={imageIndex === 0 ? "Prva fotografija" : "Druga fotografija"}
                       className="h-24"
                     />
                   )}
@@ -252,35 +252,35 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
             <Button
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
-              size="sm"
-              className="w-full border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 transition-colors"
+              size="default"
+              className="w-full min-h-[44px] text-base font-medium border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              Dodaj sliku
+              <Upload className="h-5 w-5 mr-3" />
+              Dodaj fotografiju
             </Button>
           )}
 
           {/* Slot Actions */}
           {slot.images.length > 0 && (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 onClick={() => onImagesChange(slot.id, [])}
                 variant="outline"
-                size="sm"
-                className="flex-1 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                size="default"
+                className="flex-1 min-h-[44px] text-base font-medium border-destructive/30 text-destructive hover:bg-destructive/5 focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
-                <Trash2 className="h-3 w-3 mr-1" />
-                Clear
+                <Trash2 className="h-5 w-5 mr-2" />
+                Obriši sve
               </Button>
               {slot.mode === "frame-to-frame" && slot.images.length === 2 && (
                 <Button
                   onClick={() => handlePhotoReorder(0, 1)}
                   variant="outline"
-                  size="sm"
-                  className="flex-1 text-xs"
+                  size="default"
+                  className="flex-1 min-h-[44px] text-base font-medium focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
-                  <Shuffle className="h-3 w-3 mr-1" />
-                  Swap
+                  <Shuffle className="h-5 w-5 mr-2" />
+                  Zameni mesta
                 </Button>
               )}
             </div>
@@ -288,8 +288,8 @@ function SortableSlot({ slot, index, onModeToggle, onImagesChange, onPhotoCrossS
         </div>
 
         {/* Status */}
-        <div className="text-xs text-gray-500 text-center font-medium">
-          {slot.images.length}/{maxImages} {slot.images.length === 1 ? 'slika' : 'slika'}
+        <div className="text-base text-muted-foreground text-center font-medium">
+          {slot.images.length}/{maxImages} {slot.images.length === 1 ? 'fotografija' : 'fotografije'}
         </div>
       </div>
     </Card>
@@ -430,18 +430,18 @@ export function ImageSlots({ slots, onSlotsChange, totalImages, clipCount }: Ima
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-3">
-          <h2 className="text-xl font-semibold text-gray-900">Fotografije</h2>
+      <div className="text-center space-y-3 mb-8">
+        <div className="flex items-center justify-center gap-4">
+          <h2 className="text-2xl font-bold text-foreground">Fotografije</h2>
           <Badge 
             variant={totalImages >= clipCount ? "default" : "secondary"}
-            className="px-3 py-1 font-medium"
+            className="px-4 py-2 font-semibold text-base min-h-[32px]"
           >
             {totalImages}/{clipCount}+
           </Badge>
         </div>
-        <p className="text-sm text-gray-600">
-          Organizujte fotografije u slotove • Prevucite za reorder • Click photos to replace
+        <p className="text-base text-muted-foreground leading-relaxed">
+          Organizujte fotografije u slotove • Prevucite za promenu redosleda • Kliknite na fotografije za zamenu
         </p>
       </div>
 
@@ -473,16 +473,16 @@ export function ImageSlots({ slots, onSlotsChange, totalImages, clipCount }: Ima
       </DndContext>
 
       {/* Instructions */}
-      <div className="text-center p-4 bg-gray-50 rounded-lg border">
-        <div className="space-y-2">
-          <p className="text-sm text-gray-600">
-            💡 <strong>Savet:</strong> Koristite "Slika" za jedan kadar ili "Prelaz" za animaciju između dve fotografije
+      <div className="text-center p-6 bg-muted rounded-lg border">
+        <div className="space-y-4">
+          <p className="text-base text-foreground font-medium">
+            💡 <strong>Savet:</strong> Koristite "Jedna slika" za statičan kadar ili "Dva kadra" za animaciju između dve fotografije
           </p>
-          <div className="text-xs text-gray-500 space-y-1">
-            <p>• Click on photos to replace them</p>
-            <p>• Drag photos between slots to move them</p>
-            <p>• Use bulk upload to add multiple photos at once</p>
-            <p>• Duplicate photos using the copy button</p>
+          <div className="text-base text-muted-foreground space-y-2 leading-relaxed">
+            <p>• Kliknite na fotografije da ih zamenite</p>
+            <p>• Prevucite fotografije između slotova za premeštanje</p>
+            <p>• Koristite masovno učitavanje za dodavanje više fotografija odjednom</p>
+            <p>• Kopirajte fotografije pomoću dugmeta za kopiranje</p>
           </div>
         </div>
       </div>

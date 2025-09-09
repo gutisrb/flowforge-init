@@ -17,21 +17,28 @@ export function PhotoDropZone({
   isActive = false 
 }: PhotoDropZoneProps) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {label && (
-        <div className="text-xs text-gray-600 font-medium">{label}</div>
+        <div className="text-base text-muted-foreground font-semibold">{label}</div>
       )}
       <div
-        className={`border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-50/50 transition-all duration-200 cursor-pointer hover:border-gray-300 ${className} ${
+        className={`border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/30 transition-all duration-200 cursor-pointer hover:border-primary/50 hover:bg-primary/5 focus:border-primary focus:bg-primary/5 focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className} ${
           isActive 
-            ? 'border-primary/50 bg-primary/5' 
-            : 'border-gray-200'
+            ? 'border-primary/50 bg-primary/10' 
+            : 'border-border'
         }`}
         onClick={onDrop}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onDrop();
+          }
+        }}
       >
-        <div className="text-center text-gray-500">
-          <ImageIcon className={`mx-auto mb-1 ${className.includes('h-32') ? 'h-8 w-8' : 'h-4 w-4'}`} />
-          <p className="text-xs">Add photo</p>
+        <div className="text-center text-muted-foreground">
+          <ImageIcon className={`mx-auto mb-2 ${className.includes('h-32') ? 'h-8 w-8' : 'h-6 w-6'}`} />
+          <p className="text-base font-medium">Dodaj fotografiju</p>
         </div>
       </div>
     </div>

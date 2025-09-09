@@ -40,9 +40,9 @@ export function PhotoItem({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {label && (
-        <div className="text-xs text-gray-600 font-medium">{label}</div>
+        <div className="text-base text-muted-foreground font-semibold">{label}</div>
       )}
       <div
         ref={setNodeRef}
@@ -58,48 +58,55 @@ export function PhotoItem({
         />
         
         {/* Action buttons */}
-        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             size="icon"
             variant="destructive"
-            className="h-5 w-5"
+            className="h-11 w-11 min-h-[44px] focus:ring-2 focus:ring-ring focus:ring-offset-2"
             onClick={(e) => {
               e.stopPropagation();
               onRemove();
             }}
           >
-            <X className="h-2 w-2" />
+            <X className="h-5 w-5" />
           </Button>
           {onDuplicate && (
             <Button
               size="icon"
               variant="secondary"
-              className="h-5 w-5 bg-white/90"
+              className="h-11 w-11 min-h-[44px] bg-background/90 focus:ring-2 focus:ring-ring focus:ring-offset-2"
               onClick={(e) => {
                 e.stopPropagation();
                 onDuplicate();
               }}
             >
-              <Copy className="h-2 w-2" />
+              <Copy className="h-5 w-5" />
             </Button>
           )}
         </div>
 
         {/* Replace overlay */}
         <div 
-          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg"
+          className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg focus:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2"
           onClick={onReplace}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onReplace();
+            }
+          }}
         >
-          <div className="text-white text-xs font-medium">Click to replace</div>
+          <div className="text-white text-base font-semibold">Kliknite za zamenu</div>
         </div>
 
         {/* File info */}
-        <div className="absolute bottom-1 left-1 text-xs bg-white/90 px-1 py-0.5 rounded text-gray-700 shadow-sm max-w-[80%] truncate">
+        <div className="absolute bottom-2 left-2 text-sm bg-background/95 px-3 py-1 rounded text-foreground shadow-sm max-w-[70%] truncate font-medium">
           {file.name}
         </div>
 
         {/* File size */}
-        <div className="absolute bottom-1 right-1 text-xs bg-white/90 px-1 py-0.5 rounded text-gray-600 shadow-sm">
+        <div className="absolute bottom-2 right-2 text-sm bg-background/95 px-3 py-1 rounded text-muted-foreground shadow-sm font-medium">
           {(file.size / 1024 / 1024).toFixed(1)}MB
         </div>
       </div>
