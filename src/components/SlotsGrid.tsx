@@ -10,7 +10,7 @@ interface SlotsGridProps {
 export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
   const draggingSlotIndex = useRef<number | null>(null);
 
-  const reorder = (from: number, to: number) => {
+  const reorderSlots = (from: number, to: number) => {
     if (from === to) return;
     const next = [...slots];
     const [moved] = next.splice(from, 1);
@@ -18,16 +18,25 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
     onSlotsChange(next);
   };
 
-  const moveImage = (fromSlot: number, imageIndex: number, toSlot: number) => {
-    if (fromSlot === toSlot) return;
-    const next = slots.map(s => ({...s, images: [...s.images], mode: s.mode}));
+  const moveImage = (fromSlot: number, imageIndex: number, toSlot: number, toIndex?: number) => {
+    const next = slots.map(s => ({...s, images: [...s.images]}));
     const src = next[fromSlot];
     const dst = next[toSlot];
+
     if (!src.images[imageIndex]) return;
-    if (dst.images.length >= 2) return;
+
     const [img] = src.images.splice(imageIndex, 1);
-    dst.images.push(img);
-    if (dst.images.length === 2) dst.mode = "frame-to-frame";
+
+    // if target index provided and free, place there, else push (max 2)
+    if (typeof toIndex === "number") {
+      if (!dst.images[toIndex]) dst.images[toIndex] = img;
+      else dst.images.push(img);
+    } else {
+      dst.images.push(img);
+    }
+
+    // enforce max 2 images
+    dst.images = dst.images.slice(0, 2);
     onSlotsChange(next);
   };
 
@@ -48,7 +57,7 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
             const fromStr = e.dataTransfer.getData("text/x-smartflow-slot");
             if (fromStr) {
               const from = parseInt(fromStr, 10);
-              reorder(from, index);
+              reorderSlots(from, index);
               return;
             }
           }}
@@ -57,30 +66,11 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
           <SlotCard
             slotIndex={index}
             images={slot.images}
-            mode={slot.mode}
             onImagesChange={(images) => {
               const next = slots.map((s, i) => i === index ? { ...s, images } : s);
               onSlotsChange(next);
             }}
-            onModeChange={(mode) => {
-              const next = slots.map((s, i) => i === index ? { ...s, mode } : s);
-              onSlotsChange(next);
-            }}
-            onSwapImages={() => {
-              const next = slots.map((s, i) => {
-                if (i !== index) return s;
-                if (s.images.length === 2) {
-                  const swapped = [s.images[1], s.images[0]];
-                  return { ...s, images: swapped };
-                }
-                return s;
-              });
-              onSlotsChange(next);
-            }}
-            onRemoveSlot={() => {
-              // slots are fixed by clipCount; no explicit remove
-            }}
-            onReceiveInternalImage={(payload) => moveImage(payload.fromSlot, payload.imageIndex, index)}
+            onReceiveInternalImage={(payload) => moveImage(payload.fromSlot, payload.imageIndex, index, payload.toIndex)}
           />
         </div>
       ))}
