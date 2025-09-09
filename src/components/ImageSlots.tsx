@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { BulkDropZone } from "./BulkDropZone";
 import { SlotsGrid } from "./SlotsGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Shuffle } from "lucide-react";
+import { Upload } from "lucide-react";
 
 export interface SlotData {
   id: string;
@@ -18,92 +18,88 @@ export interface ImageSlotsProps {
   clipCount: number;
   onGenerate: () => void;
   isGenerateEnabled: boolean;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
-export function ImageSlots({ 
-  slots, 
-  onSlotsChange, 
-  totalImages, 
+export function ImageSlots({
+  slots,
+  onSlotsChange,
+  totalImages,
   clipCount,
   onGenerate,
   isGenerateEnabled,
-  isLoading = false
+  isLoading,
 }: ImageSlotsProps) {
   const maxImages = clipCount * 2; // Each slot can have max 2 images
   const slotsWithImages = slots.filter(slot => slot.images.length > 0).length;
   const allSlotsFilled = slotsWithImages >= clipCount;
 
   const handleBulkAdd = (files: File[]) => {
-    const updatedSlots = [...slots];
+    const updated = [...slots].map(s => ({...s, images: [...s.images]}));
     let fileIndex = 0;
-    
-    // Fill slots left to right, first image then optional second
-    for (let slotIndex = 0; slotIndex < clipCount && fileIndex < files.length; slotIndex++) {
-      const slot = updatedSlots[slotIndex];
-      
-      // Add first image to slot if empty
-      if (slot.images.length === 0 && fileIndex < files.length) {
-        slot.images.push(files[fileIndex]);
-        fileIndex++;
-      }
-      
-      // Add second image to slot if available and slot has room
-      if (slot.images.length === 1 && fileIndex < files.length) {
-        slot.images.push(files[fileIndex]);
-        slot.mode = "frame-to-frame";
-        fileIndex++;
-      }
-    }
-    
-    onSlotsChange(updatedSlots);
-  };
 
-  const handleAutoArrange = () => {
-    // Collect all images from all slots
-    const allImages: File[] = [];
-    slots.forEach(slot => {
-      allImages.push(...slot.images);
-    });
-    
-    // Shuffle images
-    for (let i = allImages.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [allImages[i], allImages[j]] = [allImages[j], allImages[i]];
+    // Fill left → right, first image, then optional second
+    for (let i = 0; i < clipCount && fileIndex < files.length; i++) {
+      const slot = updated[i];
+      if (slot.images.length === 0 && fileIndex < files.length) {
+        slot.images.push(files[fileIndex++]);
+      }
+      if (slot.images.length === 1 && fileIndex < files.length) {
+        slot.images.push(files[fileIndex++]);
+        slot.mode = "frame-to-frame";
+      }
     }
-    
-    // Redistribute shuffled images
-    handleBulkAdd(allImages);
+
+    onSlotsChange(updated);
   };
 
   const handleAddPhotos = () => {
-    document.getElementById('bulk-file-input')?.click();
+    document.getElementById("bulk-file-input")?.click();
+  };
+
+  const handleRefreshAll = () => {
+    onSlotsChange(slots.map(s => ({ ...s, images: [] })));
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Top Section: Clip Count Info + Bulk Drop Zone */}
-      <div className="p-6 space-y-4 border-b">
-        {/* Clip Count Display */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-foreground">
-            Fotografije za {clipCount} {clipCount === 5 ? 'klipova' : 'klipova'}
-          </h2>
-          <Badge variant="secondary" className="text-sm px-3 py-1">
-            {totalImages}/{maxImages}
-          </Badge>
+    <div className="bg-white rounded-xl border shadow-sm">
+      {/* Photo Section Header */}
+      <div className="p-6 border-b">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-bold">Fotografije</h3>
+            <p className="text-sm text-muted-foreground">
+              Dodajte 1 ili 2 fotografije po slotu • Max {maxImages} fotografija
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary">
+              {totalImages}/{maxImages} fotografija
+            </Badge>
+            <input
+              id="bulk-file-input"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length) handleBulkAdd(files);
+                (e.target as HTMLInputElement).value = "";
+              }}
+            />
+          </div>
         </div>
-        
-        {/* Bulk Drop Zone */}
-        <BulkDropZone
-          onFilesSelected={handleBulkAdd}
-          maxImages={maxImages}
-          className="h-32"
-        />
       </div>
 
-      {/* Main Content: Slots Grid */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Dropzone */}
+      <div className="p-6 pt-4">
+        <BulkDropZone
+          onFilesSelected={handleBulkAdd}
+          maxImages={maxImages - totalImages}
+          className="mb-6"
+        />
+
         <SlotsGrid
           slots={slots}
           onSlotsChange={onSlotsChange}
@@ -115,27 +111,17 @@ export function ImageSlots({
         {/* Desktop Actions */}
         <div className="hidden sm:flex items-center justify-between p-6">
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={handleAddPhotos}
-              className="h-11 px-6"
-            >
+            <Button variant="outline" onClick={handleAddPhotos} className="h-11 px-6">
               <Upload className="mr-2 h-4 w-4" />
               Dodaj fotografije
             </Button>
-            
             {totalImages > 0 && (
-              <Button
-                variant="outline"
-                onClick={handleAutoArrange}
-                className="h-11 px-6"
-              >
-                <Shuffle className="mr-2 h-4 w-4" />
-                Auto-rasporedi
+              <Button variant="outline" onClick={handleRefreshAll} className="h-11 px-6">
+                Osveži (obriši sve)
               </Button>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
               {slotsWithImages}/{clipCount} slotova popunjeno
@@ -143,49 +129,37 @@ export function ImageSlots({
             <Button
               onClick={onGenerate}
               disabled={!isGenerateEnabled || !allSlotsFilled || isLoading}
-              className="h-11 px-8 text-base font-semibold gradient-primary"
+              className="h-12 px-6 text-base font-semibold gradient-primary"
             >
-              {isLoading ? "Generiše se..." : "Generiši"}
+              {isLoading ? "Generiše..." : "Generiši"}
             </Button>
           </div>
         </div>
-        
-        {/* Mobile Actions - Sticky Bottom */}
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
-          <div className="p-4 space-y-3">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleAddPhotos}
-                className="flex-1 h-12"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Dodaj
-              </Button>
-              
-              {totalImages > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={handleAutoArrange}
-                  className="h-12 px-4"
-                >
-                  <Shuffle className="h-4 w-4" />
-                </Button>
-              )}
+
+        {/* Mobile Actions */}
+        <div className="sm:hidden p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              {slotsWithImages}/{clipCount} slotova
             </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {slotsWithImages}/{clipCount} slotova • {totalImages}/{maxImages} slika
-              </div>
-              <Button
-                onClick={onGenerate}
-                disabled={!isGenerateEnabled || !allSlotsFilled || isLoading}
-                className="h-12 px-6 text-base font-semibold gradient-primary"
-              >
-                {isLoading ? "Generiše..." : "Generiši"}
+            <Badge variant="secondary">{totalImages}/{maxImages}</Badge>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={handleAddPhotos}>
+              Dodaj
+            </Button>
+            {totalImages > 0 && (
+              <Button variant="outline" className="flex-1" onClick={handleRefreshAll}>
+                Osveži
               </Button>
-            </div>
+            )}
+            <Button
+              className="flex-[2]"
+              onClick={onGenerate}
+              disabled={!isGenerateEnabled || !allSlotsFilled || isLoading}
+            >
+              {isLoading ? "Generiše..." : "Generiši"}
+            </Button>
           </div>
         </div>
       </div>
