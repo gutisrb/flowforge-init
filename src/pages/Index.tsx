@@ -8,8 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-// Initialize N empty slots based on clip count
-const createInitialSlots = (clipCount: number): SlotData[] => 
+const createInitialSlots = (clipCount: number): SlotData[] =>
   Array.from({ length: clipCount }, (_, i) => ({
     id: `slot-${i}`,
     mode: "image-to-video",
@@ -21,75 +20,49 @@ interface IndexProps {
   session: Session;
 }
 
-const Index = ({ user, session }: IndexProps) => {
-  const [clipCount, setClipCount] = useState(6);
+const Index = ({ user }: IndexProps) => {
+  const [clipCount, setClipCount] = useState<5 | 6>(6);
   const [slots, setSlots] = useState<SlotData[]>(() => createInitialSlots(6));
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile(user);
 
-  const totalImages = slots.reduce((sum, slot) => sum + slot.images.length, 0);
-  
-  // Count valid groups (slots with required images)
-  const validGroups = slots.filter(slot => {
-    const minRequired = slot.mode === "frame-to-frame" ? 1 : 1; // frame-to-frame needs at least 1 for fallback
-    return slot.images.length >= minRequired;
-  }).length;
-  
+  const totalImages = slots.reduce((sum, s) => sum + s.images.length, 0);
+
+  const validGroups = slots.filter(s => s.images.length >= 1).length;
   const isFormValid = validGroups >= clipCount;
-  
-  const getFormErrors = () => {
-    const errors = [];
-    const needed = clipCount - validGroups;
-    if (needed > 0) errors.push(`Potrebno još ${needed} ${needed === 1 ? 'grupa' : 'grupa'}`);
-    return errors;
-  };
 
   const createMultipartFormData = (formData: any, validSlots: SlotData[]) => {
     const form = new FormData();
-    
-    // Add images in slot order
     let imageIndex = 0;
     const grouping: any[] = [];
-    
+
     validSlots.forEach((slot) => {
-      if (slot.images.length > 0) {
-        if (slot.mode === "image-to-video") {
-          form.append(`image_${imageIndex}`, slot.images[0]);
-          grouping.push({
-            type: "single",
-            files: [imageIndex],
-            first_index: imageIndex,
-            second_index: ""
-          });
-          imageIndex++;
-        } else if (slot.mode === "frame-to-frame" && slot.images.length >= 2) {
-          const firstIndex = imageIndex;
-          form.append(`image_${imageIndex}`, slot.images[0]);
-          imageIndex++;
-          form.append(`image_${imageIndex}`, slot.images[1]);
-          grouping.push({
-            type: "frame-to-frame",
-            files: [firstIndex, imageIndex],
-            first_index: firstIndex,
-            second_index: imageIndex
-          });
-          imageIndex++;
-        } else if (slot.mode === "frame-to-frame" && slot.images.length === 1) {
-          form.append(`image_${imageIndex}`, slot.images[0]);
-          grouping.push({
-            type: "single",
-            files: [imageIndex],
-            first_index: imageIndex,
-            second_index: ""
-          });
-          imageIndex++;
-        }
+      if (slot.images.length === 1) {
+        form.append(`image_${imageIndex}`, slot.images[0]);
+        grouping.push({
+          type: "single",
+          files: [imageIndex],
+          first_index: imageIndex,
+          second_index: ""
+        });
+        imageIndex++;
+      } else if (slot.images.length >= 2) {
+        const firstIndex = imageIndex;
+        form.append(`image_${imageIndex}`, slot.images[0]); imageIndex++;
+        form.append(`image_${imageIndex}`, slot.images[1]);
+        grouping.push({
+          type: "frame-to-frame",
+          files: [firstIndex, imageIndex],
+          first_index: firstIndex,
+          second_index: imageIndex
+        });
+        imageIndex++;
       }
     });
 
-    // Add required text fields
+    // left form fields
     form.append("title", formData.title);
     form.append("price", formData.price);
     form.append("location", formData.location);
@@ -99,10 +72,9 @@ const Index = ({ user, session }: IndexProps) => {
     form.append("sprat", formData.sprat || "");
     form.append("extras", formData.extras || "");
 
-    // Grouping and additional metadata (as specified)
     form.append("grouping", JSON.stringify(grouping));
     form.append("slot_mode_info", JSON.stringify(grouping));
-    form.append("total_images", imageIndex.toString());
+    form.append("total_images", String(imageIndex));
 
     return form;
   };
@@ -110,132 +82,54 @@ const Index = ({ user, session }: IndexProps) => {
   const handleSubmit = async (formData: any) => {
     if (!isFormValid) {
       toast({
-        title: "Greška",
-        description: "Otpremite najmanje 5 fotografija i popunite Naslov, Cenu i Lokaciju.",
+        title: "Nedovoljno slika",
+        description: `Potrebno je popuniti ${clipCount} slotova (min. 1 slika po slotu).`,
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    setProgress(10);
+    setProgress(20);
 
     try {
-      // Use profile webhook_url if available, otherwise fall back to env var
       const webhookUrl = profile?.webhook_url || import.meta.env.VITE_WEBHOOK_URL;
-      
       if (!webhookUrl) {
-        if (!profile?.webhook_url) {
-          toast({
-            title: "Greška",
-            description: "Vašem nalogu još nije dodeljen webhook.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw new Error("No webhook URL available");
+        toast({
+          title: "Webhook nedostaje",
+          description: "Nije postavljen webhook za vaš nalog.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Only process first clipCount valid groups
-      const validSlots = slots.filter(slot => {
-        const minRequired = slot.mode === "frame-to-frame" ? 1 : 1;
-        return slot.images.length >= minRequired;
-      }).slice(0, clipCount);
-
+      const validSlots = slots.filter(s => s.images.length >= 1).slice(0, clipCount);
       const multipartData = createMultipartFormData(formData, validSlots);
-      
-      // Console logging for testing
-      console.log("=== SMARTFLOW SUBMISSION DEBUG ===");
-      console.log("Total images:", totalImages);
-      console.log("Slot order and images:");
-      slots.forEach((slot, index) => {
-        console.log(`Slot ${index + 1}:`, slot);
-      });
-      
-      // Log the grouping info (schema-aligned)
-      let imageIndex = 0;
-      const grouping: any[] = [];
-      validSlots.forEach((slot, slotIndex) => {
-        if (slot.images.length > 0) {
-          if (slot.mode === "image-to-video") {
-            grouping.push({
-              type: "single",
-              files: [imageIndex],
-              first_index: imageIndex,
-              second_index: ""
-            });
-            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex}, single)`);
-            imageIndex++;
-          } else if (slot.mode === "frame-to-frame" && slot.images.length >= 2) {
-            const firstIndex = imageIndex;
-            grouping.push({
-              type: "frame-to-frame",
-              files: [firstIndex, firstIndex + 1],
-              first_index: firstIndex,
-              second_index: firstIndex + 1
-            });
-            console.log(`Image ${firstIndex}: ${slot.images[0].name} (slot ${slotIndex}, frame-to-frame first)`);
-            console.log(`Image ${firstIndex + 1}: ${slot.images[1].name} (slot ${slotIndex}, frame-to-frame second)`);
-            imageIndex += 2;
-          } else if (slot.mode === "frame-to-frame" && slot.images.length === 1) {
-            grouping.push({
-              type: "single",
-              files: [imageIndex],
-              first_index: imageIndex,
-              second_index: ""
-            });
-            console.log(`Image ${imageIndex}: ${slot.images[0].name} (slot ${slotIndex}, frame-to-frame fallback to single)`);
-            imageIndex++;
-          }
-        }
-      });
-      console.log("Grouping array:", grouping);
-      console.log("===============================");
-      
-      setProgress(50);
 
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        body: multipartData,
-      });
+      setProgress(55);
 
+      const res = await fetch(webhookUrl, { method: "POST", body: multipartData });
       setProgress(90);
 
-      if (response.ok) {
-        toast({
-          title: "Uspešno!",
-          description: "Video je uspešno generisan.",
-        });
-        setProgress(100);
-        
-        // Reset form after success
-        setTimeout(() => {
-          setSlots(createInitialSlots(clipCount));
-          setProgress(0);
-        }, 2000);
-      } else {
-        throw new Error(`Server error: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast({
-        title: "Greška",
-        description: "Došlo je do greške prilikom generisanja videa. Pokušajte ponovo.",
-        variant: "destructive",
-      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      toast({ title: "Uspešno!", description: "Započeli smo generisanje videa." });
+      setProgress(100);
+      setTimeout(() => { setSlots(createInitialSlots(clipCount)); setProgress(0); }, 1200);
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Greška", description: "Došlo je do greške prilikom slanja.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // keep array length in sync with clipCount
   useEffect(() => {
-    // Ensure we always have exactly clipCount slots
     setSlots(prev => {
       const next = createInitialSlots(clipCount);
-      // shallow carry-over of existing images to new array length
       for (let i = 0; i < Math.min(prev.length, next.length); i++) {
         next[i].images = prev[i].images;
-        next[i].mode = prev[i].mode;
       }
       return next;
     });
@@ -243,120 +137,59 @@ const Index = ({ user, session }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Bar */}
       <header className="border-b bg-white/70 backdrop-blur">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-md bg-primary text-white flex items-center justify-center font-bold">S</div>
-              <div className="text-xl font-bold">Smartflow</div>
-              <div className="text-muted-foreground ml-2">Video oglasi</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <ProgressBar progress={progress} />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => supabase.auth.signOut()}
-              >
-                Odjavi se
-              </Button>
-            </div>
+        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-md bg-primary text-white flex items-center justify-center font-bold">S</div>
+            <div className="text-xl font-bold">Smartflow</div>
+            <div className="text-muted-foreground ml-2">Video oglasi</div>
+          </div>
+          <div className="flex items-center gap-4">
+            <ProgressBar progress={progress} />
+            <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+              Odjavi se
+            </Button>
           </div>
         </div>
       </header>
 
-      {/* Profile Loading or Missing Webhook Warning */}
-      {profileLoading && (
-        <div className="bg-muted/50 border-b">
-          <div className="container mx-auto px-6 py-3">
-            <p className="text-sm text-muted-foreground">Učitavam profil...</p>
-          </div>
-        </div>
-      )}
-      
+      {/* warning if no webhook */}
       {!profileLoading && !profile?.webhook_url && (
-        <div className="bg-yellow-50 border-yellow-200 border-b">
-          <div className="container mx-auto px-6 py-3">
-            <p className="text-sm text-yellow-800">
-              ⚠️ Vašem nalogu još nije dodeljen webhook. Kontaktirajte administratora.
-            </p>
+        <div className="bg-yellow-50 border-y border-yellow-200">
+          <div className="container mx-auto px-6 py-2 text-sm text-yellow-900">
+            Vašem nalogu još nije dodeljen webhook. Kontaktirajte administratora.
           </div>
         </div>
       )}
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 pb-24 sm:pb-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
-          {/* Left Column - Form - Sticky on desktop */}
-          <div className="xl:sticky xl:top-8 xl:h-fit space-y-6">
-            {/* Clip Count Selector */}
-            <div className="bg-white rounded-xl border shadow-sm p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-foreground">Broj klipova</h3>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                    <input
-                      type="radio"
-                      name="clipCount"
-                      value={5}
-                      checked={clipCount === 5}
-                      onChange={(e) => {
-                        const newCount = parseInt(e.target.value);
-                        setClipCount(newCount);
-                        setSlots(createInitialSlots(newCount));
-                      }}
-                      className="w-4 h-4 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm">5 klipova</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                    <input
-                      type="radio"
-                      name="clipCount"
-                      value={6}
-                      checked={clipCount === 6}
-                      onChange={(e) => {
-                        const newCount = parseInt(e.target.value);
-                        setClipCount(newCount);
-                        setSlots(createInitialSlots(newCount));
-                      }}
-                      className="w-4 h-4 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm">6 klipova</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Property Form */}
+          {/* LEFT: property form */}
+          <div className="xl:sticky xl:top-8 xl:h-fit">
             <ListingForm
               clipCount={clipCount}
               validGroups={validGroups}
-              getFormErrors={getFormErrors}
+              getFormErrors={() => []}
               onSubmit={handleSubmit}
               isLoading={isLoading}
             />
           </div>
 
-          {/* Right Column - Images */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border shadow-sm p-6">
-              <ImageSlots
-                slots={slots}
-                onSlotsChange={setSlots}
-                totalImages={totalImages}
-                clipCount={clipCount}
-                onGenerate={() => {
-                  const formElement = document.querySelector('form') as HTMLFormElement;
-                  if (formElement) {
-                    formElement.requestSubmit();
-                  }
-                }}
-                isGenerateEnabled={isFormValid}
-                isLoading={isLoading}
-              />
-            </div>
+          {/* RIGHT: photos */}
+          <div>
+            <ImageSlots
+              slots={slots}
+              onSlotsChange={setSlots}
+              totalImages={totalImages}
+              clipCount={clipCount}
+              setClipCount={setClipCount}
+              onGenerate={() => {
+                const formEl = document.querySelector('form') as HTMLFormElement;
+                if (formEl) formEl.requestSubmit();
+              }}
+              isGenerateEnabled={isFormValid}
+              isLoading={isLoading}
+            />
           </div>
         </div>
       </main>
