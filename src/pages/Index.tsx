@@ -284,14 +284,14 @@ const Index = ({ user, session }: IndexProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
-          {/* Left Column - Form */}
-          <div className="space-y-6">
+          {/* Left Column - Form - Sticky on desktop */}
+          <div className="xl:sticky xl:top-8 xl:h-fit space-y-6">
             {/* Clip Count Selector */}
             <div className="bg-white rounded-xl border shadow-sm p-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Broj klipova</h3>
-                <div className="flex gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <h3 className="text-xl font-bold text-foreground">Broj klipova</h3>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                     <input
                       type="radio"
                       name="clipCount"
@@ -302,11 +302,11 @@ const Index = ({ user, session }: IndexProps) => {
                         setClipCount(newCount);
                         setSlots(createInitialSlots(newCount));
                       }}
-                      className="text-primary focus:ring-primary"
+                      className="w-4 h-4 text-primary focus:ring-primary"
                     />
-                    <span className="text-sm font-medium">5 klipova</span>
+                    <span className="text-base font-semibold">5 klipova</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                     <input
                       type="radio"
                       name="clipCount"
@@ -317,9 +317,9 @@ const Index = ({ user, session }: IndexProps) => {
                         setClipCount(newCount);
                         setSlots(createInitialSlots(newCount));
                       }}
-                      className="text-primary focus:ring-primary"
+                      className="w-4 h-4 text-primary focus:ring-primary"
                     />
-                    <span className="text-sm font-medium">6 klipova</span>
+                    <span className="text-base font-semibold">6 klipova</span>
                   </label>
                 </div>
               </div>
@@ -339,13 +339,21 @@ const Index = ({ user, session }: IndexProps) => {
           </div>
 
           {/* Right Column - Image Slots */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border shadow-sm p-6">
+          <div className="min-h-screen">
+            <div className="bg-white rounded-xl border shadow-sm h-full overflow-hidden">
               <ImageSlots
                 slots={slots}
                 onSlotsChange={setSlots}
                 totalImages={totalImages}
                 clipCount={clipCount}
+                onGenerate={() => {
+                  const formElement = document.querySelector('form') as HTMLFormElement;
+                  if (formElement) {
+                    formElement.requestSubmit();
+                  }
+                }}
+                isGenerateEnabled={isFormValid}
+                isLoading={isLoading}
               />
             </div>
           </div>
