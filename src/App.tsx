@@ -4,7 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthWrapper } from "@/components/AuthWrapper";
+import { Navigation } from "@/components/Navigation";
 import Index from "./pages/Index";
+import Furnisher from "./pages/Furnisher";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,11 +19,15 @@ const App = () => (
       <AuthWrapper>
         {(user, session) => (
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index user={user} session={session} />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="min-h-screen bg-background">
+              <Navigation />
+              <Routes>
+                <Route path="/" element={<Index user={user} session={session} />} />
+                <Route path="/furnisher" element={<Furnisher />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
           </BrowserRouter>
         )}
       </AuthWrapper>
