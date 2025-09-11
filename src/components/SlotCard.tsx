@@ -71,27 +71,28 @@ export function SlotCard({
         onDrop={onDrop}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 pb-3 border-b border-border/50">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="p-4 pb-3 border-b border-border/50">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Slot {slotIndex + 1}</span>
-            {images.length === 2 && (
+            {images.length >= 2 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                onClick={swap}
+                title="Zameni redosled slika"
+              >
+                <ArrowLeftRight className="h-3 w-3 mr-1" />
+                Swap
+              </Button>
+            )}
+          </div>
+          {images.length === 2 && (
+            <div className="flex justify-start">
               <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
                 Frame-to-Frame
               </Badge>
-            )}
-          </div>
-
-          {images.length >= 2 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 px-3 text-xs ml-2 flex-shrink-0"
-              onClick={swap}
-              title="Zameni redosled slika"
-            >
-              <ArrowLeftRight className="h-3 w-3 mr-1" />
-              Swap
-            </Button>
+            </div>
           )}
         </div>
 
