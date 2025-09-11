@@ -22,21 +22,51 @@ export default function Furnisher() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fakeProgressRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setResultImage(null); // Clear previous result
+      setResultImage(null);
     }
   };
 
-  const startPolling = (jid: string) => {
-    // clear any prior polling
-    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+  const stopPolling = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  };
 
+  const stopFakeProgress = () => {
+    if (fakeProgressRef.current) {
+      clearInterval(fakeProgressRef.current);
+      fakeProgressRef.current = null;
+    }
+  };
+
+  const startFakeProgress = () => {
+    setProgress(0);
+    stopFakeProgress();
+    // Indeterminate progress feel: bump to 90% slowly while waiting.
+    fakeProgressRef.current = setInterval(() => {
+      setProgress((p) => (p < 90 ? p + 3 : 90));
+    }, 500);
+  };
+
+  const finishProgress = () => {
+    stopFakeProgress();
+    setProgress(100);
+    setTimeout(() => setProgress(0), 800); // reset after a moment
+  };
+
+  const startPolling = (jid: string) => {
+    stopPolling();
     pollIntervalRef.current = setInterval(async () => {
       try {
         const response = await fetch(
@@ -47,76 +77,60 @@ export default function Furnisher() {
         const ctype = response.headers.get('content-type') || '';
 
         if (ctype.includes('application/json')) {
-          const data: JobStatus = await response.json();
+          const data: JobStatus | { status: 'processing' } = await response.json();
 
-          if (data.status === 'done') {
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
+          if ((data as JobStatus).status === 'done') {
+            stopPolling();
             setIsProcessing(false);
             setJobId(null);
 
-            if (data.url) {
-              setResultImage(data.url);
-              toast({
-                title: 'Success',
-                description: 'Your image has been generated successfully!',
-              });
+            const url = (data as JobStatus).url;
+            if (url) {
+              setResultImage(url);
+              finishProgress();
+              toast({ title: 'Success', description: 'Your image has been generated successfully!' });
             } else {
-              toast({
-                title: 'Done',
-                description: 'Job finished, but no URL was returned.',
-              });
+              finishProgress();
+              toast({ title: 'Done', description: 'Job finished, but no URL was returned.' });
             }
           }
-          // if processing → keep polling
+          // if status:'processing' → do nothing; keep polling
         } else if (ctype.startsWith('image/')) {
-          // Status webhook may return the image binary
+          // Binary image response path
           const blob = await response.blob();
           const imageUrl = URL.createObjectURL(blob);
 
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
+          stopPolling();
           setIsProcessing(false);
           setJobId(null);
           setResultImage(imageUrl);
+          finishProgress();
 
-          toast({
-            title: 'Success',
-            description: 'Your image has been generated successfully!',
-          });
+          toast({ title: 'Success', description: 'Your image has been generated successfully!' });
         } else {
-          // fallback: try reading as blob; if it’s an image we’ll render it
+          // Fallback: try blob; if it’s an image, render it
           const blob = await response.blob();
           if (blob.type.startsWith('image/')) {
             const imageUrl = URL.createObjectURL(blob);
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
+            stopPolling();
             setIsProcessing(false);
             setJobId(null);
             setResultImage(imageUrl);
+            finishProgress();
             toast({ title: 'Success', description: 'Image generated.' });
           }
         }
       } catch (error) {
         console.error('Polling error:', error);
+        stopPolling();
+        setIsProcessing(false);
+        setJobId(null);
+        stopFakeProgress();
         toast({
           title: 'Error',
           description: 'Failed to check job status. Please try again.',
           variant: 'destructive',
         });
-
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-          pollIntervalRef.current = null;
-        }
-        setIsProcessing(false);
-        setJobId(null);
       }
     }, 3000);
   };
@@ -133,6 +147,7 @@ export default function Furnisher() {
 
     setIsProcessing(true);
     setResultImage(null);
+    startFakeProgress();
 
     try {
       const formData = new FormData();
@@ -147,25 +162,20 @@ export default function Furnisher() {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
-
       if (data.jobId && data.status === 'processing') {
         setJobId(data.jobId);
         startPolling(data.jobId);
-        toast({
-          title: 'Processing',
-          description: 'Your image is being generated. Please wait…',
-        });
+        toast({ title: 'Processing', description: 'Your image is being generated. Please wait…' });
       } else {
         throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Generate error:', error);
       setIsProcessing(false);
+      stopFakeProgress();
       toast({
         title: 'Error',
         description: 'Failed to start image generation. Please check your webhook configuration.',
@@ -178,10 +188,8 @@ export default function Furnisher() {
     setStyle('');
     setInstructions('');
     setResultImage(null);
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-    }
+    stopPolling();
+    stopFakeProgress();
     setIsProcessing(false);
     setJobId(null);
   };
@@ -203,7 +211,8 @@ export default function Furnisher() {
 
   React.useEffect(() => {
     return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      stopPolling();
+      stopFakeProgress();
     };
   }, []);
 
@@ -319,6 +328,16 @@ export default function Furnisher() {
                   Redo
                 </Button>
               </div>
+
+              {/* Progress bar */}
+              {isProcessing && (
+                <div className="w-full h-2 bg-muted rounded">
+                  <div
+                    className="h-2 bg-primary rounded transition-[width] duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
