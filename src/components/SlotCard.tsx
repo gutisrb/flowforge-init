@@ -72,10 +72,7 @@ export function SlotCard({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 pb-3 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">{slotIndex + 1}</span>
-            </div>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-sm font-medium">Slot {slotIndex + 1}</span>
             {images.length === 2 && (
               <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
@@ -88,7 +85,7 @@ export function SlotCard({
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-3 text-xs"
+              className="h-8 px-3 text-xs ml-2 flex-shrink-0"
               onClick={swap}
               title="Zameni redosled slika"
             >
@@ -120,7 +117,7 @@ export function SlotCard({
               />
             </label>
           ) : (
-            <div className={`grid gap-3 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            <div className="flex flex-col gap-3">
               {images.map((image, idx) => (
                 <div
                   key={idx}
