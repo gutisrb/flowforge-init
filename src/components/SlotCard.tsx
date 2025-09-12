@@ -151,9 +151,20 @@ export function SlotCard({
                 return (
                   <div
                     key={idx}
+                    draggable
+                    onDragStart={(e) => {
+                      const payload = { fromSlot: slotIndex, imageIndex: idx };
+                      setDragState(true, payload);
+                      e.dataTransfer.setData(
+                        "text/x-smartflow-image",
+                        JSON.stringify(payload)
+                      );
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragEnd={() => setDragState(false)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDropIntoIndex(idx)}
-                    className={`group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 transition-all ${
+                    className={`group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 transition-all cursor-move ${
                       isBeingDragged
                         ? "border-primary/50 opacity-50 scale-95"
                         : canDropHere
@@ -164,23 +175,12 @@ export function SlotCard({
                     <img
                       src={URL.createObjectURL(image)}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover pointer-events-none"
                     />
                     
-                    {/* Drag handle */}
+                    {/* Drag indicator */}
                     <div
-                      draggable
-                      onDragStart={(e) => {
-                        const payload = { fromSlot: slotIndex, imageIndex: idx };
-                        setDragState(true, payload);
-                        e.dataTransfer.setData(
-                          "text/x-smartflow-image",
-                          JSON.stringify(payload)
-                        );
-                        e.dataTransfer.effectAllowed = "move";
-                      }}
-                      onDragEnd={() => setDragState(false)}
-                      className="absolute top-2 left-2 p-1 bg-white/90 rounded cursor-move opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm"
+                      className="absolute top-2 left-2 p-1 bg-white/90 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-sm pointer-events-none"
                       title="Povuci za prebacivanje"
                     >
                       <GripVertical className="h-4 w-4 text-gray-600" />
