@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2, ArrowLeftRight } from "lucide-react";
+import { Eye, Trash2, ArrowLeftRight, GripVertical } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { useDrag } from "./DragContext";
 
 interface SlotCardProps {
   slotIndex: number;
@@ -21,6 +22,7 @@ export function SlotCard({
 }: SlotCardProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { isDragging, draggedImage, setDragState } = useDrag();
 
   const addFiles = (files: File[]) => {
     const next = [...images, ...files].slice(0, 2);
@@ -62,11 +64,24 @@ export function SlotCard({
     if (images.length === 2) onImagesChange([images[1], images[0]]);
   };
 
+  const canAcceptDrop = isDragging && draggedImage && (
+    draggedImage.fromSlot !== slotIndex || images.length < 2
+  );
+
   return (
     <>
       <div
-        className={`bg-white rounded-xl border-2 ${isDragOver ? "border-primary shadow-lg shadow-primary/20" : "border-border"} transition-all duration-200 h-full min-h-[280px] flex flex-col shadow-sm hover:shadow-md`}
-        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+        className={`bg-white rounded-xl border-2 transition-all duration-200 h-full min-h-[280px] flex flex-col shadow-sm hover:shadow-md ${
+          isDragOver && canAcceptDrop 
+            ? "border-primary shadow-lg shadow-primary/20 bg-primary/5" 
+            : isDragging && canAcceptDrop
+            ? "border-primary/50 shadow-md"
+            : "border-border"
+        }`}
+        onDragOver={(e) => { 
+          e.preventDefault(); 
+          if (canAcceptDrop) setIsDragOver(true); 
+        }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={onDrop}
       >
@@ -99,12 +114,22 @@ export function SlotCard({
         {/* Body */}
         <div className="flex-1 p-4">
           {images.length === 0 ? (
-            <label className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 text-center text-sm text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-colors">
+            <label className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
+              isDragOver && canAcceptDrop
+                ? "border-primary bg-primary/10 text-primary"
+                : isDragging && canAcceptDrop
+                ? "border-primary/50 bg-primary/5 text-primary/70"
+                : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
+            }`}>
               <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                 <span className="text-2xl">📸</span>
               </div>
-              <span className="font-medium">Dodaj 1 ili 2 fotografije</span>
-              <span className="text-xs mt-1 opacity-75">Povuci ovde ili klikni za izbor</span>
+              <span className="font-medium">
+                {isDragOver && canAcceptDrop ? "Otpusti ovde" : "Dodaj 1 ili 2 fotografije"}
+              </span>
+              <span className="text-xs mt-1 opacity-75">
+                {isDragOver && canAcceptDrop ? "Slika će biti dodana" : "Povuci ovde ili klikni za izbor"}
+              </span>
               <input
                 type="file"
                 multiple
@@ -119,41 +144,71 @@ export function SlotCard({
             </label>
           ) : (
             <div className="flex flex-col gap-3">
-              {images.map((image, idx) => (
-                <div
-                  key={idx}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={onDropIntoIndex(idx)}
-                  className="group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 border-transparent hover:border-primary/30 transition-all"
-                >
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt=""
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData(
-                        "text/x-smartflow-image",
-                        JSON.stringify({ fromSlot: slotIndex, imageIndex: idx })
-                      );
-                      e.dataTransfer.effectAllowed = "move";
-                    }}
-                    className="w-full h-full object-cover cursor-move"
-                  />
-                  
-                  {/* Overlay with controls */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
-                    {/* Position badge */}
-                    <div className="absolute top-2 left-2">
-                      <Badge 
-                        variant="secondary" 
-                        className="text-xs bg-white/90 text-gray-900 border-0 shadow-sm"
-                      >
-                        {idx === 0 ? "Početak" : "Kraj"}
-                      </Badge>
-                    </div>
+              {images.map((image, idx) => {
+                const isBeingDragged = isDragging && draggedImage?.fromSlot === slotIndex && draggedImage?.imageIndex === idx;
+                const canDropHere = isDragging && draggedImage && !(draggedImage.fromSlot === slotIndex && draggedImage.imageIndex === idx);
+                
+                return (
+                  <div
+                    key={idx}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={onDropIntoIndex(idx)}
+                    className={`group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 transition-all ${
+                      isBeingDragged
+                        ? "border-primary/50 opacity-50 scale-95"
+                        : canDropHere
+                        ? "border-primary/50 shadow-md"
+                        : "border-transparent hover:border-primary/30"
+                    }`}
+                  >
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                     
-                    {/* Action buttons */}
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Drag handle */}
+                    <div
+                      draggable
+                      onDragStart={(e) => {
+                        const payload = { fromSlot: slotIndex, imageIndex: idx };
+                        setDragState(true, payload);
+                        e.dataTransfer.setData(
+                          "text/x-smartflow-image",
+                          JSON.stringify(payload)
+                        );
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragEnd={() => setDragState(false)}
+                      className="absolute top-2 left-2 p-1 bg-white/90 rounded cursor-move opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm"
+                      title="Povuci za prebacivanje"
+                    >
+                      <GripVertical className="h-4 w-4 text-gray-600" />
+                    </div>
+                  
+                    {/* Drop overlay */}
+                    {canDropHere && (
+                      <div className="absolute inset-0 bg-primary/20 border-2 border-primary border-dashed rounded-lg flex items-center justify-center">
+                        <div className="bg-white/90 px-3 py-1 rounded-md text-xs font-medium text-primary">
+                          Zameni poziciju
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Overlay with controls */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
+                      {/* Position badge */}
+                      <div className="absolute top-2 right-2">
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs bg-white/90 text-gray-900 border-0 shadow-sm"
+                        >
+                          {idx === 0 ? "Početak" : "Kraj"}
+                        </Badge>
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -172,24 +227,31 @@ export function SlotCard({
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               
               {/* Add second image slot when only one image */}
               {images.length === 1 && (
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={onDropIntoIndex(1)}
-                  className="rounded-lg border-2 border-dashed border-muted-foreground/25 aspect-[4/3] flex items-center justify-center text-sm text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer"
+                  className={`rounded-lg border-2 border-dashed aspect-[4/3] flex items-center justify-center text-sm transition-colors cursor-pointer ${
+                    canAcceptDrop
+                      ? "border-primary/50 bg-primary/5 text-primary"
+                      : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
+                  }`}
                   onClick={() => document.getElementById(`slot-${slotIndex}-add`)?.click()}
                 >
                   <div className="text-center">
                     <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-2">
                       <span className="text-lg">+</span>
                     </div>
-                    <span className="text-xs">Dodaj drugu</span>
+                    <span className="text-xs">
+                      {canAcceptDrop ? "Otpusti ovde" : "Dodaj drugu"}
+                    </span>
                   </div>
                   <input
                     id={`slot-${slotIndex}-add`}

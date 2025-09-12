@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
+import React from "react";
 import { SlotCard } from "./SlotCard";
 import { SlotData } from "./ImageSlots";
+import { DragProvider } from "./DragContext";
 
 interface SlotsGridProps {
   slots: SlotData[];
@@ -8,16 +9,6 @@ interface SlotsGridProps {
 }
 
 export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
-  const draggingSlotIndex = useRef<number | null>(null);
-
-  const reorderSlots = (from: number, to: number) => {
-    if (from === to) return;
-    const next = [...slots];
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    onSlotsChange(next);
-  };
-
   const moveImage = (fromSlot: number, imageIndex: number, toSlot: number, toIndex?: number) => {
     const next = slots.map(s => ({...s, images: [...s.images]}));
     const src = next[fromSlot];
@@ -41,29 +32,11 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {slots.map((slot, index) => (
-        <div
-          key={slot.id}
-          draggable
-          onDragStart={(e) => {
-            draggingSlotIndex.current = index;
-            e.dataTransfer.setData("text/x-smartflow-slot", String(index));
-            e.dataTransfer.effectAllowed = "move";
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const fromStr = e.dataTransfer.getData("text/x-smartflow-slot");
-            if (fromStr) {
-              const from = parseInt(fromStr, 10);
-              reorderSlots(from, index);
-              return;
-            }
-          }}
-          className="cursor-move"
-        >
+    <DragProvider>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {slots.map((slot, index) => (
           <SlotCard
+            key={slot.id}
             slotIndex={index}
             images={slot.images}
             onImagesChange={(images) => {
@@ -72,8 +45,8 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
             }}
             onReceiveInternalImage={(payload) => moveImage(payload.fromSlot, payload.imageIndex, index, payload.toIndex)}
           />
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </DragProvider>
   );
 }
