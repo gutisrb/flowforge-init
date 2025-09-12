@@ -18,16 +18,28 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
 
     const [img] = src.images.splice(imageIndex, 1);
 
-    // if target index provided and free, place there, else push (max 2)
+    // if target index provided, place there or swap if occupied
     if (typeof toIndex === "number") {
-      if (!dst.images[toIndex]) dst.images[toIndex] = img;
-      else dst.images.push(img);
+      if (!dst.images[toIndex]) {
+        dst.images[toIndex] = img;
+      } else {
+        // Swap images - move displaced image back to source slot
+        const displacedImage = dst.images[toIndex];
+        dst.images[toIndex] = img;
+        src.images.push(displacedImage);
+      }
     } else {
-      dst.images.push(img);
+      // Dropping into general slot area
+      if (dst.images.length < 2) {
+        dst.images.push(img);
+      } else {
+        // Slot is full, swap with the last image
+        const displacedImage = dst.images.pop()!;
+        dst.images.push(img);
+        src.images.push(displacedImage);
+      }
     }
 
-    // enforce max 2 images
-    dst.images = dst.images.slice(0, 2);
     onSlotsChange(next);
   };
 

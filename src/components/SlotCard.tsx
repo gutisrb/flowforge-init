@@ -50,6 +50,7 @@ export function SlotCard({
 
   const onDropIntoIndex = (toIndex: number) => (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragOver(false);
     const payload = e.dataTransfer.getData("text/x-smartflow-image");
     if (!payload) return;
     try {
@@ -82,7 +83,15 @@ export function SlotCard({
           e.preventDefault(); 
           if (canAcceptDrop) setIsDragOver(true); 
         }}
-        onDragLeave={() => setIsDragOver(false)}
+        onDragLeave={(e) => {
+          // Only clear drag over if we're actually leaving the slot card
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX;
+          const y = e.clientY;
+          if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+            setIsDragOver(false);
+          }
+        }}
         onDrop={onDrop}
       >
         {/* Header */}
@@ -125,10 +134,13 @@ export function SlotCard({
                 <span className="text-2xl">📸</span>
               </div>
               <span className="font-medium">
-                {isDragOver && canAcceptDrop ? "Otpusti ovde" : "Dodaj 1 ili 2 fotografije"}
+                {isDragOver && canAcceptDrop ? "Otpusti ovde" : "Dodaj 1-2 fotografije"}
               </span>
               <span className="text-xs mt-1 opacity-75">
-                {isDragOver && canAcceptDrop ? "Slika će biti dodana" : "Povuci ovde ili klikni za izbor"}
+                {isDragOver && canAcceptDrop ? "Slika će biti dodana" : "Jedna slika = statična / Dve slike = animacija"}
+              </span>
+              <span className="text-xs mt-1 opacity-60">
+                Povuci ovde ili klikni za izbor
               </span>
               <input
                 type="file"
@@ -164,6 +176,7 @@ export function SlotCard({
                     onDragEnd={() => setDragState(false)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDropIntoIndex(idx)}
+                    onDragLeave={() => setIsDragOver(false)}
                     className={`group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 transition-all cursor-move ${
                       isBeingDragged
                         ? "border-primary/50 opacity-50 scale-95"
@@ -238,6 +251,7 @@ export function SlotCard({
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={onDropIntoIndex(1)}
+                  onDragLeave={() => setIsDragOver(false)}
                   className={`rounded-lg border-2 border-dashed aspect-[4/3] flex items-center justify-center text-sm transition-colors cursor-pointer ${
                     canAcceptDrop
                       ? "border-primary/50 bg-primary/5 text-primary"
@@ -249,8 +263,11 @@ export function SlotCard({
                     <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-2">
                       <span className="text-lg">+</span>
                     </div>
-                    <span className="text-xs">
-                      {canAcceptDrop ? "Otpusti ovde" : "Dodaj drugu"}
+                    <span className="text-xs font-medium">
+                      {canAcceptDrop ? "Otpusti ovde" : "Dodaj drugu sliku"}
+                    </span>
+                    <span className="text-xs opacity-75 mt-1 block">
+                      Za animaciju
                     </span>
                   </div>
                   <input
