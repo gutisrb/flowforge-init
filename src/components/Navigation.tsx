@@ -1,15 +1,33 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { User, Session } from '@supabase/supabase-js';
 import { cn } from '@/lib/utils';
 import { Video, Sofa } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ProgressBar } from '@/components/ProgressBar';
+import { supabase } from '@/integrations/supabase/client';
 
-export function Navigation() {
+interface NavigationProps {
+  user?: User;
+  session?: Session;
+  progress?: number;
+}
+
+export function Navigation({ user, session, progress = 0 }: NavigationProps) {
   const location = useLocation();
 
   return (
-    <nav className="border-b border-border bg-card">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center space-x-8">
+    <nav className="border-b bg-white/70 backdrop-blur">
+      <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          {/* Smartflow Branding */}
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-md bg-primary text-white flex items-center justify-center font-bold">S</div>
+            <div className="text-xl font-bold">Smartflow</div>
+            <div className="text-muted-foreground ml-2">Video oglasi</div>
+          </div>
+          
+          {/* Navigation Links */}
           <div className="flex space-x-6">
             <Link
               to="/"
@@ -37,6 +55,16 @@ export function Navigation() {
             </Link>
           </div>
         </div>
+        
+        {/* Right side - Progress and Sign Out (only show if user is authenticated) */}
+        {user && (
+          <div className="flex items-center gap-4">
+            <ProgressBar value={progress} />
+            <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+              Odjavi se
+            </Button>
+          </div>
+        )}
       </div>
     </nav>
   );

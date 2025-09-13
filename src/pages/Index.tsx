@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { User, Session } from '@supabase/supabase-js';
 import { ListingForm } from "@/components/ListingForm";
 import { ImageSlots, SlotData } from "@/components/ImageSlots";
-import { ProgressBar } from "@/components/ProgressBar";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { useProgress } from "@/contexts/ProgressContext";
 
 const createInitialSlots = (clipCount: number): SlotData[] =>
   Array.from({ length: clipCount }, (_, i) => ({
@@ -24,7 +22,7 @@ const Index = ({ user }: IndexProps) => {
   const [clipCount, setClipCount] = useState<5 | 6>(6);
   const [slots, setSlots] = useState<SlotData[]>(() => createInitialSlots(6));
   const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const { progress, setProgress } = useProgress();
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile(user);
 
@@ -137,22 +135,6 @@ const Index = ({ user }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white/70 backdrop-blur">
-        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-md bg-primary text-white flex items-center justify-center font-bold">S</div>
-            <div className="text-xl font-bold">Smartflow</div>
-            <div className="text-muted-foreground ml-2">Video oglasi</div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ProgressBar value={progress} />
-            <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
-              Odjavi se
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* warning if no webhook */}
       {!profileLoading && !profile?.webhook_url && (
         <div className="bg-yellow-50 border-y border-yellow-200">
