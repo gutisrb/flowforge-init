@@ -17,25 +17,25 @@ export function Navigation({ user, session, progress = 0 }: NavigationProps) {
   const location = useLocation();
 
   return (
-    <nav className="border-b bg-white/70 backdrop-blur">
-      <div className="container mx-auto px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+    <nav className="page-header border-b border-border bg-background/95 backdrop-blur-md shadow-card">
+      <div className="container max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-12">
           {/* Smartflow Branding */}
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-md bg-primary text-white flex items-center justify-center font-bold">S</div>
-            <div className="text-xl font-bold">Smartflow</div>
-            <div className="text-muted-foreground ml-2">Video oglasi</div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">S</div>
+            <div className="text-heading-3 font-semibold text-text-primary">Smartflow</div>
+            <div className="text-body text-text-muted ml-2">Video oglasi</div>
           </div>
           
           {/* Navigation Links */}
-          <div className="flex space-x-6">
+          <div className="flex space-x-2">
             <Link
               to="/"
               className={cn(
-                "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center space-x-3 px-4 py-3 rounded-2xl text-body font-medium transition-all duration-150 hover-lift",
                 location.pathname === "/"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  ? "bg-primary text-primary-foreground shadow-raised"
+                  : "text-text-muted hover:text-text-primary hover:bg-surface-calm"
               )}
             >
               <Video className="h-4 w-4" />
@@ -44,10 +44,10 @@ export function Navigation({ user, session, progress = 0 }: NavigationProps) {
             <Link
               to="/furnisher"
               className={cn(
-                "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center space-x-3 px-4 py-3 rounded-2xl text-body font-medium transition-all duration-150 hover-lift",
                 location.pathname === "/furnisher"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  ? "bg-primary text-primary-foreground shadow-raised"
+                  : "text-text-muted hover:text-text-primary hover:bg-surface-calm"
               )}
             >
               <Sofa className="h-4 w-4" />
@@ -60,7 +60,12 @@ export function Navigation({ user, session, progress = 0 }: NavigationProps) {
         {user && (
           <div className="flex items-center gap-4">
             <ProgressBar value={progress} />
-            <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => supabase.auth.signOut()}
+              className="rounded-2xl border-border-subtle hover:border-border hover-lift focus-ring"
+            >
               Odjavi se
             </Button>
           </div>

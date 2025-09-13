@@ -134,46 +134,50 @@ const Index = ({ user }: IndexProps) => {
   }, [clipCount]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-surface-calm">
       {/* warning if no webhook */}
       {!profileLoading && !profile?.webhook_url && (
         <div className="bg-yellow-50 border-y border-yellow-200">
-          <div className="container mx-auto px-6 py-2 text-sm text-yellow-900">
+          <div className="container max-w-7xl mx-auto px-6 py-3 text-body text-yellow-900">
             Vašem nalogu još nije dodeljen webhook. Kontaktirajte administratora.
           </div>
         </div>
       )}
 
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <main className="container max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
           {/* LEFT: property form */}
           <div className="xl:sticky xl:top-8 xl:h-fit">
-            <ListingForm
-              clipCount={clipCount}
-              validGroups={validGroups}
-              formErrors={[]}
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-              isValid={isFormValid}
-              totalImages={totalImages}
-            />
+            <div className="key-card bg-card p-8 rounded-2xl shadow-card">
+              <ListingForm
+                clipCount={clipCount}
+                validGroups={validGroups}
+                formErrors={[]}
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                isValid={isFormValid}
+                totalImages={totalImages}
+              />
+            </div>
           </div>
 
           {/* RIGHT: photos */}
-          <div>
-            <ImageSlots
-              slots={slots}
-              onSlotsChange={setSlots}
-              totalImages={totalImages}
-              clipCount={clipCount}
-              setClipCount={setClipCount}
-              onGenerate={() => {
-                const formEl = document.querySelector('form') as HTMLFormElement;
-                if (formEl) formEl.requestSubmit();
-              }}
-              isGenerateEnabled={isFormValid}
-              isLoading={isLoading}
-            />
+          <div className="space-y-8">
+            <div className="key-card bg-card p-8 rounded-2xl shadow-card">
+              <ImageSlots
+                slots={slots}
+                onSlotsChange={setSlots}
+                totalImages={totalImages}
+                clipCount={clipCount}
+                setClipCount={setClipCount}
+                onGenerate={() => {
+                  const formEl = document.querySelector('form') as HTMLFormElement;
+                  if (formEl) formEl.requestSubmit();
+                }}
+                isGenerateEnabled={isFormValid}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
         </div>
       </main>
