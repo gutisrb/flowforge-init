@@ -27,7 +27,7 @@ export function BulkDropZone({
   };
   return (
     <div
-      className={`border-2 border-dashed border-muted-foreground/25 rounded-lg p-3 text-center transition-colors ${
+      className={`border-2 border-dashed border-border rounded-lg p-3 text-center transition-colors ${
         isDragOver ? "border-primary bg-primary/5" : ""
       } ${className || ""}`}
       onDrop={handleDrop}

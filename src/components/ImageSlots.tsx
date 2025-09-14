@@ -57,10 +57,10 @@ export function ImageSlots({
   };
 
   return (
-    <div className="bg-white rounded-xl border shadow-sm h-full flex flex-col">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="p-4 border-b text-center space-y-2">
-        <h3 className="text-2xl font-bold text-foreground">Fotografije</h3>
+      <div className="text-center space-y-3">
+        <h2 className="text-2xl font-bold text-foreground">Fotografije</h2>
         <p className="text-base text-muted-foreground">
           Dodajte 1 ili 2 fotografije po slotu · Max {maxImages} fotografija
         </p>
@@ -91,14 +91,14 @@ export function ImageSlots({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex-1 flex flex-col min-h-0">
+      <div className="space-y-4">
         <BulkDropZone
           onFilesSelected={handleBulkAdd}
           maxImages={maxImages - totalImages}
-          className="mb-4 flex-shrink-0"
+          className="flex-shrink-0"
         />
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="min-h-0">
           <SlotsGrid
             slots={slots}
             onSlotsChange={onSlotsChange}
@@ -106,15 +106,15 @@ export function ImageSlots({
         </div>
       </div>
 
-      {/* Footer (sticky) — now holds 5/6 selector */}
-      <div className="border-t bg-white/95 backdrop-blur-sm flex-shrink-0">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-4">
+      {/* Footer with 5/6 selector and generate button */}
+      <div className="border-t pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               Popunjeno: {slots.filter(s => s.images.length >= 1).length}/{clipCount}
             </div>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1 cursor-pointer text-xs">
+              <label className="flex items-center gap-1 cursor-pointer text-sm">
                 <input
                   type="radio"
                   name="clipCount"
@@ -123,7 +123,7 @@ export function ImageSlots({
                 />
                 5 klipova
               </label>
-              <label className="flex items-center gap-1 cursor-pointer text-xs">
+              <label className="flex items-center gap-1 cursor-pointer text-sm">
                 <input
                   type="radio"
                   name="clipCount"
@@ -138,7 +138,7 @@ export function ImageSlots({
           <Button
             onClick={onGenerate}
             disabled={!isGenerateEnabled || isLoading}
-            className="h-10 px-4 text-sm font-semibold"
+            className="min-h-[44px] text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 font-semibold"
           >
             {isLoading ? "Generiše..." : "Generiši"}
           </Button>
