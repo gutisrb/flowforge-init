@@ -25,5 +25,36 @@ export function BulkDropZone({
       onFilesSelected(files.slice(0, maxImages));
     }
   };
-  return;
+  return (
+    <div
+      className={`border-2 border-dashed border-muted-foreground/25 rounded-lg p-3 text-center transition-colors ${
+        isDragOver ? "border-primary bg-primary/5" : ""
+      } ${className || ""}`}
+      onDrop={handleDrop}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+    >
+      <Upload className="mx-auto h-6 w-6 text-muted-foreground mb-2" />
+      <p className="text-sm text-muted-foreground mb-2">
+        Prevucite fotografije ili kliknite da odaberete
+      </p>
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        id="bulk-drop-input"
+      />
+      <label
+        htmlFor="bulk-drop-input"
+        className="inline-block px-3 py-1 bg-primary text-primary-foreground rounded text-sm cursor-pointer hover:bg-primary/90 transition-colors"
+      >
+        Odaberite fajlove
+      </label>
+    </div>
+  );
 }
