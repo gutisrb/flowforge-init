@@ -72,7 +72,7 @@ export function SlotCard({
   return (
     <>
       <div
-        className={`bg-white rounded-xl border-2 transition-all duration-200 h-full min-h-[280px] flex flex-col shadow-sm hover:shadow-md ${
+        className={`bg-white rounded-xl border-2 transition-all duration-200 h-full min-h-[320px] flex flex-col shadow-sm hover:shadow-md ${
           isDragOver && canAcceptDrop 
             ? "border-primary shadow-lg shadow-primary/20 bg-primary/5" 
             : isDragging && canAcceptDrop
@@ -84,11 +84,7 @@ export function SlotCard({
           if (canAcceptDrop) setIsDragOver(true); 
         }}
         onDragLeave={(e) => {
-          // Only clear drag over if we're actually leaving the slot card
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX;
-          const y = e.clientY;
-          if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsDragOver(false);
           }
         }}
@@ -123,7 +119,7 @@ export function SlotCard({
         {/* Body */}
         <div className="flex-1 p-4">
           {images.length === 0 ? (
-            <label className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
+            <label className={`flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
               isDragOver && canAcceptDrop
                 ? "border-primary bg-primary/10 text-primary"
                 : isDragging && canAcceptDrop
@@ -176,8 +172,12 @@ export function SlotCard({
                     onDragEnd={() => setDragState(false)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDropIntoIndex(idx)}
-                    onDragLeave={() => setIsDragOver(false)}
-                    className={`group relative rounded-lg overflow-hidden aspect-[4/3] bg-muted border-2 transition-all cursor-move ${
+                    onDragLeave={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setIsDragOver(false);
+                      }
+                    }}
+                    className={`group relative rounded-lg overflow-hidden aspect-[3/2] bg-muted border-2 transition-all cursor-move ${
                       isBeingDragged
                         ? "border-primary/50 opacity-50 scale-95"
                         : canDropHere
@@ -251,8 +251,12 @@ export function SlotCard({
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={onDropIntoIndex(1)}
-                  onDragLeave={() => setIsDragOver(false)}
-                  className={`rounded-lg border-2 border-dashed aspect-[4/3] flex items-center justify-center text-sm transition-colors cursor-pointer ${
+                  onDragLeave={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      setIsDragOver(false);
+                    }
+                  }}
+                  className={`rounded-lg border-2 border-dashed aspect-[3/2] flex items-center justify-center text-sm transition-colors cursor-pointer ${
                     canAcceptDrop
                       ? "border-primary/50 bg-primary/5 text-primary"
                       : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"

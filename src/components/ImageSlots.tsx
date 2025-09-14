@@ -59,38 +59,34 @@ export function ImageSlots({
   return (
     <div className="bg-white rounded-xl border shadow-sm h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold">Fotografije</h3>
-            <p className="text-xs text-muted-foreground">
-              Dodajte 1 ili 2 fotografije po slotu · Max {maxImages} fotografija
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{totalImages}/{maxImages}</Badge>
-            <input
-              id="bulk-file-input"
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const files = Array.from(e.target.files || []);
-                if (files.length) handleBulkAdd(files);
-                (e.target as HTMLInputElement).value = "";
-              }}
-            />
-            <Button variant="outline" size="sm" onClick={handleAddPhotos}>
-              <Upload className="mr-1 h-3 w-3" />
-              Dodaj
+      <div className="p-4 border-b text-center space-y-2">
+        <h3 className="text-2xl font-bold text-foreground">Fotografije</h3>
+        <p className="text-base text-muted-foreground">
+          Dodajte 1 ili 2 fotografije po slotu · Max {maxImages} fotografija
+        </p>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Badge variant="secondary">{totalImages}/{maxImages}</Badge>
+          <input
+            id="bulk-file-input"
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              if (files.length) handleBulkAdd(files);
+              (e.target as HTMLInputElement).value = "";
+            }}
+          />
+          <Button variant="outline" size="sm" onClick={handleAddPhotos}>
+            <Upload className="mr-1 h-3 w-3" />
+            Dodaj
+          </Button>
+          {totalImages > 0 && (
+            <Button variant="outline" size="sm" onClick={handleRefreshAll}>
+              Osveži
             </Button>
-            {totalImages > 0 && (
-              <Button variant="outline" size="sm" onClick={handleRefreshAll}>
-                Osveži
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
