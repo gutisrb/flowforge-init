@@ -144,11 +144,11 @@ const Index = ({ user }: IndexProps) => {
         </div>
       )}
 
-      <main className="container max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+      <main className="container max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
           {/* LEFT: property form */}
-          <div className="xl:sticky xl:top-8 xl:h-fit">
-            <div className="key-card bg-card p-8 rounded-2xl shadow-card">
+          <div className="h-fit">
+            <div className="key-card bg-card p-6 rounded-2xl shadow-card h-full">
               <ListingForm
                 clipCount={clipCount}
                 validGroups={validGroups}
@@ -162,8 +162,8 @@ const Index = ({ user }: IndexProps) => {
           </div>
 
           {/* RIGHT: photos */}
-          <div className="space-y-8">
-            <div className="key-card bg-card p-8 rounded-2xl shadow-card">
+          <div className="h-full">
+            <div className="key-card bg-card p-6 rounded-2xl shadow-card h-full overflow-hidden">
               <ImageSlots
                 slots={slots}
                 onSlotsChange={setSlots}

@@ -49,24 +49,20 @@ export function BulkDropZone({ onFilesSelected, maxImages, className }: BulkDrop
       onDragLeave={() => setIsDragOver(false)}
       onClick={() => document.getElementById('bulk-file-input')?.click()}
     >
-      <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+      <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
         <div className={`
-          p-4 rounded-full transition-colors
+          p-2 rounded-full transition-colors
           ${isDragOver ? "bg-accent text-white" : "bg-accent/20 text-accent"}
         `}>
-          <Upload className="h-8 w-8" />
+          <Upload className="h-5 w-5" />
         </div>
         
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground">
+        <div className="space-y-1">
+          <h3 className="text-base font-semibold text-foreground">
             Otpremi fotografije
           </h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Prevuci fotografije ovde ili klikni za izbor. 
-            Automatski će se rasporediti po slotovima.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Maksimalno {maxImages} fotografija
+          <p className="text-xs text-muted-foreground max-w-xs">
+            Prevuci fotografije ovde ili klikni za izbor
           </p>
         </div>
       </div>
