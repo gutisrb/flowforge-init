@@ -86,10 +86,10 @@ export default function Furnisher() {
       
       const formData = new FormData();
       formData.append('instructions', instructions.trim());
-      
-      images.forEach(image => {
-        formData.append('images[]', image);
-      });
+      formData.append('image1', images[0]);
+      if (images[1]) {
+        formData.append('image2', images[1]);
+      }
 
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
