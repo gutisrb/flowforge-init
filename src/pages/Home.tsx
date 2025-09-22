@@ -1,3 +1,4 @@
+import { HeroSection } from '@/components/HeroSection';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -5,17 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-          Transformišite prostor uz AI
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Napredna AI tehnologija za kreiranje savršenih video prezentacija nekretnina
-        </p>
-        <Button asChild size="lg" className="text-lg px-8 py-4">
-          <Link to="/app/login">Započni rani pristup</Link>
-        </Button>
-      </section>
+      <HeroSection />
 
       {/* Features Sections */}
       <section id="kako" className="container mx-auto px-4 py-20">

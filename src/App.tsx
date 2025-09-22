@@ -17,6 +17,7 @@ import Furnisher from "./pages/Furnisher";
 import Assets from "./pages/Assets";
 import { Library } from "./pages/app/Library";
 import { Docs } from "./pages/app/Docs";
+import { Profile } from "./pages/app/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ function AppContent() {
               <Route path="reel" element={<VideoGenerator user={user} session={session} />} />
               <Route path="stage" element={<Furnisher />} />
               <Route path="docs" element={<Docs />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="assets" element={<Assets />} />
             </Route>
             <Route path="*" element={<NotFound />} />

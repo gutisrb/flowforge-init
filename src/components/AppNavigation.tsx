@@ -44,7 +44,7 @@ export function AppNavigation() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/app" className="flex items-center space-x-3">
-            <img src={logoImage} alt="Reel Estate" className="h-8 w-8" />
+            <img src={logoImage} alt="Reel Estate" className="h-8 w-8 object-contain" />
             <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
               Reel Estate
             </span>
