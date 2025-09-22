@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import logoImage from '@/assets/reel-estate-logo.png';
+import logoImage from '@/assets/reel-estate-logo-transparent.png';
 
 export function MarketingNav() {
   return (
@@ -10,7 +10,7 @@ export function MarketingNav() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <img src={logoImage} alt="Reel Estate" className="h-8 w-8 object-contain" />
-            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">Reel Estate</span>
+            <span className="text-xl font-bold text-foreground">Reel Estate</span>
           </Link>
 
           {/* Navigation Links */}

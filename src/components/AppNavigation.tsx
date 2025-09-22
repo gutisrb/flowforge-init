@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Library, Video, Home, BookOpen, User, LogOut } from 'lucide-react';
-import logoImage from '@/assets/reel-estate-logo.png';
+import logoImage from '@/assets/reel-estate-logo-transparent.png';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -45,7 +45,7 @@ export function AppNavigation() {
           {/* Logo */}
           <Link to="/app" className="flex items-center space-x-3">
             <img src={logoImage} alt="Reel Estate" className="h-8 w-8 object-contain" />
-            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-foreground">
               Reel Estate
             </span>
           </Link>
