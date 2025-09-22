@@ -30,10 +30,10 @@ export function Navigation({ user, session, progress = 0 }: NavigationProps) {
           {/* Navigation Links */}
           <div className="flex space-x-2">
             <Link
-              to="/"
+              to="/app"
               className={cn(
                 "flex items-center space-x-3 px-4 py-3 rounded-2xl text-body font-medium transition-all duration-150 hover-lift",
-                location.pathname === "/"
+                location.pathname === "/app"
                   ? "bg-primary text-primary-foreground shadow-raised"
                   : "text-text-muted hover:text-text-primary hover:bg-surface-calm"
               )}
@@ -42,10 +42,10 @@ export function Navigation({ user, session, progress = 0 }: NavigationProps) {
               <span>AI Video Generator</span>
             </Link>
             <Link
-              to="/furnisher"
+              to="/app/furnisher"
               className={cn(
                 "flex items-center space-x-3 px-4 py-3 rounded-2xl text-body font-medium transition-all duration-150 hover-lift",
-                location.pathname === "/furnisher"
+                location.pathname === "/app/furnisher"
                   ? "bg-primary text-primary-foreground shadow-raised"
                   : "text-text-muted hover:text-text-primary hover:bg-surface-calm"
               )}
