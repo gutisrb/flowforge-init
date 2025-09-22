@@ -18,8 +18,8 @@ export const PreviewStep = ({
   onSaveDraft, 
   isLoading 
 }: PreviewStepProps) => {
-  const { formData, images, pairA, pairB } = wizardData;
-  const totalImages = images.length + (pairA ? 1 : 0) + (pairB ? 1 : 0);
+  const { formData, slots } = wizardData;
+  const totalImages = slots.reduce((acc, slot) => acc + slot.images.length, 0);
 
   return (
     <div className="space-y-6">
@@ -117,46 +117,37 @@ export const PreviewStep = ({
               Fotografije
             </h3>
             <span className="text-sm text-text-muted">
-              {totalImages} slika
+              {totalImages} slika u {slots.length} slotova
             </span>
           </div>
           
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {images.map((image, index) => (
-              <div key={index} className="aspect-square rounded-md overflow-hidden bg-muted">
-                <img
-                  src={URL.createObjectURL(image)}
-                  alt={`Slika ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+          <div className="space-y-4">
+            {slots.map((slot, slotIndex) => (
+              <div key={slot.id} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-text-primary">
+                    Slot {slotIndex + 1}
+                  </h4>
+                  <span className="text-xs text-text-muted">
+                    {slot.images.length} {slot.images.length === 2 ? 'slike (animacija)' : 'slika'}
+                  </span>
+                </div>
+                
+                {slot.images.length > 0 && (
+                  <div className="grid grid-cols-6 gap-2">
+                    {slot.images.map((image, imageIndex) => (
+                      <div key={imageIndex} className="aspect-square rounded-md overflow-hidden bg-muted">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Slot ${slotIndex + 1}, Slika ${imageIndex + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
-            
-            {pairA && (
-              <div className="aspect-square rounded-md overflow-hidden bg-muted relative">
-                <img
-                  src={URL.createObjectURL(pairA)}
-                  alt="Kadar A"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-1 py-0.5 text-center">
-                  A
-                </div>
-              </div>
-            )}
-            
-            {pairB && (
-              <div className="aspect-square rounded-md overflow-hidden bg-muted relative">
-                <img
-                  src={URL.createObjectURL(pairB)}
-                  alt="Kadar B"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-1 py-0.5 text-center">
-                  B
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

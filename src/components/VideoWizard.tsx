@@ -7,6 +7,7 @@ import { PreviewStep } from '@/components/wizard/PreviewStep';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
+import { SlotData } from '@/components/ImageSlots';
 
 interface VideoWizardProps {
   user: User;
@@ -26,9 +27,8 @@ export interface FormData {
 
 export interface WizardData {
   formData: FormData;
-  images: File[];
-  pairA?: File;
-  pairB?: File;
+  slots: SlotData[];
+  clipCount: 5 | 6;
 }
 
 const steps = [
@@ -45,7 +45,12 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
       price: '',
       location: '',
     },
-    images: [],
+    slots: Array.from({ length: 5 }, (_, i) => ({
+      id: `slot-${i}`,
+      mode: 'frame-to-frame',
+      images: []
+    })),
+    clipCount: 5,
   });
   const [isLoading, setIsLoading] = useState(false);
   
@@ -57,9 +62,21 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     setWizardData(prev => ({ ...prev, formData: data }));
   }, []);
 
-  const updateImages = (images: File[], pairA?: File, pairB?: File) => {
-    setWizardData(prev => ({ ...prev, images, pairA, pairB }));
-  };
+  const updateSlots = useCallback((slots: SlotData[]) => {
+    setWizardData(prev => ({ ...prev, slots }));
+  }, []);
+
+  const updateClipCount = useCallback((clipCount: 5 | 6) => {
+    const newSlots: SlotData[] = Array.from({ length: clipCount }, (_, i) => {
+      const existingSlot = wizardData.slots[i];
+      return existingSlot || {
+        id: `slot-${i}`,
+        mode: 'frame-to-frame' as const,
+        images: []
+      };
+    });
+    setWizardData(prev => ({ ...prev, clipCount, slots: newSlots }));
+  }, [wizardData.slots]);
 
   const canProceedToStep2 = () => {
     const { title, price, location } = wizardData.formData;
@@ -67,7 +84,9 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
   };
 
   const canProceedToStep3 = () => {
-    return wizardData.images.length >= 5;
+    const totalImages = wizardData.slots.reduce((acc, slot) => acc + slot.images.length, 0);
+    const hasAtLeastOneImagePerSlot = wizardData.slots.every(slot => slot.images.length > 0);
+    return totalImages >= wizardData.clipCount && hasAtLeastOneImagePerSlot;
   };
 
   const nextStep = () => {
@@ -81,11 +100,22 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     }
     
     if (currentStep === 2 && !canProceedToStep3()) {
-      toast({
-        title: "Nedovoljno slika",
-        description: "Potrebno je minimum 5 slika za kreiranje videa.",
-        variant: "destructive",
-      });
+      const totalImages = wizardData.slots.reduce((acc, slot) => acc + slot.images.length, 0);
+      const hasAtLeastOneImagePerSlot = wizardData.slots.every(slot => slot.images.length > 0);
+      
+      if (!hasAtLeastOneImagePerSlot) {
+        toast({
+          title: "Nedovoljno slika",
+          description: "Svaki slot mora imati bar jednu sliku.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Nedovoljno slika",
+          description: `Potrebno je minimum ${wizardData.clipCount} slika za kreiranje videa.`,
+          variant: "destructive",
+        });
+      }
       return;
     }
     
@@ -113,42 +143,37 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     form.append("sprat", wizardData.formData.sprat || "");
     form.append("extras", wizardData.formData.extras || "");
 
-    // Add images in order
-    const allImages = [...wizardData.images];
-    if (wizardData.pairA && wizardData.pairB) {
-      allImages.push(wizardData.pairA, wizardData.pairB);
-    }
-
     const grouping: any[] = [];
     let imageIndex = 0;
 
-    // Add regular images as singles
-    wizardData.images.forEach((image, index) => {
-      form.append(`image_${imageIndex}`, image);
-      grouping.push({
-        type: "single",
-        files: [imageIndex],
-        first_index: imageIndex,
-        second_index: ""
-      });
-      imageIndex++;
+    // Process each slot
+    wizardData.slots.forEach((slot) => {
+      if (slot.images.length === 1) {
+        // Single image - static
+        form.append(`image_${imageIndex}`, slot.images[0]);
+        grouping.push({
+          type: "single",
+          files: [imageIndex],
+          first_index: imageIndex,
+          second_index: ""
+        });
+        imageIndex++;
+      } else if (slot.images.length === 2) {
+        // Two images - frame-to-frame
+        const firstIndex = imageIndex;
+        form.append(`image_${imageIndex}`, slot.images[0]);
+        imageIndex++;
+        form.append(`image_${imageIndex}`, slot.images[1]);
+        
+        grouping.push({
+          type: "frame-to-frame",
+          files: [firstIndex, imageIndex],
+          first_index: firstIndex,
+          second_index: imageIndex
+        });
+        imageIndex++;
+      }
     });
-
-    // Add pair if exists
-    if (wizardData.pairA && wizardData.pairB) {
-      const firstIndex = imageIndex;
-      form.append(`image_${imageIndex}`, wizardData.pairA);
-      imageIndex++;
-      form.append(`image_${imageIndex}`, wizardData.pairB);
-      
-      grouping.push({
-        type: "frame-to-frame",
-        files: [firstIndex, imageIndex],
-        first_index: firstIndex,
-        second_index: imageIndex
-      });
-      imageIndex++;
-    }
 
     form.append("grouping", JSON.stringify(grouping));
     form.append("slot_mode_info", JSON.stringify(grouping));
@@ -187,7 +212,12 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
       setTimeout(() => {
         setWizardData({
           formData: { title: '', price: '', location: '' },
-          images: [],
+        slots: Array.from({ length: 5 }, (_, i) => ({
+          id: `slot-${i}`,
+          mode: 'frame-to-frame' as const,
+          images: []
+        })),
+        clipCount: 5 as const,
         });
         setCurrentStep(1);
         setProgress(0);
@@ -243,10 +273,10 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
           
           {currentStep === 2 && (
             <PhotosStep
-              images={wizardData.images}
-              pairA={wizardData.pairA}
-              pairB={wizardData.pairB}
-              onChange={updateImages}
+              slots={wizardData.slots}
+              clipCount={wizardData.clipCount}
+              onSlotsChange={updateSlots}
+              onClipCountChange={updateClipCount}
               onNext={nextStep}
               onPrev={prevStep}
               canProceed={canProceedToStep3()}
