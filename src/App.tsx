@@ -14,6 +14,7 @@ import Privacy from "./pages/Privacy";
 import Login from "./pages/Login";
 import VideoGenerator from "./pages/VideoGenerator";
 import Furnisher from "./pages/Furnisher";
+import Assets from "./pages/Assets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ function AppContent() {
             <Routes>
               <Route path="/app" element={<VideoGenerator user={user} session={session} />} />
               <Route path="/app/furnisher" element={<Furnisher />} />
+              <Route path="/app/assets" element={<Assets />} />
               <Route path="/app/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
