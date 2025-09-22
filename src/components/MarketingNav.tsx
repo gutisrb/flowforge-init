@@ -17,30 +17,50 @@ export function MarketingNav() {
           <div className="hidden md:flex items-center space-x-6">
             <a 
               href="#kako" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('kako')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Kako
             </a>
             <a 
               href="#zasto" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('zasto')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Zašto
             </a>
             <a 
               href="#funkcije" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('funkcije')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Funkcije
             </a>
             <a 
               href="#cena" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('cena')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Cena
             </a>
             <a 
               href="#faq" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               FAQ

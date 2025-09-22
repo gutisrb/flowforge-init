@@ -1,5 +1,6 @@
 import { HeroSection } from '@/components/HeroSection';
 import { FeatureModal } from '@/components/FeatureModal';
+import { StickyButton } from '@/components/StickyButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -10,6 +11,9 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Sticky Button */}
+      <StickyButton />
 
       {/* How it Works Section */}
       <section id="kako" className="container mx-auto px-4 py-20">
@@ -294,18 +298,30 @@ export default function Home() {
 
       <section id="faq" className="container mx-auto px-4 py-20 bg-muted/50">
         <h2 className="text-3xl font-bold text-center mb-12">Česta pitanja</h2>
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Da li je besplatno?</h3>
-            <p className="text-muted-foreground">Ne, koristimo premium model sa mesečnom pretplatom za profesionalne agencije.</p>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Da li ovo zamenjuje portale?</h3>
+            <p className="text-muted-foreground">Ne — društvene mreže dodaju domet.</p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Koje formate podržavate?</h3>
-            <p className="text-muted-foreground">Podržavamo PNG, JPG i WEBP format slika, a izlaz je uvek MP4 video u 9:16 formatu.</p>
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Mogu li menjati scenario ili muziku u app-u?</h3>
+            <p className="text-muted-foreground">Ne trenutno; izlaz je automatski iz podataka iz oglasa.</p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Da li mogu da koristim svoj brend?</h3>
-            <p className="text-muted-foreground">Da, svaki video automatski sadrži vaš logo i boje agencije u skladu sa brend smernicama.</p>
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Garantujete viral?</h3>
+            <p className="text-muted-foreground">Ne; format je po best-practice-u (vertikalno, rani hook, titlovi) radi bolje gledanosti.</p>
+          </div>
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Hoće li videi izgledati generički?</h3>
+            <p className="text-muted-foreground">Tvoj logo/vodeni žig se dodaje pri set-upu.</p>
+          </div>
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Muzika?</h3>
+            <p className="text-muted-foreground">AI instrumentali; ako menjaš zvuk u platformi, koristi njihove komercijalne biblioteke.</p>
+          </div>
+          <div className="bg-background p-6 rounded-xl shadow-sm">
+            <h3 className="text-lg font-semibold mb-3">Za koga je?</h3>
+            <p className="text-muted-foreground">Agencije koje spajaju vlasnike i kupce/zakupce.</p>
           </div>
         </div>
       </section>
