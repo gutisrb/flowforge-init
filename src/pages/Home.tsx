@@ -1,6 +1,7 @@
 import { HeroSection } from '@/components/HeroSection';
 import { FeatureModal } from '@/components/FeatureModal';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Zap, Type, Music, Shuffle, Sparkles, FolderOpen } from 'lucide-react';
 
@@ -132,6 +133,151 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Demo Section */}
+      <section id="demo" className="container mx-auto px-4 py-20 bg-muted/50">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">
+            Od onoga što već imaš → do videa koji se gleda.
+          </h2>
+          <p className="text-text-muted text-lg">Format prilagođen feedovima.</p>
+        </div>
+        
+        <div className="flex justify-center">
+          <div className="relative max-w-sm">
+            {/* Phone Frame */}
+            <div className="relative w-64 h-[520px] bg-gray-900 rounded-[3rem] p-2 shadow-2xl">
+              <div className="w-full h-full bg-black rounded-[2.5rem] overflow-hidden relative">
+                
+                {/* Phone Notch */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
+                
+                {/* Video Placeholder */}
+                <div className="w-full h-full bg-gradient-primary relative overflow-hidden">
+                  
+                  {/* Placeholder Video Content */}
+                  <div className="absolute inset-0 flex flex-col justify-between p-4 text-white">
+                    
+                    {/* Top content */}
+                    <div className="flex justify-between items-start pt-6">
+                      <div className="text-left">
+                        <div className="text-xs opacity-75 mb-1">@realestateagency</div>
+                        <div className="text-sm font-medium">Novi stan u centru</div>
+                      </div>
+                      <div className="text-xs opacity-75">20s</div>
+                    </div>
+                    
+                    {/* Center play indicator */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-16 h-16 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                        <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Bottom content - Captions */}
+                    <div className="space-y-3">
+                      <div className="bg-black/50 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-sm font-medium">€750/mesec • 55m²</p>
+                      </div>
+                      
+                      <div className="bg-black/50 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-xs">2 sobe • 1 kupatilo • 3. sprat</p>
+                      </div>
+                      
+                      <div className="bg-black/50 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-xs">Knez Mihailova, centar Beograda</p>
+                      </div>
+                      
+                      {/* Social media UI */}
+                      <div className="flex justify-between items-center pt-2">
+                        <div className="flex space-x-4">
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                            <span className="text-sm">♡</span>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                            <span className="text-sm">💬</span>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                            <span className="text-sm">📤</span>
+                          </div>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                          <span className="text-sm">📖</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Animated progress bar */}
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                      <div className="h-full bg-white rounded-full w-1/3"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl -z-10 scale-110"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="cena" className="container mx-auto px-4 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">Cena</h2>
+        <div className="flex justify-center">
+          <Card className="max-w-md w-full border-2 border-primary/20 shadow-lg hover-lift">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl font-bold text-primary">
+                Rani pristup (Srbija)
+              </CardTitle>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">€99</span>
+                <span className="text-text-muted">/mesec</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <ul className="space-y-3">
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>Do 30 reel-ova mesečno</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>AI video: scenario, voice, muzika</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>Frame-to-frame tranzicije</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>AI Furnisher (pre/posle)</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>Moja biblioteka</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                  <span>Vodeni žig / logo u set-upu</span>
+                </li>
+              </ul>
+              
+              <div className="text-center">
+                <p className="text-sm text-text-muted mb-4">
+                  Osnivačke agencije: –30% prva 3 meseca.
+                </p>
+                <Button asChild size="lg" className="w-full gradient-primary">
+                  <Link to="/app/login">Rezerviši mesto</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       <section id="cena" className="container mx-auto px-4 py-20 bg-muted/50">
         <h2 className="text-3xl font-bold text-center mb-12">Cena</h2>
         <div className="text-center">
@@ -146,16 +292,20 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="faq" className="container mx-auto px-4 py-20">
+      <section id="faq" className="container mx-auto px-4 py-20 bg-muted/50">
         <h2 className="text-3xl font-bold text-center mb-12">Česta pitanja</h2>
         <div className="max-w-2xl mx-auto space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-2">Da li je besplatno?</h3>
-            <p className="text-muted-foreground">Da, tokom beta periode pristup je potpuno besplatan.</p>
+            <p className="text-muted-foreground">Ne, koristimo premium model sa mesečnom pretplatom za profesionalne agencije.</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2">Koje formate podržavate?</h3>
-            <p className="text-muted-foreground">Podržavamo PNG, JPG i WEBP formatu slika.</p>
+            <p className="text-muted-foreground">Podržavamo PNG, JPG i WEBP format slika, a izlaz je uvek MP4 video u 9:16 formatu.</p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Da li mogu da koristim svoj brend?</h3>
+            <p className="text-muted-foreground">Da, svaki video automatski sadrži vaš logo i boje agencije u skladu sa brend smernicama.</p>
           </div>
         </div>
       </section>
