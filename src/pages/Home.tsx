@@ -8,22 +8,50 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Features Sections */}
+      {/* How it Works Section */}
       <section id="kako" className="container mx-auto px-4 py-20">
         <h2 className="text-3xl font-bold text-center mb-12">Kako funkcioniše</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div className="text-center">
-            <h3 className="text-xl font-semibold mb-4">1. Učitajte slike</h3>
-            <p className="text-muted-foreground">Dodajte fotografije vašeg prostora</p>
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
+              1
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Dodaj 5–12 fotografija + cena/m²/lokacija
+            </h3>
+            <p className="text-muted-foreground">
+              Učitaj slike prostora i unesi osnovne podatke o nekretnini
+            </p>
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-semibold mb-4">2. Opišite viziju</h3>
-            <p className="text-muted-foreground">Unesite instrukcije za AI</p>
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
+              2
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Opcionalno: unesi jednu "Dodatno" rečenicu i poređaj fotografije
+            </h3>
+            <p className="text-muted-foreground">
+              Prilagodi redosled slika i dodaj dodatne informacije
+            </p>
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-semibold mb-4">3. Generiši video</h3>
-            <p className="text-muted-foreground">AI kreira profesionalnu prezentaciju</p>
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
+              3
+            </div>
+            <h3 className="text-xl font-semibold mb-4">
+              Generiši → preuzmi MP4 → objavi
+            </h3>
+            <p className="text-muted-foreground">
+              AI kreira video spreman za objavljivanje na društvenim mrežama
+            </p>
           </div>
+        </div>
+        
+        {/* Note under the grid */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Izlaz je prilagođen feedovima: 9:16, hook u prvim sekundama, pozadinska muzika, otvoreni titlovi.
+          </p>
         </div>
       </section>
 
