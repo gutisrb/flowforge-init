@@ -30,11 +30,15 @@ export default {
 			maxWidth: {
 				'7xl': '1280px',
 			},
+			fontFamily: {
+				'inter': ['Inter', 'sans-serif'],
+			},
 			fontSize: {
-				'heading-1': ['36px', { lineHeight: '43px', letterSpacing: '-0.01em', fontWeight: '600' }],
-				'heading-2': ['24px', { lineHeight: '31px', letterSpacing: '-0.01em', fontWeight: '600' }],
-				'heading-3': ['18px', { lineHeight: '25px', letterSpacing: '-0.01em', fontWeight: '600' }],
-				'body': ['15px', { lineHeight: '24px', letterSpacing: '-0.002em' }],
+				'heading-1': ['44px', { lineHeight: '48px', letterSpacing: '-0.01em', fontWeight: '700' }],
+				'heading-2': ['32px', { lineHeight: '36px', letterSpacing: '-0.01em', fontWeight: '600' }],
+				'heading-3': ['24px', { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '600' }],
+				'body': ['18px', { lineHeight: '28px', letterSpacing: '-0.002em', fontWeight: '400' }],
+				'body-sm': ['16px', { lineHeight: '24px', letterSpacing: '-0.002em', fontWeight: '400' }],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -87,6 +91,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-card': 'var(--gradient-card)',
 			},
 			borderRadius: {
 				'2xl': '1rem',

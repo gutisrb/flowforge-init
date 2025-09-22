@@ -1,14 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import logoImage from '@/assets/reel-estate-logo.png';
 
 export function MarketingNav() {
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <nav className="glass-nav sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">Reel Estate</span>
+          <Link to="/" className="flex items-center space-x-3">
+            <img src={logoImage} alt="Reel Estate" className="h-8 w-8" />
+            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">Reel Estate</span>
           </Link>
 
           {/* Navigation Links */}
