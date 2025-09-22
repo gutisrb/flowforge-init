@@ -1,166 +1,138 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, Play, Download, Star } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Copy, Check } from 'lucide-react';
 
 const guides = [
   {
-    title: "Osnove Reel Studio-a",
-    description: "Naučite kako da kreirate profesionalne video prezentacije nekretnina",
-    duration: "5 min",
-    type: "Video vodič",
-    featured: true,
-  },
-  {
-    title: "Stage Studio - AI namestanje",
-    description: "Kako da koristite AI za virtuelno uređenje prostora",
-    duration: "8 min", 
-    type: "Video vodič",
-    featured: true,
-  },
-  {
-    title: "Optimizacija fotografija",
-    description: "Najbolje prakse za fotografisanje nekretnina",
-    duration: "12 min",
-    type: "Písani vodič",
-    featured: false,
-  },
-  {
-    title: "Kreiranje glatkih prelaza",
-    description: "Tehnike za profesionalne video prelaze između prostorija",
-    duration: "6 min",
-    type: "Video vodič", 
-    featured: false,
-  },
-];
+    id: 'prvi-video',
+    title: 'Prvi video za 15 minuta',
+    content: {
+      title: 'Prvi video za 15 minuta',
+      text: 'Naučite kako da kreirate profesionalan video prezentaciju nekretnine za samo 15 minuta koristeći naše alate. Ovaj vodič pokriva osnovne korake od importovanja fotografija do izvoza finalnog videa.',
+      codeTemplate: `[Template za Oglas]
+✨ TRANSFORMACIJA ✨
 
-const examples = [
-  {
-    title: "Luksuzan penthouse",
-    description: "Kompletna video prezentacija luksuznog stana",
-    views: "2.4k",
-    type: "Video primer",
+Pogledajte kako smo ovaj prostor pretvorili iz [KADAR A] u [KADAR B]!
+
+📍 Lokacija: [Unesi Lokaciju]
+💰 Cena: [Unesi Cenu]
+
+#realestate #transformacija #nekretnine #ai`
+    }
   },
   {
-    title: "Porodična kuća",
-    description: "Kreiranje video ture kroz veliki porodičnu kuću",
-    views: "1.8k",
-    type: "Video primer",
+    id: 'frame-to-frame',
+    title: 'Frame-to-frame: glatki prelazi',
+    content: {
+      title: 'Frame-to-frame: glatki prelazi',
+      text: 'Savladajte tehnike kreiranja glatkih prelaza između fotografija za profesionalni video. Ovaj vodič pokriva napredne opcije editovanja i animacije.',
+      codeTemplate: null
+    }
   },
   {
-    title: "Studio apartman",
-    description: "Efikasno prikazivanje malog prostora",
-    views: "3.1k",
-    type: "Video primer",
-  },
+    id: 'ai-namestanje',
+    title: 'AI nameštanje: da izgleda stvarno',
+    content: {
+      title: 'AI nameštanje: da izgleda stvarno',
+      text: 'Koristite AI alate za virtuelno nameštanje prostora da bi vaša nekretnina izgledala privlačnije za potencijalne kupce. Naučite napredne tehnike stilizovanja.',
+      codeTemplate: null
+    }
+  }
 ];
 
 export function Docs() {
+  const [selectedGuide, setSelectedGuide] = useState(guides[0]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const filteredGuides = guides.filter(guide =>
+    guide.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCopyToClipboard = () => {
+    if (selectedGuide.content.codeTemplate) {
+      navigator.clipboard.writeText(selectedGuide.content.codeTemplate);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-heading-1 font-bold mb-2">Vodič & primeri</h1>
-        <p className="text-text-muted text-lg">
-          Naučite kako da maksimalno iskoristite Reel Estate platformu
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="flex">
+        {/* Left Sidebar */}
+        <aside className="w-80 bg-card border-r border-border fixed h-full">
+          <div className="p-6">
+            {/* Search Input */}
+            <Input
+              type="text"
+              placeholder="Pretraga..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="mb-6"
+            />
 
-      {/* Featured Guides */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-heading-2 font-semibold">Preporučeni vodiči</h2>
-          <Button variant="outline">
-            Svi vodiči
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {guides.filter(guide => guide.featured).map((guide, index) => (
-            <Card key={index} className="hover-lift cursor-pointer">
-              <div className="aspect-video bg-gradient-primary rounded-t-xl flex items-center justify-center">
-                <Play className="h-12 w-12 text-white" />
-              </div>
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="secondary">{guide.type}</Badge>
-                  <div className="flex items-center text-sm text-text-muted">
-                    <Star className="h-4 w-4 mr-1 fill-current text-yellow-500" />
-                    Preporučeno
-                  </div>
-                </div>
-                <CardTitle className="text-lg">{guide.title}</CardTitle>
-                <CardDescription>{guide.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-text-muted">{guide.duration}</span>
-                  <Button size="sm">
-                    <Play className="h-4 w-4 mr-2" />
-                    Pokreni
+            {/* Navigation Links */}
+            <nav className="space-y-2">
+              {filteredGuides.map((guide) => (
+                <button
+                  key={guide.id}
+                  onClick={() => setSelectedGuide(guide)}
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    selectedGuide.id === guide.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted text-foreground'
+                  }`}
+                >
+                  {guide.title}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="ml-80 flex-1 p-8">
+          <div className="max-w-4xl">
+            <h1 className="text-heading-1 mb-6">{selectedGuide.content.title}</h1>
+            
+            <p className="text-body text-text-muted mb-8">
+              {selectedGuide.content.text}
+            </p>
+
+            {/* Code Block - only show for the first guide */}
+            {selectedGuide.content.codeTemplate && (
+              <Card className="bg-muted border border-border">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <span className="text-sm font-medium text-foreground">Template</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyToClipboard}
+                    className="h-8 px-3"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Kopirano
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 mr-2" />
+                        Kopiraj
+                      </>
+                    )}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* All Guides */}
-        <section>
-          <h2 className="text-heading-2 font-semibold mb-6">Svi vodiči</h2>
-          <div className="space-y-4">
-            {guides.map((guide, index) => (
-              <Card key={index} className="hover-lift cursor-pointer">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline">{guide.type}</Badge>
-                    <span className="text-sm text-text-muted">{guide.duration}</span>
-                  </div>
-                  <CardTitle className="text-lg">{guide.title}</CardTitle>
-                  <CardDescription>{guide.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Otvori vodič
-                  </Button>
-                </CardContent>
+                <pre className="p-4 text-sm text-foreground font-mono whitespace-pre-wrap">
+                  {selectedGuide.content.codeTemplate}
+                </pre>
               </Card>
-            ))}
+            )}
           </div>
-        </section>
-
-        {/* Examples */}
-        <section>
-          <h2 className="text-heading-2 font-semibold mb-6">Video primeri</h2>
-          <div className="space-y-4">
-            {examples.map((example, index) => (
-              <Card key={index} className="hover-lift cursor-pointer">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline">{example.type}</Badge>
-                    <span className="text-sm text-text-muted">{example.views} pregleda</span>
-                  </div>
-                  <CardTitle className="text-lg">{example.title}</CardTitle>
-                  <CardDescription>{example.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" className="p-0 h-auto">
-                      <Play className="h-4 w-4 mr-2" />
-                      Pokreni
-                    </Button>
-                    <Button variant="ghost" size="sm" className="p-0 h-auto">
-                      <Download className="h-4 w-4 mr-2" />
-                      Preuzmi
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        </main>
       </div>
     </div>
   );
