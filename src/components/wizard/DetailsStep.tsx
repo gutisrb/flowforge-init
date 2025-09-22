@@ -194,7 +194,7 @@ export const DetailsStep = ({ formData, onChange, onNext, canProceed }: DetailsS
 
           <div>
             <Label htmlFor="extras" className="text-base font-semibold">
-              Posebnosti
+              Dodatni komentar
             </Label>
             <Textarea
               id="extras"
