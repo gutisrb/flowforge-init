@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Play, Save, Sparkles } from 'lucide-react';
 import { WizardData } from '@/components/VideoWizard';
-
 interface PreviewStepProps {
   wizardData: WizardData;
   onPrev: () => void;
@@ -10,19 +9,19 @@ interface PreviewStepProps {
   onSaveDraft: () => void;
   isLoading: boolean;
 }
-
-export const PreviewStep = ({ 
-  wizardData, 
-  onPrev, 
-  onGenerate, 
-  onSaveDraft, 
-  isLoading 
+export const PreviewStep = ({
+  wizardData,
+  onPrev,
+  onGenerate,
+  onSaveDraft,
+  isLoading
 }: PreviewStepProps) => {
-  const { formData, slots } = wizardData;
+  const {
+    formData,
+    slots
+  } = wizardData;
   const totalImages = slots.reduce((acc, slot) => acc + slot.images.length, 0);
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="text-center space-y-2">
         <h2 className="text-heading-2 text-text-primary">
           Pregled & preuzimanje
@@ -61,51 +60,41 @@ export const PreviewStep = ({
               </dd>
             </div>
             
-            {formData.size && (
-              <div>
+            {formData.size && <div>
                 <dt className="text-sm text-text-muted">Površina</dt>
                 <dd className="text-base text-text-primary">
                   {formData.size} m²
                 </dd>
-              </div>
-            )}
+              </div>}
             
-            {formData.beds && (
-              <div>
+            {formData.beds && <div>
                 <dt className="text-sm text-text-muted">Sobe</dt>
                 <dd className="text-base text-text-primary">
                   {formData.beds}
                 </dd>
-              </div>
-            )}
+              </div>}
             
-            {formData.baths && (
-              <div>
+            {formData.baths && <div>
                 <dt className="text-sm text-text-muted">Kupatila</dt>
                 <dd className="text-base text-text-primary">
                   {formData.baths}
                 </dd>
-              </div>
-            )}
+              </div>}
             
-            {formData.sprat && (
-              <div>
+            {formData.sprat && <div>
                 <dt className="text-sm text-text-muted">Sprat</dt>
                 <dd className="text-base text-text-primary">
                   {formData.sprat}
                 </dd>
-              </div>
-            )}
+              </div>}
           </div>
           
-          {formData.extras && (
-            <div className="mt-4 pt-4 border-t">
+          {formData.extras && <div className="mt-4 pt-4 border-t">
               <dt className="text-sm text-text-muted mb-1">Posebnosti</dt>
               <dd className="text-base text-text-primary">
                 {formData.extras}
               </dd>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -122,8 +111,7 @@ export const PreviewStep = ({
           </div>
           
           <div className="space-y-4">
-            {slots.map((slot, slotIndex) => (
-              <div key={slot.id} className="border rounded-lg p-4">
+            {slots.map((slot, slotIndex) => <div key={slot.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-text-primary">
                     Slot {slotIndex + 1}
@@ -133,52 +121,22 @@ export const PreviewStep = ({
                   </span>
                 </div>
                 
-                {slot.images.length > 0 && (
-                  <div className="grid grid-cols-6 gap-2">
-                    {slot.images.map((image, imageIndex) => (
-                      <div key={imageIndex} className="aspect-square rounded-md overflow-hidden bg-muted">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Slot ${slotIndex + 1}, Slika ${imageIndex + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                {slot.images.length > 0 && <div className="grid grid-cols-6 gap-2">
+                    {slot.images.map((image, imageIndex) => <div key={imageIndex} className="aspect-square rounded-md overflow-hidden bg-muted">
+                        <img src={URL.createObjectURL(image)} alt={`Slot ${slotIndex + 1}, Slika ${imageIndex + 1}`} className="w-full h-full object-cover" />
+                      </div>)}
+                  </div>}
+              </div>)}
           </div>
         </CardContent>
       </Card>
 
       {/* Preview player placeholder */}
-      <Card className="border border-border">
-        <CardContent className="p-8">
-          <div className="text-center space-y-4">
-            <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-              <Play className="w-10 h-10 text-primary fill-current" />
-            </div>
-            <div>
-              <h3 className="text-heading-3 text-text-primary mb-2">
-                Scenario generisan
-              </h3>
-              <p className="text-body text-text-muted">
-                Video će biti kreiran na osnovu vaših podataka i slika
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-6 border-t">
-        <Button
-          variant="outline"
-          onClick={onPrev}
-          disabled={isLoading}
-          className="px-8"
-        >
+        <Button variant="outline" onClick={onPrev} disabled={isLoading} className="px-8">
           <ArrowLeft className="mr-2 w-4 h-4" />
           Nazad
         </Button>
@@ -187,35 +145,21 @@ export const PreviewStep = ({
       {/* Sticky footer */}
       <div className="sticky bottom-0 bg-card border-t border-border p-6 -mx-8 -mb-8 rounded-b-2xl">
         <div className="flex flex-col sm:flex-row gap-3 justify-end">
-          <Button
-            variant="ghost"
-            onClick={onSaveDraft}
-            disabled={isLoading}
-            className="px-6"
-          >
+          <Button variant="ghost" onClick={onSaveDraft} disabled={isLoading} className="px-6">
             <Save className="mr-2 w-4 h-4" />
             Sačuvaj nacrt
           </Button>
           
-          <Button
-            onClick={onGenerate}
-            disabled={isLoading}
-            className="gradient-accent text-white px-8"
-          >
-            {isLoading ? (
-              <>
+          <Button onClick={onGenerate} disabled={isLoading} className="gradient-accent text-white px-8">
+            {isLoading ? <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                 Generisanje u toku...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Sparkles className="mr-2 w-4 h-4" />
                 Generiši video
-              </>
-            )}
+              </>}
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
