@@ -13,7 +13,7 @@ export function HeroSection() {
             <div className="space-y-6">
               <h1 className="text-heading-1 font-bold leading-tight">
                 Objavi više.{' '}
-                <span className="gradient-primary bg-clip-text text-transparent">
+                <span className="text-primary">
                   Prodaj brže.
                 </span>
               </h1>
