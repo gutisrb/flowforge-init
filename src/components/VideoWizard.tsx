@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { Stepper } from '@/components/Stepper';
 import { DetailsStep } from '@/components/wizard/DetailsStep';
@@ -53,9 +53,9 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
   const { profile, loading: profileLoading } = useProfile(user);
   const { progress, setProgress } = useProgress();
 
-  const updateFormData = (data: FormData) => {
+  const updateFormData = useCallback((data: FormData) => {
     setWizardData(prev => ({ ...prev, formData: data }));
-  };
+  }, []);
 
   const updateImages = (images: File[], pairA?: File, pairB?: File) => {
     setWizardData(prev => ({ ...prev, images, pairA, pairB }));

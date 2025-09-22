@@ -41,10 +41,10 @@ export const DetailsStep = ({ formData, onChange, onNext, canProceed }: DetailsS
   // Watch for changes and update parent
   const watchedData = watch();
   
-  // Update parent whenever form data changes
+  // Update parent whenever form data changes (excluding onChange from deps to prevent infinite loop)
   React.useEffect(() => {
     onChange(watchedData);
-  }, [watchedData, onChange]);
+  }, [watchedData]);
 
   const onSubmit = (data: FormData) => {
     onChange(data);
