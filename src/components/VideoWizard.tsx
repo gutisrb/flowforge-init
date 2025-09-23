@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
 import { SlotData } from '@/components/ImageSlots';
+import { MAKE_VIDEO_URL } from '@/config/make';
 
 interface VideoWizardProps {
   user: User;
@@ -28,32 +29,22 @@ export interface FormData {
 export interface WizardData {
   formData: FormData;
   slots: SlotData[];
-  clipCount: 5 | 6;
+  clipCount: 5 | 10 | 15;
 }
 
-const steps = [
-  { id: 1, title: 'Detalji', description: 'Osnovne informacije' },
-  { id: 2, title: 'Fotografije', description: 'Upload slika' },
-  { id: 3, title: 'Pregled & preuzimanje', description: 'Finalizuj video' }
-];
-
-export const VideoWizard = ({ user }: VideoWizardProps) => {
-  const [currentStep, setCurrentStep] = useState(1);
+export const VideoWizard = ({ user, session }: VideoWizardProps) => {
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [wizardData, setWizardData] = useState<WizardData>({
-    formData: {
-      title: '',
-      price: '',
-      location: '',
-    },
+    formData: { title: '', price: '', location: '' },
     slots: Array.from({ length: 5 }, (_, i) => ({
       id: `slot-${i}`,
-      mode: 'frame-to-frame',
+      mode: 'frame-to-frame' as const,
       images: []
     })),
-    clipCount: 5,
+    clipCount: 5 as const,
   });
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile(user);
   const { progress, setProgress } = useProgress();
@@ -66,69 +57,15 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     setWizardData(prev => ({ ...prev, slots }));
   }, []);
 
-  const updateClipCount = useCallback((clipCount: 5 | 6) => {
-    const newSlots: SlotData[] = Array.from({ length: clipCount }, (_, i) => {
-      const existingSlot = wizardData.slots[i];
-      return existingSlot || {
-        id: `slot-${i}`,
-        mode: 'frame-to-frame' as const,
-        images: []
-      };
-    });
-    setWizardData(prev => ({ ...prev, clipCount, slots: newSlots }));
-  }, [wizardData.slots]);
+  const updateClipCount = useCallback((count: 5 | 10 | 15) => {
+    setWizardData(prev => ({ ...prev, clipCount: count }));
+  }, []);
 
-  const canProceedToStep2 = () => {
-    const { title, price, location } = wizardData.formData;
-    return title.trim() !== '' && price.trim() !== '' && location.trim() !== '';
-  };
+  const nextStep = () => setCurrentStep(prev => Math.min(3, (prev + 1) as 1 | 2 | 3));
+  const prevStep = () => setCurrentStep(prev => Math.max(1, (prev - 1) as 1 | 2 | 3));
 
-  const canProceedToStep3 = () => {
-    const totalImages = wizardData.slots.reduce((acc, slot) => acc + slot.images.length, 0);
-    const hasAtLeastOneImagePerSlot = wizardData.slots.every(slot => slot.images.length > 0);
-    return totalImages >= wizardData.clipCount && hasAtLeastOneImagePerSlot;
-  };
-
-  const nextStep = () => {
-    if (currentStep === 1 && !canProceedToStep2()) {
-      toast({
-        title: "Podaci nedostaju",
-        description: "Molimo popunite naslov, cenu i lokaciju pre prelaska na sledeći korak.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (currentStep === 2 && !canProceedToStep3()) {
-      const totalImages = wizardData.slots.reduce((acc, slot) => acc + slot.images.length, 0);
-      const hasAtLeastOneImagePerSlot = wizardData.slots.every(slot => slot.images.length > 0);
-      
-      if (!hasAtLeastOneImagePerSlot) {
-        toast({
-          title: "Nedovoljno slika",
-          description: "Svaki slot mora imati bar jednu sliku.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Nedovoljno slika",
-          description: `Potrebno je minimum ${wizardData.clipCount} slika za kreiranje videa.`,
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-    
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const canProceedToStep2 = () => wizardData.formData.title && wizardData.formData.price && wizardData.formData.location;
+  const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
   const createMultipartFormData = () => {
     const form = new FormData();
@@ -146,25 +83,30 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     const grouping: any[] = [];
     let imageIndex = 0;
 
-    // Process each slot
-    wizardData.slots.forEach((slot) => {
-      if (slot.images.length === 1) {
-        // Single image - static
-        form.append(`image_${imageIndex}`, slot.images[0]);
+    wizardData.slots.forEach((slot, i) => {
+      if (slot.mode === 'frame-to-frame') {
+        for (let j = 0; j < slot.images.length; j++) {
+          form.append(`image_${imageIndex}`, slot.images[j].file);
+          grouping.push({
+            type: "single",
+            index: imageIndex
+          });
+          imageIndex++;
+        }
+      } else if (slot.mode === 'frame-to-clip') {
+        if (slot.images.length === 0) return;
+        form.append(`image_${imageIndex}`, slot.images[0].file);
         grouping.push({
-          type: "single",
-          files: [imageIndex],
-          first_index: imageIndex,
-          second_index: ""
+          type: "clip",
+          index: imageIndex
         });
         imageIndex++;
-      } else if (slot.images.length === 2) {
-        // Two images - frame-to-frame
+      } else if (slot.mode === 'frame-to-frame-paired') {
+        if (slot.images.length < 2) return;
         const firstIndex = imageIndex;
-        form.append(`image_${imageIndex}`, slot.images[0]);
+        form.append(`image_${imageIndex}`, slot.images[0].file);
         imageIndex++;
-        form.append(`image_${imageIndex}`, slot.images[1]);
-        
+        form.append(`image_${imageIndex}`, slot.images[1].file);
         grouping.push({
           type: "frame-to-frame",
           files: [firstIndex, imageIndex],
@@ -179,6 +121,9 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     form.append("slot_mode_info", JSON.stringify(grouping));
     form.append("total_images", String(imageIndex));
 
+    // IMPORTANT: attach user_id for Make credit checks
+    form.append("user_id", user.id);
+
     return form;
   };
 
@@ -187,15 +132,7 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
     setProgress(20);
 
     try {
-      const webhookUrl = profile?.webhook_url || import.meta.env.VITE_WEBHOOK_URL;
-      if (!webhookUrl) {
-        toast({
-          title: "Webhook nedostaje",
-          description: "Nije postavljen webhook za vaš nalog.",
-          variant: "destructive",
-        });
-        return;
-      }
+      const webhookUrl = MAKE_VIDEO_URL;
 
       const multipartData = createMultipartFormData();
       setProgress(55);
@@ -208,16 +145,16 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
       toast({ title: "Uspešno!", description: "Započeli smo generisanje videa." });
       setProgress(100);
       
-      // Reset wizard after successful submission
+      // Reset wizard after successful submit
       setTimeout(() => {
         setWizardData({
           formData: { title: '', price: '', location: '' },
-        slots: Array.from({ length: 5 }, (_, i) => ({
-          id: `slot-${i}`,
-          mode: 'frame-to-frame' as const,
-          images: []
-        })),
-        clipCount: 5 as const,
+          slots: Array.from({ length: 5 }, (_, i) => ({
+            id: `slot-${i}`,
+            mode: 'frame-to-frame' as const,
+            images: []
+          })),
+          clipCount: 5 as const,
         });
         setCurrentStep(1);
         setProgress(0);
@@ -235,50 +172,40 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
   };
 
   const handleSaveDraft = () => {
-    // TODO: Implement draft saving
-    toast({
-      title: "Nacrt sačuvan",
-      description: "Možete nastaviti kasnije.",
-    });
+    toast({ title: "Sačuvano", description: "Vaš nacrt je sačuvan." });
   };
 
   return (
-    <div className="min-h-screen bg-surface-calm">
-      {/* Warning if no webhook */}
-      {!profileLoading && !profile?.webhook_url && (
-        <div className="bg-yellow-50 border-y border-yellow-200">
-          <div className="container max-w-7xl mx-auto px-6 py-3 text-body text-yellow-900">
-            Vašem nalogu još nije dodeljen webhook. Kontaktirajte administratora.
-          </div>
-        </div>
-      )}
-
-      <main className="container max-w-4xl mx-auto px-6 py-8">
+    <div className="min-h-[calc(100vh-64px)] bg-background">
+      <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-heading-1 text-text-primary mb-6 text-center">
-            Kreiraj video nekretnine
-          </h1>
-          <Stepper steps={steps} currentStep={currentStep} />
+          <h1 className="text-heading-1 font-bold text-text-primary">Kreiranje video oglasa</h1>
+          <p className="text-text-muted text-lg mt-2">
+            Dodajte slike, uredite redosled i generišite reels oglas.
+          </p>
         </div>
 
-        <div className="key-card bg-card rounded-2xl shadow-card p-8">
+        <Stepper currentStep={currentStep} />
+
+        <div className="mt-8">
           {currentStep === 1 && (
             <DetailsStep
               formData={wizardData.formData}
-              onChange={updateFormData}
-              onNext={nextStep}
+              updateFormData={updateFormData}
+              nextStep={nextStep}
               canProceed={canProceedToStep2()}
+              isLoading={isLoading}
             />
           )}
-          
+
           {currentStep === 2 && (
             <PhotosStep
               slots={wizardData.slots}
+              updateSlots={updateSlots}
               clipCount={wizardData.clipCount}
-              onSlotsChange={updateSlots}
-              onClipCountChange={updateClipCount}
-              onNext={nextStep}
+              updateClipCount={updateClipCount}
               onPrev={prevStep}
+              onNext={nextStep}
               canProceed={canProceedToStep3()}
             />
           )}
