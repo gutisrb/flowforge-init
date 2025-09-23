@@ -1,224 +1,142 @@
-import React from 'react';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+// src/components/wizard/DetailsStep.tsx
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight } from "lucide-react";
-import { FormData } from "@/components/VideoWizard";
+import { Button } from "@/components/ui/button";
 
-const detailsSchema = z.object({
-  title: z.string().min(1, "Naslov je obavezan"),
-  price: z.string().min(1, "Cena je obavezna"),
-  location: z.string().min(1, "Lokacija je obavezna"),
-  size: z.string().optional(),
-  beds: z.string().optional(),
-  baths: z.string().optional(),
-  sprat: z.string().optional(),
-  extras: z.string().optional(),
-});
+type FormData = {
+  title: string;
+  price: string;
+  location: string;
+  size?: string;
+  beds?: string;
+  baths?: string;
+  sprat?: string;
+  extras?: string;
+};
 
 interface DetailsStepProps {
   formData: FormData;
-  onChange: (data: FormData) => void;
-  onNext: () => void;
+  updateFormData: (data: FormData) => void; // <-- we use only this to change fields
+  nextStep: () => void;
   canProceed: boolean;
+  isLoading?: boolean;
 }
 
-export const DetailsStep = ({ formData, onChange, onNext, canProceed }: DetailsStepProps) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<FormData>({
-    resolver: zodResolver(detailsSchema),
-    defaultValues: formData,
-  });
+const DetailsStep: React.FC<DetailsStepProps> = ({
+  formData,
+  updateFormData,
+  nextStep,
+  canProceed,
+  isLoading = false,
+}) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    // Update the full formData object; no external onChange prop required
+    updateFormData({ ...formData, [name]: value });
+  };
 
-  // Watch for changes and update parent
-  const watchedData = watch();
-  
-  // Update parent whenever form data changes (excluding onChange from deps to prevent infinite loop)
-  React.useEffect(() => {
-    onChange(watchedData);
-  }, [watchedData]);
-
-  const onSubmit = (data: FormData) => {
-    onChange(data);
-    onNext();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (canProceed) nextStep();
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-heading-2 text-text-primary">
-          Detalji o nekretnini
-        </h2>
-        <p className="text-body text-text-muted">
-          Popunite osnovne informacije koje će se koristiti u videu
-        </p>
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="title">Naslov</Label>
+        <Input
+          id="title"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder="npr. Trosoban stan, Vračar"
+        />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Required fields */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title" className="text-base font-semibold">
-              Naslov <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="title"
-              {...register("title")}
-              placeholder="npr. Moderan trosoban stan u centru Beograda"
-              className="mt-2"
-            />
-            <p className="text-sm text-text-subtle mt-1">
-              Opišite nekretninu jasno i privlačno
-            </p>
-            {errors.title && (
-              <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
-            )}
-          </div>
+      <div>
+        <Label htmlFor="price">Cena</Label>
+        <Input
+          id="price"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+          placeholder="npr. 245.000 €"
+        />
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="price" className="text-base font-semibold">
-                Cena <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="price"
-                {...register("price")}
-                placeholder="npr. 180.000€"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Unesite prodajnu cenu
-              </p>
-              {errors.price && (
-                <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
-              )}
-            </div>
+      <div className="md:col-span-2">
+        <Label htmlFor="location">Lokacija</Label>
+        <Input
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          placeholder="npr. Vračar, Beograd"
+        />
+      </div>
 
-            <div>
-              <Label htmlFor="location" className="text-base font-semibold">
-                Lokacija <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="location"
-                {...register("location")}
-                placeholder="npr. Vračar, Beograd"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Grad ili opština
-              </p>
-              {errors.location && (
-                <p className="text-sm text-destructive mt-1">{errors.location.message}</p>
-              )}
-            </div>
-          </div>
-        </div>
+      <div>
+        <Label htmlFor="size">Površina (m²)</Label>
+        <Input
+          id="size"
+          name="size"
+          value={formData.size || ""}
+          onChange={handleChange}
+        />
+      </div>
 
-        {/* Optional details */}
-        <div className="space-y-4">
-          <h3 className="text-heading-3 text-text-primary border-t pt-4">
-            Dodatni detalji
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="size" className="text-base font-semibold">
-                Površina (m²)
-              </Label>
-              <Input
-                id="size"
-                {...register("size")}
-                placeholder="npr. 65"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Ukupna kvadratura
-              </p>
-            </div>
+      <div>
+        <Label htmlFor="beds">Spavaće sobe</Label>
+        <Input
+          id="beds"
+          name="beds"
+          value={formData.beds || ""}
+          onChange={handleChange}
+        />
+      </div>
 
-            <div>
-              <Label htmlFor="beds" className="text-base font-semibold">
-                Sobe
-              </Label>
-              <Input
-                id="beds"
-                {...register("beds")}
-                placeholder="npr. 3"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Broj spavaćih soba
-              </p>
-            </div>
-          </div>
+      <div>
+        <Label htmlFor="baths">Kupatila</Label>
+        <Input
+          id="baths"
+          name="baths"
+          value={formData.baths || ""}
+          onChange={handleChange}
+        />
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="baths" className="text-base font-semibold">
-                Kupatila
-              </Label>
-              <Input
-                id="baths"
-                {...register("baths")}
-                placeholder="npr. 1"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Broj kupatila
-              </p>
-            </div>
+      <div>
+        <Label htmlFor="sprat">Sprat</Label>
+        <Input
+          id="sprat"
+          name="sprat"
+          value={formData.sprat || ""}
+          onChange={handleChange}
+        />
+      </div>
 
-            <div>
-              <Label htmlFor="sprat" className="text-base font-semibold">
-                Sprat
-              </Label>
-              <Input
-                id="sprat"
-                {...register("sprat")}
-                placeholder="npr. 3/5"
-                className="mt-2"
-              />
-              <p className="text-sm text-text-subtle mt-1">
-                Koji sprat od ukupno
-              </p>
-            </div>
-          </div>
+      <div className="md:col-span-2">
+        <Label htmlFor="extras">Dodatno</Label>
+        <Input
+          id="extras"
+          name="extras"
+          value={formData.extras || ""}
+          onChange={handleChange}
+          placeholder="npr. Garaža, terasa, lift…"
+        />
+      </div>
 
-          <div>
-            <Label htmlFor="extras" className="text-base font-semibold">
-              Dodatni komentar
-            </Label>
-            <Textarea
-              id="extras"
-              {...register("extras")}
-              placeholder="npr. Terasa sa pogledom, parking, lift, klima, renoviran..."
-              className="mt-2 min-h-[80px] resize-none"
-            />
-            <p className="text-sm text-text-subtle mt-1">
-              Izdvojite ono što čini ovu nekretninu posebnom
-            </p>
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-6 border-t">
-          <Button
-            type="submit"
-            disabled={!canProceed}
-            className="gradient-accent text-white px-8"
-          >
-            Sledeći korak
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-        </div>
-      </form>
-    </div>
+      <div className="md:col-span-2 mt-2 flex justify-end">
+        <Button type="submit" disabled={!canProceed || isLoading}>
+          {isLoading ? "Sačuvavam…" : "Dalje"}
+        </Button>
+      </div>
+    </form>
   );
 };
+
+export { DetailsStep };
+export default DetailsStep;
