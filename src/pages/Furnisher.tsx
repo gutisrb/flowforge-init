@@ -1,5 +1,5 @@
 // src/pages/Furnisher.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -14,47 +14,75 @@ export default function Furnisher() {
   const [instructions, setInstructions] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
+  const jobIdRef = useRef<string | null>(null);
+  const pollingRef = useRef<boolean>(false);
+
+  const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
   const checkStatus = async (jobId: string) => {
     try {
-      const response = await fetch(`${MAKE_STATUS_URL}?jobId=${jobId}`);
-      
-      if (response.headers.get('content-type')?.includes('image/')) {
-        // Response is an image - job is complete
+      // POST JSON (this is what your Make webhook should expect)
+      const response = await fetch(MAKE_STATUS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId })
+      });
+
+      // If Make returns the image directly
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('image/')) {
         const blob = await response.blob();
         const imageUrl = URL.createObjectURL(blob);
         setResultImage(imageUrl);
         setIsProcessing(false);
-        return true; // Stop polling
-      } else {
-        // Response is JSON status
-        const result = await response.json();
-        if (result.status === 'processing') {
-          return false; // Continue polling
-        } else if (result.status === 'done' && result.url) {
-          setResultImage(result.url);
-          setIsProcessing(false);
-          return true; // Stop polling
-        } else {
-          throw new Error('Unexpected status');
-        }
+        return true; // done
       }
+
+      // Otherwise parse JSON status
+      const result = await response.json().catch(() => null);
+
+      if (!result) {
+        throw new Error('Status response was not JSON or image');
+      }
+
+      if (result.status === 'processing') {
+        return false; // keep polling
+      }
+
+      if (result.status === 'done' && result.url) {
+        setResultImage(result.url);
+        setIsProcessing(false);
+        return true; // done
+      }
+
+      // Any other shape -> treat as error to stop infinite loops
+      throw new Error(`Unexpected status payload: ${JSON.stringify(result)}`);
     } catch (error) {
       console.error('Status check error:', error);
-      toast.error('Failed to check job status');
+      toast.error('Greška pri proveri statusa');
       setIsProcessing(false);
-      return true; // Stop polling
+      return true; // stop polling on error
     }
   };
 
-  const startPolling = (jobId: string) => {
-    const pollInterval = setInterval(async () => {
-      const shouldStop = await checkStatus(jobId);
-      if (shouldStop) {
-        clearInterval(pollInterval);
+  const pollUntilDone = async (jobId: string) => {
+    if (pollingRef.current) return; // guard
+    pollingRef.current = true;
+
+    // poll every 5 seconds, up to ~10 minutes (120 attempts)
+    for (let i = 0; i < 120; i++) {
+      const stop = await checkStatus(jobId);
+      if (stop) {
+        pollingRef.current = false;
+        return;
       }
-    }, 5000);
+      await sleep(5000);
+    }
+
+    // timeout
+    toast.error('Vreme čekanja je isteklo. Pokušajte ponovo.');
+    setIsProcessing(false);
+    pollingRef.current = false;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,25 +99,20 @@ export default function Furnisher() {
 
       const formData = new FormData();
 
-      // Attach user_id for Make credit checks (required by your scenarios)
+      // Attach user_id for Make credit checks (if you use it in the scenario)
       try {
         const { data } = await supabase.auth.getUser();
         const uid = data?.user?.id;
         if (uid) formData.append('user_id', uid);
-      } catch {
-        // If auth read fails, we still proceed; Make may reject without user_id
-      }
+      } catch { /* ignore */ }
 
-      // Always send image1 (required)
+      // Always send image1
       formData.append('image1', images[0]);
 
-      // Always send image2 KEY as well:
-      // - if user picked a second image → send that file
-      // - if not → send an EMPTY field so key exists (restores your old behavior)
+      // Always send image2 key (file or empty string) so your Make logic is consistent
       if (images.length >= 2) {
         formData.append('image2', images[1]);
       } else {
-        // IMPORTANT: empty string, not omitted
         formData.append('image2', '');
       }
 
@@ -105,21 +128,33 @@ export default function Furnisher() {
           toast.error('Nema image kredita. Nadogradite paket.');
         } else {
           const txt = await response.text().catch(() => '');
-          toast.error(`Failed to submit form${txt ? `: ${txt}` : ''}`);
+          toast.error(`Greška pri slanju${txt ? `: ${txt}` : ''}`);
         }
         setIsProcessing(false);
         return;
       }
 
       const result = await response.json();
-      setJobId(result.jobId);
 
-      // Start polling for status
-      startPolling(result.jobId);
+      // Expecting { jobId: "..." }
+      if (!result?.jobId) {
+        // If your scenario sometimes returns the final image immediately:
+        if (result?.url) {
+          setResultImage(result.url);
+          setIsProcessing(false);
+          return;
+        }
+        toast.error('Nedostaje jobId u odgovoru.');
+        setIsProcessing(false);
+        return;
+      }
+
+      jobIdRef.current = result.jobId;
+      pollUntilDone(result.jobId);
       
     } catch (error) {
       console.error('Submit error:', error);
-      toast.error('Failed to generate image');
+      toast.error('Greška pri slanju');
       setIsProcessing(false);
     }
   };
@@ -144,9 +179,7 @@ export default function Furnisher() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Image Upload */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Slike *
-                </Label>
+                <Label className="text-sm font-medium">Slike *</Label>
                 <ImageUploader
                   images={images}
                   onImagesChange={setImages}
@@ -154,7 +187,7 @@ export default function Furnisher() {
                 />
                 <p className="text-xs text-muted-foreground">
                   Uvek šaljemo polja <b>image1</b> i <b>image2</b>. Ako ne izaberete drugu sliku,
-                  <b> image2</b> se šalje prazno (kao ranije), da bi Make scenario ispravno radio.
+                  <b> image2</b> se šalje prazno, radi doslednosti u Make scenariju.
                 </p>
               </div>
 
