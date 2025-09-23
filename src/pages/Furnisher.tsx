@@ -145,90 +145,121 @@ export default function Furnisher() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">AI Nameštanje</h1>
-        <p className="text-muted-foreground mt-2">
-          Transformišite vaše prostori uz AI nameštanje
-        </p>
-      </div>
+    <div className="min-h-[calc(100vh-64px)] bg-background">
+      <main className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="aurora text-text-primary">Stage Studio</h1>
+          <p className="text-text-muted mt-4">
+            Transformišite vaše prostori uz AI nameštanje
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Panel - Input Form */}
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Slike *</Label>
-                <ImageUploader
-                  images={images}
-                  onImagesChange={setImages}
-                  maxImages={2}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Uvek šaljemo polja <b>image1</b> i <b>image2</b>. Ako ne izaberete drugu sliku,
-                  <b> image2</b> se šalje prazno (radi doslednosti u scenariju).
-                </p>
-              </div>
-
-              {/* Instructions Textarea */}
-              <div className="space-y-2">
-                <Label htmlFor="instructions" className="text-sm font-medium">
-                  Instrukcije
-                </Label>
-                <Textarea
-                  id="instructions"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="npr. 'Namesti ovaj prazan dnevni boravak u skandinavskom stilu'"
-                  rows={4}
-                  disabled={isProcessing}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={images.length === 0 || isProcessing}
-              >
-                {isProcessing ? 'Generisanje…' : 'Generiši sliku'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Right Panel - Result Panel */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="min-h-[400px] flex items-center justify-center">
-              {!resultImage && !isProcessing && (
-                <div className="text-center text-muted-foreground">
-                  <p>Rezultat će biti prikazan ovde</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Panel - Input Form */}
+          <Card className="card-premium">
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Image Upload */}
+                <div className="space-y-3">
+                  <Label className="text-text-primary">Slike *</Label>
+                  <ImageUploader
+                    images={images}
+                    onImagesChange={setImages}
+                    maxImages={2}
+                  />
+                  <p className="text-helper text-text-muted">
+                    Uvek šaljemo polja <b>image1</b> i <b>image2</b>. Ako ne izaberete drugu sliku,
+                    <b> image2</b> se šalje prazno (radi doslednosti u scenariju).
+                  </p>
                 </div>
-              )}
 
-              {isProcessing && (
-                <div className="text-center space-y-4">
-                  <Spinner />
-                  <p className="text-muted-foreground">Generisanje u toku...</p>
-                </div>
-              )}
-
-              {resultImage && (
-                <div className="w-full">
-                  <img
-                    src={resultImage}
-                    alt="Generated result"
-                    className="w-full h-auto rounded-lg shadow-lg"
+                {/* Instructions Textarea */}
+                <div className="space-y-3">
+                  <Label htmlFor="instructions" className="text-text-primary">
+                    Instrukcije
+                  </Label>
+                  <Textarea
+                    id="instructions"
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder="npr. 'Namesti ovaj prazan dnevni boravak u skandinavskom stilu'"
+                    rows={4}
+                    disabled={isProcessing}
+                    className="focus-ring rounded-xl"
                   />
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={images.length === 0 || isProcessing}
+                >
+                  {isProcessing ? 'Generisanje…' : 'Generiši sliku'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Right Panel - Result Panel */}
+          <Card className="card-premium">
+            <CardContent>
+              <h2 className="text-text-primary mb-6">Rezultat</h2>
+              <div className="min-h-[400px] flex items-center justify-center">
+                {!resultImage && !isProcessing && (
+                  <div className="text-center text-text-muted bg-muted rounded-xl p-8 border-2 border-dashed border-border">
+                    <p className="text-helper">Rezultat će biti prikazan ovde</p>
+                  </div>
+                )}
+
+                {isProcessing && (
+                  <div className="text-center space-y-4">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                    <p className="text-text-muted text-helper">Generisanje u toku...</p>
+                  </div>
+                )}
+
+                {resultImage && (
+                  <div className="w-full space-y-4">
+                    <div className="relative rounded-xl overflow-hidden bg-muted shadow-premium">
+                      <img
+                        src={resultImage}
+                        alt="Generated result"
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = resultImage;
+                          a.download = 'generated-interior.jpg';
+                          a.click();
+                        }}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Preuzmi
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setResultImage(null);
+                          setJobId(null);
+                        }}
+                        variant="outline" 
+                        className="flex-1"
+                      >
+                        Nova generacija
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 }

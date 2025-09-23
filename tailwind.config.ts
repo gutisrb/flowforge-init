@@ -20,12 +20,21 @@ export default {
 		extend: {
 			/* 8pt spatial system */
 			spacing: {
+				'1': '4px',
 				'2': '8px',
 				'3': '12px', 
 				'4': '16px',
+				'5': '20px',
 				'6': '24px',
+				'7': '28px',
 				'8': '32px',
+				'9': '36px',
+				'10': '40px',
 				'12': '48px',
+				'16': '64px',
+				'20': '80px',
+				'24': '96px',
+				'32': '128px',
 			},
 			maxWidth: {
 				'7xl': '1280px',
@@ -98,9 +107,12 @@ export default {
 			},
 			borderRadius: {
 				'2xl': '1rem',
+				'xl': '12px',
 				lg: 'calc(var(--radius) - 4px)',
 				md: 'calc(var(--radius) - 8px)',
-				sm: 'calc(var(--radius) - 12px)'
+				sm: 'calc(var(--radius) - 12px)',
+				input: 'var(--input-radius)',
+				pill: 'var(--pill-radius)'
 			},
 			keyframes: {
 				/* Accordion animations */

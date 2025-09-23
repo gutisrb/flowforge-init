@@ -131,8 +131,8 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     <div className="min-h-[calc(100vh-64px)] bg-background">
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-heading-1 font-bold text-text-primary">Kreiranje video oglasa</h1>
-          <p className="text-text-muted text-lg mt-2">
+          <h1 className="aurora text-text-primary">Kreiranje video oglasa</h1>
+          <p className="text-text-muted mt-4">
             Dodajte slike, uredite redosled i generišite reels oglas.
           </p>
         </div>

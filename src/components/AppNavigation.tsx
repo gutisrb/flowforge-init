@@ -51,24 +51,22 @@ export function AppNavigation() {
           </Link>
 
           {/* Navigation Items */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link key={item.href} to={item.href}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <div
                     className={cn(
-                      "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all",
+                      "glass-tab flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-all duration-200",
                       isActive(item.href)
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-text-muted hover:text-text-primary hover:bg-muted/50"
+                        ? "active text-primary"
+                        : "text-text-muted hover:text-text-primary"
                     )}
                   >
                     <Icon className="h-4 w-4" />
                     <span>{item.name}</span>
-                  </Button>
+                  </div>
                 </Link>
               );
             })}
