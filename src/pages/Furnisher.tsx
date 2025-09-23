@@ -105,7 +105,7 @@ export default function Furnisher() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label>Upload slike</Label>
-                <ImageUploader images={images} setImages={setImages} disabled={isProcessing} />
+                <ImageUploader images={images} onImagesChange={setImages} />
               </div>
 
               <div>

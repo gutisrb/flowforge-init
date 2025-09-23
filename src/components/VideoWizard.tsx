@@ -29,7 +29,7 @@ export interface FormData {
 export interface WizardData {
   formData: FormData;
   slots: SlotData[];
-  clipCount: 5 | 10 | 15;
+  clipCount: 5 | 6;
 }
 
 export const VideoWizard = ({ user, session }: VideoWizardProps) => {
@@ -38,7 +38,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     formData: { title: '', price: '', location: '' },
     slots: Array.from({ length: 5 }, (_, i) => ({
       id: `slot-${i}`,
-      mode: 'frame-to-frame' as const,
+      mode: 'image-to-video' as const,
       images: []
     })),
     clipCount: 5 as const,
@@ -57,14 +57,14 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     setWizardData(prev => ({ ...prev, slots }));
   }, []);
 
-  const updateClipCount = useCallback((count: 5 | 10 | 15) => {
+  const updateClipCount = useCallback((count: 5 | 6) => {
     setWizardData(prev => ({ ...prev, clipCount: count }));
   }, []);
 
-  const nextStep = () => setCurrentStep(prev => Math.min(3, (prev + 1) as 1 | 2 | 3));
-  const prevStep = () => setCurrentStep(prev => Math.max(1, (prev - 1) as 1 | 2 | 3));
+  const nextStep = () => setCurrentStep(prev => (prev < 3 ? (prev + 1) as 1 | 2 | 3 : 3));
+  const prevStep = () => setCurrentStep(prev => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : 1));
 
-  const canProceedToStep2 = () => wizardData.formData.title && wizardData.formData.price && wizardData.formData.location;
+  const canProceedToStep2 = () => !!(wizardData.formData.title && wizardData.formData.price && wizardData.formData.location);
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
   const createMultipartFormData = () => {
@@ -84,29 +84,21 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     let imageIndex = 0;
 
     wizardData.slots.forEach((slot, i) => {
-      if (slot.mode === 'frame-to-frame') {
+      if (slot.mode === 'image-to-video') {
         for (let j = 0; j < slot.images.length; j++) {
-          form.append(`image_${imageIndex}`, slot.images[j].file);
+          form.append(`image_${imageIndex}`, slot.images[j]);
           grouping.push({
             type: "single",
             index: imageIndex
           });
           imageIndex++;
         }
-      } else if (slot.mode === 'frame-to-clip') {
-        if (slot.images.length === 0) return;
-        form.append(`image_${imageIndex}`, slot.images[0].file);
-        grouping.push({
-          type: "clip",
-          index: imageIndex
-        });
-        imageIndex++;
-      } else if (slot.mode === 'frame-to-frame-paired') {
+      } else if (slot.mode === 'frame-to-frame') {
         if (slot.images.length < 2) return;
         const firstIndex = imageIndex;
-        form.append(`image_${imageIndex}`, slot.images[0].file);
+        form.append(`image_${imageIndex}`, slot.images[0]);
         imageIndex++;
-        form.append(`image_${imageIndex}`, slot.images[1].file);
+        form.append(`image_${imageIndex}`, slot.images[1]);
         grouping.push({
           type: "frame-to-frame",
           files: [firstIndex, imageIndex],
@@ -151,7 +143,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
           formData: { title: '', price: '', location: '' },
           slots: Array.from({ length: 5 }, (_, i) => ({
             id: `slot-${i}`,
-            mode: 'frame-to-frame' as const,
+            mode: 'image-to-video' as const,
             images: []
           })),
           clipCount: 5 as const,
@@ -201,9 +193,9 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
           {currentStep === 2 && (
             <PhotosStep
               slots={wizardData.slots}
-              updateSlots={updateSlots}
+              onSlotsChange={updateSlots}
               clipCount={wizardData.clipCount}
-              updateClipCount={updateClipCount}
+              onClipCountChange={updateClipCount}
               onPrev={prevStep}
               onNext={nextStep}
               canProceed={canProceedToStep3()}
