@@ -95,32 +95,36 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="zasto" className="container mx-auto px-4 py-20 bg-muted/50">
-        <h2 className="text-3xl font-bold text-center mb-12">Zašto radi</h2>
+      <section id="zasto" className="container mx-auto px-4 py-20 bg-background">
+        <h2 className="text-3xl font-bold text-center mb-12">Zašto ovo radi</h2>
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
-              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg font-medium">
-                Dodatni domet, preko portala.
+            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+              {/* TODO: ICON_BENEFIT1 */}
+              <h3 className="text-lg font-semibold mb-3">Veći domet i zadržavanje pažnje</h3>
+              <p className="text-muted-foreground">
+                Vertical 9:16 format, kretanje kamere i kratke priče zaustavljaju skrol i povećavaju gledanost.
               </p>
             </div>
-            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
-              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg font-medium">
-                Doslednost bez zapošljavanja — 30 objava mesečno.
+            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+              {/* TODO: ICON_BENEFIT2 */}
+              <h3 className="text-lg font-semibold mb-3">Doslednost bez angažovanja ekipe</h3>
+              <p className="text-muted-foreground">
+                Umesto dana editovanja – gotov video za par minuta, spreman za objavu.
               </p>
             </div>
-            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
-              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg font-medium">
-                Podešeno za algoritme: 9:16, rani hook, titlovi, balansirana muzika.
+            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+              {/* TODO: ICON_BENEFIT3 */}
+              <h3 className="text-lg font-semibold mb-3">Prirodni glas i jasna poruka</h3>
+              <p className="text-muted-foreground">
+                Narator na srpskom + animirani titlovi za gledanje bez zvuka.
               </p>
             </div>
-            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
-              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
-              <p className="text-lg font-medium">
-                Uvek brendirano: vodeni žig i boje agencije u set-upu.
+            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+              {/* TODO: ICON_BENEFIT4 */}
+              <h3 className="text-lg font-semibold mb-3">Kreativni vizuali (AI Nameštanje)</h3>
+              <p className="text-muted-foreground">
+                Pre/posle, virtuelno nameštanje, 'magija' tranzicija – sadržaj koji se pamti.
               </p>
             </div>
           </div>
