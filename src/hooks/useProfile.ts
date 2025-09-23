@@ -1,69 +1,51 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-
-// This defines what a user's profile looks like in our app
-export interface Profile {
-  id: string;
-  org_name: string | null;
-  webhook_url: string;
-  tier: 'starter' | 'pro' | 'scale';
-  video_credits_remaining: number;
-  image_credits_remaining: number;
-  created_at: string;
-}
+import { useAuth } from '@/hooks/useAuth'; // <-- Sada uvozimo ispravno
+import { Profile } from '@/integrations/supabase/types'; // <-- Koristimo tvoj postojeći tip
 
 export const useProfile = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Dobijamo korisnika
 
-  const queryResult = useQuery<Profile | null>({
-    queryKey: ['profile', user?.id],
+  return useQuery<Profile | null>({
+    queryKey: ['profile', user?.id], // Ključ zavisi od user.id
     queryFn: async () => {
       if (!user) {
         return null;
       }
 
-      // First try to fetch the profile
+      // 1. Pokušaj da pronađeš profil
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
         .eq('id', user.id)
         .single();
 
       if (error) {
-        // If the profile doesn't exist, create it
+        // 2. Ako ne postoji (npr. novi korisnik), napravi ga
         if (error.code === 'PGRST116') {
           const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
             .insert({ 
               id: user.id, 
-              org_name: 'New Agency', 
-              webhook_url: '' 
+              org_name: 'Nova Agencija',
+              webhook_url: '' // Dodajemo ovo da bi se poklapalo sa tabelom
             })
-            .select('*')
+            .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
             .single();
 
           if (insertError) {
-            console.error('Error creating profile:', insertError);
+            console.error('Greška pri kreiranju profila:', insertError);
             throw insertError;
           }
-          return newProfile as Profile;
+          return newProfile;
         }
-        console.error('Error fetching profile:', error);
+        
+        console.error('Greška pri dohvatanju profila:', error);
         throw error;
       }
       
-      return data as Profile;
+      return data;
     },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    enabled: !!user, // Pokreni samo ako je korisnik ulogovan
   });
-
-  return {
-    profile: queryResult.data,
-    loading: queryResult.isLoading,
-    error: queryResult.error,
-    refetch: queryResult.refetch
-  };
 };
-
