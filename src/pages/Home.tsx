@@ -15,12 +15,12 @@ export default function Home() {
       <div className="fixed inset-0 -z-10">
         <MeshGradient
           className="absolute inset-0 w-full h-full"
-          colors={["#000000", "#06b6d4", "#0891b2", "#164e63", "#f97316"]}
+          colors={["#000000", "#1e3a8a", "#2563eb", "#0ea5e9", "#10b981", "#059669"]}
           speed={0.2}
         />
         <MeshGradient
           className="absolute inset-0 w-full h-full opacity-40"
-          colors={["#000000", "#ffffff", "#06b6d4", "#f97316"]}
+          colors={["#000000", "#1e3a8a", "#10b981", "#ffffff"]}
           speed={0.15}
         />
       </div>
@@ -113,9 +113,9 @@ export default function Home() {
 
       {/* Why It Works Section - Semi-transparent Background */}
       <section id="zasto" className="relative py-20" aria-labelledby="zasto-heading">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/75 backdrop-blur-sm"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <h2 id="zasto-heading" className="text-heading-2 text-center mb-12 text-white">Zašto ovo radi</h2>
+          <h2 id="zasto-heading" className="text-heading-2 text-center mb-12 text-text-primary">Zašto ovo radi</h2>
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6 hover-lift focus-ring" tabIndex={0} role="article" aria-label="Veći domet i zadržavanje pažnje">
@@ -357,9 +357,9 @@ export default function Home() {
 
       {/* Pricing Section - Gradient Overlay */}
       <section id="cena" className="relative py-20" aria-labelledby="cena-heading">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/40 to-orange-900/40 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <h2 id="cena-heading" className="text-heading-2 text-center mb-12 text-white">Cena</h2>
+          <h2 id="cena-heading" className="text-heading-2 text-center mb-12 text-text-primary">Cena</h2>
           <div className="text-center">
             <Card className="bg-background p-8 max-w-md mx-auto hover-lift focus-ring border-2 border-primary/20" tabIndex={0} role="article" aria-label="Plan cene za ranu registraciju">
               <CardContent className="p-0">
