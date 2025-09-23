@@ -1,6 +1,7 @@
 import { HeroSection } from '@/components/HeroSection';
 import { FeatureModal } from '@/components/FeatureModal';
 import { StickyButton } from '@/components/StickyButton';
+import { ReelPreviewModal } from '@/components/ReelPreviewModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -16,49 +17,81 @@ export default function Home() {
       <StickyButton />
 
       {/* How it Works Section */}
-      <section id="kako" className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12">Kako funkcioniše</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
-              1
-            </div>
-            <h3 className="text-xl font-semibold mb-4">
-              Dodaj 5–12 fotografija + cena/m²/lokacija
-            </h3>
-            <p className="text-muted-foreground">
-              Učitaj slike prostora i unesi osnovne podatke o nekretnini
-            </p>
+      <section id="kako" className="bg-muted/30 py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Kako funkcioniše</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            
+            {/* Step 1 */}
+            <Card className="text-center p-6 hover-lift">
+              <CardContent className="pt-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-4">
+                  1
+                </div>
+                {/* TODO: ICON_STEP1 */}
+                <CardTitle className="text-lg font-semibold mb-3">
+                  Dodaj detalje i fotografije
+                </CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Unesite cenu, lokaciju i ključne podatke – dodajte jednu ili dve fotografije nekretnine.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 2 */}
+            <Card className="text-center p-6 hover-lift">
+              <CardContent className="pt-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-4">
+                  2
+                </div>
+                {/* TODO: ICON_STEP2 */}
+                <CardTitle className="text-lg font-semibold mb-3">
+                  AI video za mreže
+                </CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Reel Studio automatski pravi 9:16 video sa kretanjem kamere i tranzicijom između dve fotke.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 3 */}
+            <Card className="text-center p-6 hover-lift">
+              <CardContent className="pt-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-4">
+                  3
+                </div>
+                {/* TODO: ICON_STEP3 */}
+                <CardTitle className="text-lg font-semibold mb-3">
+                  Glas, muzika i titlovi
+                </CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Generiše se glasovni narator na srpskom, bira se muzika i dodaju animirani titlovi i opis objave.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 4 */}
+            <Card className="text-center p-6 hover-lift">
+              <CardContent className="pt-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-4">
+                  4
+                </div>
+                {/* TODO: ICON_STEP4 */}
+                <CardTitle className="text-lg font-semibold mb-3">
+                  Preuzmi ili objavi
+                </CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Preuzmite video ili ga direktno objavite na povezane profile (kada je povezivanje aktivirano).
+                </p>
+              </CardContent>
+            </Card>
+            
           </div>
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
-              2
-            </div>
-            <h3 className="text-xl font-semibold mb-4">
-              Opcionalno: unesi jednu "Dodatno" rečenicu i poređaj fotografije
-            </h3>
-            <p className="text-muted-foreground">
-              Prilagodi redosled slika i dodaj dodatne informacije
-            </p>
+
+          {/* Mini-demo under the grid */}
+          <div className="mt-12 text-center">
+            <ReelPreviewModal />
           </div>
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl mb-6">
-              3
-            </div>
-            <h3 className="text-xl font-semibold mb-4">
-              Generiši → preuzmi MP4 → objavi
-            </h3>
-            <p className="text-muted-foreground">
-              AI kreira video spreman za objavljivanje na društvenim mrežama
-            </p>
-          </div>
-        </div>
-        
-        {/* Note under the grid */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Izlaz je prilagođen feedovima: 9:16, hook u prvim sekundama, pozadinska muzika, otvoreni titlovi.
-          </p>
         </div>
       </section>
 
