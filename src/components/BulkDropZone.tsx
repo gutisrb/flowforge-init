@@ -43,35 +43,64 @@ export function BulkDropZone({
   };
 
   return (
-    <div
-      className={cn(
-        "border-2 border-dashed rounded-xl p-4 sm:p-6 text-center transition-all duration-200 cursor-pointer touch-manipulation",
-        isDragOver 
-          ? "border-primary bg-primary/10 scale-[1.02]" 
-          : "border-border hover:border-primary/50 hover:bg-primary/5",
-        maxImages <= 0 && "opacity-50 cursor-not-allowed",
-        className
-      )}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onClick={() => maxImages > 0 && document.getElementById("bulk-file-input")?.click()}
-    >
-      <Upload className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mb-2" />
-      <p className="text-sm font-medium text-foreground">
-        {maxImages > 0 ? "Dodajte slike" : "Maksimum slika dostignut"}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">
-        {maxImages > 0 ? `Prevucite ili kliknite • Još ${maxImages} slika` : "Uklonite slike da biste dodali nove"}
-      </p>
-      <input
-        id="bulk-file-input"
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-    </div>
+      <div
+        className={`
+          relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer
+          min-h-[240px] flex flex-col items-center justify-center overflow-hidden
+          ${isDragOver 
+            ? "border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-2xl shadow-primary/30 scale-[1.02]" 
+            : "border-border hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
+          }
+          ${maxImages <= 0 ? "opacity-50 cursor-not-allowed" : ""}
+          ${className}
+        `}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => maxImages > 0 && document.getElementById("bulk-file-input")?.click()}
+      >
+        {/* Upload Icon */}
+        <div className={`w-20 h-20 rounded-full mb-6 flex items-center justify-center transition-all duration-300 ${
+          isDragOver ? "bg-primary/20 scale-110" : "bg-muted/50"
+        }`}>
+          <span className="text-3xl">📸</span>
+        </div>
+
+        {/* Main Text */}
+        <h3 className="text-xl font-semibold mb-3 text-foreground">
+          {isDragOver ? "Otpusti fotografije ovde" : "Dodaj fotografije"}
+        </h3>
+
+        {/* Subtitle */}
+        <p className="text-muted-foreground mb-6 max-w-md">
+          {isDragOver 
+            ? "Slike će biti automatski raspoređene po slotovima"
+            : "Povuci i otpusti slike ili klikni za izbor datoteka"
+          }
+        </p>
+
+        {/* Stats */}
+        <div className="text-13 text-muted-foreground/70">
+          {maxImages > 0 ? `Još ${maxImages} slika • JPG, PNG, WebP` : "Maksimum slika dostignut"}
+        </div>
+
+        {/* Hidden input */}
+        <input
+          id="bulk-file-input"
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+
+        {/* Animated gradient glow on drag */}
+        {isDragOver && (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 rounded-2xl pointer-events-none animate-pulse" />
+            <div className="absolute inset-2 border border-primary/30 rounded-2xl pointer-events-none animate-pulse" />
+          </>
+        )}
+      </div>
   );
 }

@@ -43,22 +43,26 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
     onSlotsChange(next);
   };
 
-  return (
-    <DragProvider>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {slots.map((slot, index) => (
-          <SlotCard
-            key={slot.id}
-            slotIndex={index}
-            images={slot.images}
-            onImagesChange={(images) => {
-              const next = slots.map((s, i) => i === index ? { ...s, images } : s);
-              onSlotsChange(next);
-            }}
-            onReceiveInternalImage={(payload) => moveImage(payload.fromSlot, payload.imageIndex, index, payload.toIndex)}
-          />
-        ))}
-      </div>
-    </DragProvider>
-  );
+    return (
+      <DragProvider>
+        <div className="bento-grid">
+          {slots.map((slot, index) => (
+            <SlotCard
+              key={slot.id}
+              slotIndex={index}
+              images={slot.images}
+              isHero={index === 0}
+              onImagesChange={(images: File[]) => {
+                const newSlots = [...slots];
+                newSlots[index] = { ...slot, images };
+                onSlotsChange(newSlots);
+              }}
+              onReceiveInternalImage={({ fromSlot, imageIndex, toIndex }) =>
+                moveImage(fromSlot, imageIndex, index, toIndex)
+              }
+            />
+          ))}
+        </div>
+      </DragProvider>
+    );
 }

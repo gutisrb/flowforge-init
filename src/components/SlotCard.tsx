@@ -10,6 +10,7 @@ import { useDrag } from "./DragContext";
 interface SlotCardProps {
   slotIndex: number;
   images: File[];
+  isHero?: boolean;
   onImagesChange: (images: File[]) => void;
   onReceiveInternalImage: (payload: { fromSlot: number; imageIndex: number; toIndex?: number }) => void;
 }
@@ -17,6 +18,7 @@ interface SlotCardProps {
 export function SlotCard({
   slotIndex,
   images,
+  isHero = false,
   onImagesChange,
   onReceiveInternalImage,
 }: SlotCardProps) {
@@ -72,11 +74,13 @@ export function SlotCard({
   return (
     <>
       <div
-        className={`bg-card rounded-xl border-2 transition-all duration-200 h-full min-h-[280px] sm:min-h-[320px] flex flex-col shadow-sm hover:shadow-md ${
+        className={`bg-surface rounded-2xl border-2 transition-all duration-200 h-full flex flex-col shadow-card hover:shadow-hover hover:-translate-y-1 hover:scale-[1.02] ${
+          isHero ? "min-h-[360px]" : "min-h-[320px]"
+        } ${
           isDragOver && canAcceptDrop 
-            ? "border-primary shadow-lg shadow-primary/20 bg-primary/5" 
+            ? "border-primary shadow-2xl shadow-primary/30 bg-gradient-to-br from-primary/10 to-accent/5" 
             : isDragging && canAcceptDrop
-            ? "border-primary/50 shadow-md"
+            ? "border-primary/50 shadow-lg"
             : "border-border"
         }`}
         onDragOver={(e) => { 
@@ -91,29 +95,35 @@ export function SlotCard({
         onDrop={onDrop}
       >
         {/* Header */}
-        <div className="p-3 sm:p-4 pb-3 border-b border-border/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Slot {slotIndex + 1}</span>
-            {images.length >= 2 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 sm:h-8 px-2 sm:px-3 text-xs"
-                onClick={swap}
-                title="Zameni redosled slika"
-              >
-                <ArrowLeftRight className="h-3 w-3 sm:mr-1" />
-                <span className="hidden sm:inline">Swap</span>
-              </Button>
-            )}
-          </div>
-          {images.length === 2 && (
-            <div className="flex justify-start">
-              <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
-                Frame-to-Frame
-              </Badge>
+        <div className="p-4 border-b border-border/30">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                {isHero ? "Hero" : `Slot ${slotIndex + 1}`}
+              </span>
+              {images.length === 2 && (
+                <Badge className="rounded-full px-2 py-0.5 text-xs bg-primary/10 text-primary border-primary/20">
+                  Početak/Kraj
+                </Badge>
+              )}
             </div>
-          )}
+            <div className="flex items-center gap-1">
+              {images.length >= 2 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-primary/10"
+                  onClick={swap}
+                  title="Zameni redosled slika"
+                >
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Body */}

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { Button } from '@/components/ui/button';
 import { Stepper } from '@/components/Stepper';
 import { DetailsStep } from '@/components/wizard/DetailsStep';
 import { PhotosStep } from '@/components/wizard/PhotosStep';
@@ -131,15 +132,16 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     <div className="min-h-[calc(100vh-64px)] bg-background">
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="aurora text-text-primary">Kreiranje video oglasa</h1>
-          <p className="text-text-muted mt-4">
+          <h1 className="text-4xl font-bold text-primary mb-2">Kreiranje video oglasa</h1>
+          <div className="aurora-stripe mb-4"></div>
+          <p className="text-muted-foreground">
             Dodajte slike, uredite redosled i generišite reels oglas.
           </p>
         </div>
 
         <Stepper currentStep={wizardData.currentStep} />
 
-        <div className="mt-8">
+        <div className="mt-8 relative pb-20">
           {wizardData.currentStep === 1 && (
             <DetailsStep
               formData={wizardData.formData}
@@ -171,6 +173,45 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
               isLoading={isLoading}
             />
           )}
+
+          {/* Sticky Action Bar */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-glass backdrop-blur-lg border-t border-white/10 px-6 py-4">
+            <div className="container mx-auto flex justify-between items-center">
+              {wizardData.currentStep > 1 && (
+                <Button variant="ghost" onClick={prevStep} className="text-muted-foreground">
+                  Nazad
+                </Button>
+              )}
+              <div className="flex-1"></div>
+              {wizardData.currentStep === 1 && (
+                <Button 
+                  onClick={nextStep} 
+                  disabled={!canProceedToStep2() || isLoading}
+                  className="gradient-primary text-white hover-sheen"
+                >
+                  Sledeći korak
+                </Button>
+              )}
+              {wizardData.currentStep === 2 && (
+                <Button 
+                  onClick={nextStep} 
+                  disabled={!canProceedToStep3()}
+                  className="gradient-primary text-white hover-sheen"
+                >
+                  Sledeći korak
+                </Button>
+              )}
+              {wizardData.currentStep === 3 && (
+                <Button 
+                  onClick={handleGenerate} 
+                  disabled={isLoading}
+                  className="gradient-primary text-white hover-sheen"
+                >
+                  {isLoading ? "Generišem..." : "Generiši video"}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>

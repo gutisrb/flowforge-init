@@ -348,3 +348,95 @@ label {
     hsl(var(--primary) / 0.4) 50%, 
     transparent 100%);
 }
+
+/* Aurora stripe under H1s */
+.aurora-stripe {
+  height: 2px;
+  width: 120px;
+  background: var(--gradient-primary);
+  border-radius: 999px;
+}
+
+/* Glass effect for action bars */
+.bg-glass {
+  background: rgba(247, 249, 252, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .bg-glass {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* Hover sheen effect */
+.hover-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-sheen:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: sheen 1.2s ease-out;
+}
+
+@keyframes sheen {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Bento grid layout */
+.bento-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-auto-rows: min-content;
+}
+
+.bento-grid > *:first-child {
+  grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+  .bento-grid > *:first-child {
+    grid-column: span 1;
+  }
+}
+
+/* Gradient border utility */
+.gradient-border {
+  position: relative;
+  background: transparent;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: var(--gradient-primary);
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: subtract;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: source-out;
+}
+
+/* Shadow utilities */
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+.shadow-hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Surface color alias */
+.bg-surface {
+  background-color: hsl(var(--surface-calm));
+}
