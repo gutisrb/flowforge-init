@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Zap, Type, Music, Shuffle, Sparkles, FolderOpen } from 'lucide-react';
-
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <HeroSection />
 
@@ -95,36 +93,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="zasto" className="container mx-auto px-4 py-20 bg-background">
-        <h2 className="text-3xl font-bold text-center mb-12">Zašto ovo radi</h2>
+      <section id="zasto" className="container mx-auto px-4 py-20 bg-muted/50">
+        <h2 className="text-3xl font-bold text-center mb-12">Zašto radi</h2>
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-              {/* TODO: ICON_BENEFIT1 */}
-              <h3 className="text-lg font-semibold mb-3">Veći domet i zadržavanje pažnje</h3>
-              <p className="text-muted-foreground">
-                Vertical 9:16 format, kretanje kamere i kratke priče zaustavljaju skrol i povećavaju gledanost.
+            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
+              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg font-medium">
+                Dodatni domet, preko portala.
               </p>
             </div>
-            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-              {/* TODO: ICON_BENEFIT2 */}
-              <h3 className="text-lg font-semibold mb-3">Doslednost bez angažovanja ekipe</h3>
-              <p className="text-muted-foreground">
-                Umesto dana editovanja – gotov video za par minuta, spreman za objavu.
+            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
+              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg font-medium">
+                Doslednost bez zapošljavanja — 30 objava mesečno.
               </p>
             </div>
-            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-              {/* TODO: ICON_BENEFIT3 */}
-              <h3 className="text-lg font-semibold mb-3">Prirodni glas i jasna poruka</h3>
-              <p className="text-muted-foreground">
-                Narator na srpskom + animirani titlovi za gledanje bez zvuka.
+            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
+              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg font-medium">
+                Podešeno za algoritme: 9:16, rani hook, titlovi, balansirana muzika.
               </p>
             </div>
-            <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-              {/* TODO: ICON_BENEFIT4 */}
-              <h3 className="text-lg font-semibold mb-3">Kreativni vizuali (AI Nameštanje)</h3>
-              <p className="text-muted-foreground">
-                Pre/posle, virtuelno nameštanje, 'magija' tranzicija – sadržaj koji se pamti.
+            <div className="flex items-start space-x-4 p-6 bg-background rounded-xl shadow-sm">
+              <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+              <p className="text-lg font-medium">
+                Uvek brendirano: vodeni žig i boje agencije u set-upu.
               </p>
             </div>
           </div>
@@ -133,62 +127,20 @@ export default function Home() {
 
       <section id="funkcije" className="container mx-auto px-4 py-20">
         <h2 className="text-3xl font-bold text-center mb-12">Funkcije</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_1 */}
-            <h3 className="text-lg font-semibold mb-3">AI generacija video-reelova</h3>
-          </div>
+          <FeatureModal icon={<Zap className="h-6 w-6" />} title="Hook u prvim sekundama" description="AI automatski kreira privlačan početak videa koji zadržava pažnju gledaoca u prvih 3 sekunde. Koristi se kombinacija dinamičnih prelaza, atraktivnih kadrova i vizuelnih efekata koji odmah privlače pogled na društvenim mrežama." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_2 */}
-            <h3 className="text-lg font-semibold mb-3">Dinamična kamera i tranzicije</h3>
-          </div>
+          <FeatureModal icon={<Type className="h-6 w-6" />} title="Titlovi (gledanje bez zvuka)" description="Automatski generirani titlovi omogućavaju gledanje videa bez zvuka, što je ključno jer većina korisnika na društvenim mrežama gleda sadržaj sa isključenim zvukom. Titlovi su stilizovani i pozicionirani za maksimalnu čitljivost." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_3 */}
-            <h3 className="text-lg font-semibold mb-3">Glasovni narator na srpskom</h3>
-          </div>
+          <FeatureModal icon={<Music className="h-6 w-6" />} title="AI muzika u pozadini" description="Pažljivo odabrana pozadinska muzika koja odgovara stilu nekretnine i ciljnoj publici. AI bira melodije koje pojačavaju atmosferu prostora bez ometanja govora ili narušavanja profesionalnog tona prezentacije." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_4 */}
-            <h3 className="text-lg font-semibold mb-3">Automatski titlovi i opis objave</h3>
-          </div>
+          <FeatureModal icon={<Shuffle className="h-6 w-6" />} title="Frame-to-frame tranzicije" description="Glatki prelazi između fotografija koji kreiraju osećaj kontinuiteta i prirodnog kretanja kroz prostor. AI analizira slike i kreira tranzicije koje naglašavaju najbolje karakteristike svakog kadra." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_5 */}
-            <h3 className="text-lg font-semibold mb-3">Muzika optimizovana za mreže</h3>
-          </div>
+          <FeatureModal icon={<Sparkles className="h-6 w-6" />} title="AI Furnisher (pre/posle)" description="Virtuelno nameštanje praznih prostora pomoću AI tehnologije. Kreira realistične prikaze kako bi prostor mogao da izgleda kada je namešten, pomoćući klijentima da lakše vizualizuju potencijal nekretnine." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_6 */}
-            <h3 className="text-lg font-semibold mb-3">Virtuelno nameštanje i uređivanje slika</h3>
-          </div>
+          <FeatureModal icon={<FolderOpen className="h-6 w-6" />} title="Moja biblioteka" description="Centralizovano mesto za čuvanje svih vaših video projekata, fotografija i materijala. Omogućava lakše organizovanje, pretragu i ponovnu upotrebu sadržaja za buduće projekte sa naprednim sistemom tagovanja." />
           
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_7 */}
-            <h3 className="text-lg font-semibold mb-3">Format 9:16, spreman za Instagram/TikTok</h3>
-          </div>
-          
-          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
-            {/* TODO: FEATURE_ICON_8 */}
-            <h3 className="text-lg font-semibold mb-3">Preuzimanje ili direktno objavljivanje*</h3>
-          </div>
-          
-        </div>
-        
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            *Direktno objavljivanje dostupno nakon povezivanja naloga. (Bez integracije u ovoj verziji stranice.)
-          </p>
-        </div>
-        
-        <div className="mt-8 max-w-md mx-auto">
-          <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-            <p className="text-sm text-muted-foreground">
-              <strong>Saveti za hook</strong> – pre/posle, lik u kadru, neočekivani objekat.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -359,7 +311,7 @@ export default function Home() {
             <p className="text-muted-foreground">Ne — društvene mreže dodaju domet.</p>
           </div>
           <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Mogu li menjati scenario ili muziku u app-u?</h3>
+            
             <p className="text-muted-foreground">Ne trenutno; izlaz je automatski iz podataka iz oglasa.</p>
           </div>
           <div className="bg-background p-6 rounded-xl shadow-sm">
@@ -380,6 +332,5 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
