@@ -7,17 +7,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
 import { Zap, Type, Music, Shuffle, Sparkles, FolderOpen } from 'lucide-react';
+import { MeshGradient } from "@paper-design/shaders-react";
+
 export default function Home() {
-  return <div className="min-h-screen bg-background">
+  return <div className="min-h-screen relative">
+      {/* Global Shader Background */}
+      <div className="fixed inset-0 -z-10">
+        <MeshGradient
+          className="absolute inset-0 w-full h-full"
+          colors={["#000000", "#06b6d4", "#0891b2", "#164e63", "#f97316"]}
+          speed={0.2}
+        />
+        <MeshGradient
+          className="absolute inset-0 w-full h-full opacity-40"
+          colors={["#000000", "#ffffff", "#06b6d4", "#f97316"]}
+          speed={0.15}
+        />
+      </div>
+
       {/* Hero Section */}
       <HeroSection />
 
       {/* Sticky Button */}
       <StickyButton />
 
-      {/* How it Works Section - Alt Background */}
-      <section id="kako" className="bg-muted/30 py-20" aria-labelledby="kako-heading">
-        <div className="container mx-auto px-4">
+      {/* How it Works Section - White Overlay */}
+      <section id="kako" className="relative py-20" aria-labelledby="kako-heading">
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <h2 id="kako-heading" className="text-heading-2 text-center mb-12">Kako funkcioniše</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             
@@ -94,10 +111,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why It Works Section - White Background */}
-      <section id="zasto" className="bg-background py-20" aria-labelledby="zasto-heading">
-        <div className="container mx-auto px-4">
-          <h2 id="zasto-heading" className="text-heading-2 text-center mb-12">Zašto ovo radi</h2>
+      {/* Why It Works Section - Semi-transparent Background */}
+      <section id="zasto" className="relative py-20" aria-labelledby="zasto-heading">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 id="zasto-heading" className="text-heading-2 text-center mb-12 text-white">Zašto ovo radi</h2>
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6 hover-lift focus-ring" tabIndex={0} role="article" aria-label="Veći domet i zadržavanje pažnje">
@@ -152,9 +170,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section - Alt Background */}
-      <section id="funkcije" className="bg-muted/30 py-20" aria-labelledby="funkcije-heading">
-        <div className="container mx-auto px-4">
+      {/* Features Section - White Overlay */}
+      <section id="funkcije" className="relative py-20" aria-labelledby="funkcije-heading">
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <h2 id="funkcije-heading" className="text-heading-2 text-center mb-12">Funkcije</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             
@@ -242,14 +261,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo Section - White Background */}
-      <section id="demo" className="bg-background py-20" aria-labelledby="demo-heading">
-        <div className="container mx-auto px-4">
+      {/* Demo Section - Semi-transparent Background */}
+      <section id="demo" className="relative py-20" aria-labelledby="demo-heading">
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12">
-            <h2 id="demo-heading" className="text-heading-2 mb-4">
+            <h2 id="demo-heading" className="text-heading-2 mb-4 text-white">
               Od onoga što već imaš → do videa koji se gleda.
             </h2>
-            <p className="text-text-muted text-body">Format prilagođen feedovima.</p>
+            <p className="text-white/80 text-body">Format prilagođen feedovima.</p>
           </div>
           
           <div className="flex justify-center">
@@ -335,10 +355,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Section - Alt Background */}
-      <section id="cena" className="bg-muted/30 py-20" aria-labelledby="cena-heading">
-        <div className="container mx-auto px-4">
-          <h2 id="cena-heading" className="text-heading-2 text-center mb-12">Cena</h2>
+      {/* Pricing Section - Gradient Overlay */}
+      <section id="cena" className="relative py-20" aria-labelledby="cena-heading">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/40 to-orange-900/40 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 id="cena-heading" className="text-heading-2 text-center mb-12 text-white">Cena</h2>
           <div className="text-center">
             <Card className="bg-background p-8 max-w-md mx-auto hover-lift focus-ring border-2 border-primary/20" tabIndex={0} role="article" aria-label="Plan cene za ranu registraciju">
               <CardContent className="p-0">
@@ -361,9 +382,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section - White Background */}
-      <section id="faq" className="bg-background py-20" aria-labelledby="faq-heading">
-        <div className="container mx-auto px-4">
+      {/* FAQ Section - White Overlay */}
+      <section id="faq" className="relative py-20" aria-labelledby="faq-heading">
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <h2 id="faq-heading" className="text-heading-2 text-center mb-12">Česta pitanja</h2>
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="w-full space-y-2" aria-label="Česta pitanja o Reel Studio">
