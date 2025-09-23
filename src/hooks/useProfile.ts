@@ -26,7 +26,7 @@ export const useProfile = (user: User | null) => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, webhook_url, org_name')
+          .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
           .eq('id', user.id)
           .single();
 
@@ -40,7 +40,7 @@ export const useProfile = (user: User | null) => {
                 webhook_url: null,
                 org_name: null,
               })
-              .select('id, webhook_url, org_name')
+              .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
               .single();
 
             if (insertError) {
