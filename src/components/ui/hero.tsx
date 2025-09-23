@@ -59,14 +59,14 @@ export default function ShaderShowcase() {
             </feMerge>
           </filter>
           <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1e3a8a" />
-            <stop offset="50%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#10b981" />
+            <stop offset="0%" stopColor="#06b6d4" />
+            <stop offset="50%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#8B5CF6" />
           </linearGradient>
           <linearGradient id="hero-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="30%" stopColor="#1e3a8a" />
-            <stop offset="70%" stopColor="#10b981" />
+            <stop offset="30%" stopColor="#06b6d4" />
+            <stop offset="70%" stopColor="#8B5CF6" />
             <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
           <filter id="text-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -81,12 +81,12 @@ export default function ShaderShowcase() {
 
       <MeshGradient
         className="absolute inset-0 w-full h-full"
-        colors={["#000000", "#1e3a8a", "#2563eb", "#0ea5e9", "#10b981", "#059669"]}
+        colors={["#000000", "#06b6d4", "#3B82F6", "#8B5CF6", "#5B21B6", "#1E1B4B"]}
         speed={0.3}
       />
       <MeshGradient
         className="absolute inset-0 w-full h-full opacity-60"
-        colors={["#000000", "#1e3a8a", "#10b981", "#ffffff"]}
+        colors={["#000000", "#06b6d4", "#8B5CF6", "#ffffff"]}
         speed={0.2}
       />
 
@@ -211,7 +211,7 @@ export default function ShaderShowcase() {
             <motion.span
               className="block font-light text-white/90 text-4xl md:text-5xl lg:text-6xl mb-2 tracking-wider"
               style={{
-                background: "linear-gradient(135deg, #ffffff 0%, #1e3a8a 30%, #10b981 70%, #ffffff 100%)",
+                background: "linear-gradient(135deg, #ffffff 0%, #06b6d4 30%, #8B5CF6 70%, #ffffff 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -256,7 +256,7 @@ export default function ShaderShowcase() {
               View Pricing
             </motion.button>
             <motion.button
-              className="px-10 py-4 rounded-full bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold text-sm transition-all duration-300 hover:from-blue-500 hover:to-emerald-400 cursor-pointer shadow-lg hover:shadow-xl"
+              className="px-10 py-4 rounded-full bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-semibold text-sm transition-all duration-300 hover:from-cyan-400 hover:to-violet-400 cursor-pointer shadow-lg hover:shadow-xl"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -269,7 +269,7 @@ export default function ShaderShowcase() {
       <div className="absolute bottom-8 right-8 z-30">
         <div className="relative w-20 h-20 flex items-center justify-center">
           <PulsingBorder
-            colors={["#1e3a8a", "#2563eb", "#0ea5e9", "#10b981", "#059669", "#ffffff"]}
+            colors={["#06b6d4", "#3B82F6", "#8B5CF6", "#5B21B6", "#A855F7", "#ffffff"]}
             colorBack="#00000000"
             speed={1.5}
             roundness={1}
