@@ -22,7 +22,7 @@ interface PasswordFormData {
 
 export function Profile() {
   const [user, setUser] = useState<User | null>(null);
-  const { profile, loading } = useProfile(user);
+  const { profile, loading } = useProfile();
   const { toast } = useToast();
   
   // Get current user
