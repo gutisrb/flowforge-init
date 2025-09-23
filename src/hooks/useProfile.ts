@@ -1,51 +1,68 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth'; // <-- Sada uvozimo ispravno
-import { Profile } from '@/integrations/supabase/types'; // <-- Koristimo tvoj postojeći tip
 
-export const useProfile = () => {
-  const { user } = useAuth(); // Dobijamo korisnika
+interface Profile {
+  id: string;
+  webhook_url: string | null;
+  org_name: string | null;
+}
 
-  return useQuery<Profile | null>({
-    queryKey: ['profile', user?.id], // Ključ zavisi od user.id
-    queryFn: async () => {
-      if (!user) {
-        return null;
-      }
+export const useProfile = (user: User | null) => {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-      // 1. Pokušaj da pronađeš profil
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
-        .eq('id', user.id)
-        .single();
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
 
-      if (error) {
-        // 2. Ako ne postoji (npr. novi korisnik), napravi ga
-        if (error.code === 'PGRST116') {
-          const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert({ 
-              id: user.id, 
-              org_name: 'Nova Agencija',
-              webhook_url: '' // Dodajemo ovo da bi se poklapalo sa tabelom
-            })
-            .select('id, org_name, webhook_url, tier, video_credits_remaining, image_credits_remaining')
-            .single();
-
-          if (insertError) {
-            console.error('Greška pri kreiranju profila:', insertError);
-            throw insertError;
-          }
-          return newProfile;
-        }
-        
-        console.error('Greška pri dohvatanju profila:', error);
-        throw error;
-      }
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError(null);
       
-      return data;
-    },
-    enabled: !!user, // Pokreni samo ako je korisnik ulogovan
-  });
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, webhook_url, org_name')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile not found, create one
+            const { data: newProfile, error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: user.id,
+                webhook_url: null,
+                org_name: null,
+              })
+              .select('id, webhook_url, org_name')
+              .single();
+
+            if (insertError) {
+              throw insertError;
+            }
+            setProfile(newProfile);
+          } else {
+            throw error;
+          }
+        } else {
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  return { profile, loading, error };
 };

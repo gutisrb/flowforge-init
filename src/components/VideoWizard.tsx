@@ -55,7 +55,7 @@ export const VideoWizard = ({ user }: VideoWizardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading } = useProfile(user);
   const { progress, setProgress } = useProgress();
 
   const updateFormData = useCallback((data: FormData) => {
