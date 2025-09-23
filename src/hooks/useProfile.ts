@@ -6,9 +6,6 @@ interface Profile {
   id: string;
   webhook_url: string | null;
   org_name: string | null;
-  tier: 'starter' | 'pro' | 'scale';
-  video_credits_remaining: number | null;   // null OK
-  image_credits_remaining: number | null;   // null = unlimited
 }
 
 export const useProfile = (user: User | null) => {
@@ -27,11 +24,11 @@ export const useProfile = (user: User | null) => {
       setError(null);
       
       try {
-const { data, error } = await supabase
-  .from('profiles')
-  .select('id, webhook_url, org_name, tier, video_credits_remaining, image_credits_remaining')
-  .eq('id', user.id)
-  .single();
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, webhook_url, org_name')
+          .eq('id', user.id)
+          .single();
 
         if (error) {
           if (error.code === 'PGRST116') {
