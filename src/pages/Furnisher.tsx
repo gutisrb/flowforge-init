@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ImageUploader } from '@/components/ImageUploader';
 import { MAKE_CREATE_URL, MAKE_STATUS_URL } from '@/config/make';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Furnisher() {
   const [images, setImages] = useState<File[]>([]);
@@ -19,17 +20,15 @@ export default function Furnisher() {
       const response = await fetch(`${MAKE_STATUS_URL}?jobId=${jobId}`);
       
       if (response.headers.get('content-type')?.includes('image/')) {
-        // Response is an image - job is complete
         const blob = await response.blob();
         const imageUrl = URL.createObjectURL(blob);
         setResultImage(imageUrl);
         setIsProcessing(false);
-        return true; // Stop polling
+        return true;
       } else {
-        // Response is JSON status
         const result = await response.json();
         if (result.status === 'processing') {
-          return false; // Continue polling
+          return false;
         } else {
           throw new Error('Unexpected status');
         }
@@ -38,17 +37,15 @@ export default function Furnisher() {
       console.error('Status check error:', error);
       toast.error('Failed to check job status');
       setIsProcessing(false);
-      return true; // Stop polling
+      return true;
     }
   };
 
-  const startPolling = (jobId: string) => {
-    const pollInterval = setInterval(async () => {
-      const shouldStop = await checkStatus(jobId);
-      if (shouldStop) {
-        clearInterval(pollInterval);
-      }
-    }, 5000);
+  const startPolling = async (jobId: string) => {
+    const interval = setInterval(async () => {
+      const done = await checkStatus(jobId);
+      if (done) clearInterval(interval);
+    }, 3000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,6 +61,11 @@ export default function Furnisher() {
       setResultImage(null);
 
       const formData = new FormData();
+      // Attach user_id for Make credit checks
+      const { data: u } = await supabase.auth.getUser();
+      if (u?.user?.id) {
+        formData.append('user_id', u.user.id);
+      }
       images.forEach((image, index) => {
         formData.append(`image${index + 1}`, image);
       });
@@ -75,108 +77,64 @@ export default function Furnisher() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        if (response.status === 402) {
+          toast.error('Nema image kredita. Nadogradite paket.');
+        } else {
+          throw new Error('Failed to submit form');
+        }
+        setIsProcessing(false);
+        return;
       }
 
       const result = await response.json();
       setJobId(result.jobId);
-      
-      // Start polling for status
       startPolling(result.jobId);
       
     } catch (error) {
       console.error('Submit error:', error);
-      toast.error('Failed to generate image');
+      toast.error('Greška pri slanju');
       setIsProcessing(false);
     }
   };
 
-  const Spinner = () => (
-    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-  );
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">AI Nameštanje</h1>
-        <p className="text-muted-foreground mt-2">
-          Transformišite vaše prostori uz AI nameštanje
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Panel - Input Form */}
+    <div className="container mx-auto px-6 py-8">
+      <div className="max-w-3xl mx-auto">
         <Card>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Slike *
-                </Label>
-                <ImageUploader
-                  images={images}
-                  onImagesChange={setImages}
-                  maxImages={2}
-                />
+              <div>
+                <Label>Upload slike</Label>
+                <ImageUploader images={images} setImages={setImages} disabled={isProcessing} />
               </div>
 
-              {/* Instructions Textarea */}
-              <div className="space-y-2">
-                <Label htmlFor="instructions" className="text-sm font-medium">
-                  Instrukcije
-                </Label>
+              <div>
+                <Label>Instrukcije (opciono)</Label>
                 <Textarea
-                  id="instructions"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="npr. 'Namesti ovaj prazan dnevni boravak u skandinavskom stilu'"
+                  placeholder="npr. postavi moderan nameštaj, svetli tonovi..."
                   rows={4}
                   disabled={isProcessing}
                 />
               </div>
 
-              {/* Submit Button */}
               <Button 
                 type="submit" 
                 className="w-full" 
                 disabled={images.length === 0 || isProcessing}
               >
-                Generiši sliku
+                {isProcessing ? 'Obrada…' : 'Generiši sliku'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Right Panel - Result Panel */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="min-h-[400px] flex items-center justify-center">
-              {!resultImage && !isProcessing && (
-                <div className="text-center text-muted-foreground">
-                  <p>Rezultat će biti prikazan ovde</p>
-                </div>
-              )}
-              
-              {isProcessing && (
-                <div className="text-center space-y-4">
-                  <Spinner />
-                  <p className="text-muted-foreground">Generisanje u toku...</p>
-                </div>
-              )}
-              
-              {resultImage && (
-                <div className="w-full">
-                  <img 
-                    src={resultImage} 
-                    alt="Generated result" 
-                    className="w-full h-auto rounded-lg shadow-lg"
-                  />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {resultImage && (
+          <div className="mt-6">
+            <img src={resultImage} alt="Rezultat" className="rounded-xl border max-w-full" />
+          </div>
+        )}
       </div>
     </div>
   );
