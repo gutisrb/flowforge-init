@@ -1,24 +1,25 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AuthWrapper } from "@/components/AuthWrapper";
-import { AppShell } from "@/components/AppShell";
-import { MarketingNav } from "@/components/MarketingNav";
-import { MarketingFooter } from "@/components/MarketingFooter";
-import { ProgressProvider, useProgress } from "@/contexts/ProgressContext";
-import Home from "./pages/Home";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import Login from "./pages/Login";
-import VideoGenerator from "./pages/VideoGenerator";
-import Furnisher from "./pages/Furnisher";
-import Assets from "./pages/Assets";
-import { Library } from "./pages/app/Library";
-import { Docs } from "./pages/app/Docs";
-import { Profile } from "./pages/app/Profile";
-import NotFound from "./pages/NotFound";
+import { AuthWrapper } from "./components/AuthWrapper.tsx";
+import { AppShell } from "./components/AppShell.tsx";
+import { MarketingNav } from "./components/MarketingNav.tsx";
+import { MarketingFooter } from "./components/MarketingFooter.tsx";
+import { ProgressProvider } from "./contexts/ProgressContext.tsx";
+import Home from "./pages/Home.tsx";
+import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import Login from "./pages/Login.tsx";
+import VideoGenerator from "./pages/VideoGenerator.tsx";
+import Furnisher from "./pages/Furnisher.tsx";
+import Assets from "./pages/Assets.tsx";
+import { Library } from "./pages/app/Library.tsx";
+import { Docs } from "./pages/app/Docs.tsx";
+import { Profile } from "./pages/app/Profile.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
@@ -73,13 +74,16 @@ function App() {
 export default function AppRoot() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <ProgressProvider>
-          <App />
-        </ProgressProvider>
-      </TooltipProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <ProgressProvider>
+            <App />
+          </ProgressProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
