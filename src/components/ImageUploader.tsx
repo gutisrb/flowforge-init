@@ -58,22 +58,27 @@ export function ImageUploader({ images, onImagesChange, maxImages = 2 }: ImageUp
       {/* Drag and Drop Zone */}
       {images.length < maxImages && (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer min-h-[160px] flex flex-col items-center justify-center ${
             isDragOver 
-              ? 'border-primary bg-primary/5' 
-              : 'border-border hover:border-primary/50'
-          }`}
+              ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-2xl shadow-primary/30 scale-[1.02]' 
+              : 'border-border hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg'
+          } drag-zone`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
+          onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <div className={`w-16 h-16 rounded-full mb-4 flex items-center justify-center transition-all duration-300 ${
+            isDragOver ? "bg-primary/20 scale-110" : "bg-muted/50"
+          }`}>
+            <Upload className={`h-8 w-8 transition-colors ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
           <div className="space-y-2">
-            <p className="text-lg font-medium">
-              Prevucite slike ili kliknite da odaberete
+            <p className="font-medium text-text-primary">
+              {isDragOver ? 'Otpustite slike ovde' : 'Prevucite slike ili kliknite'}
             </p>
-            <p className="text-sm text-muted-foreground">
-              PNG, JPG ili WEBP do {maxImages} slika
+            <p className="text-helper text-text-muted">
+              PNG, JPG ili WEBP • najbolji rezultati sa prirodnim osvetljenjem
             </p>
           </div>
           <input
@@ -84,13 +89,6 @@ export function ImageUploader({ images, onImagesChange, maxImages = 2 }: ImageUp
             className="hidden"
             onChange={(e) => handleFileSelect(e.target.files)}
           />
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Odaberite fajlove
-          </Button>
         </div>
       )}
 

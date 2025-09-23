@@ -15,6 +15,7 @@ export default function Furnisher() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
 
   const checkStatus = async (jobId: string) => {
     try {
@@ -144,6 +145,32 @@ export default function Furnisher() {
     <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
   );
 
+  const copyToClipboard = async () => {
+    if (resultImage) {
+      try {
+        await navigator.clipboard.writeText(resultImage);
+        toast.success('Link kopiran!');
+      } catch {
+        toast.error('Greška pri kopiranju');
+      }
+    }
+  };
+
+  const handleRedo = () => {
+    setResultImage(null);
+    setJobId(null);
+    setShowComparison(false);
+  };
+
+  const downloadImage = () => {
+    if (resultImage) {
+      const a = document.createElement('a');
+      a.href = resultImage;
+      a.download = 'generated-interior.jpg';
+      a.click();
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-64px)] bg-background">
       <main className="container mx-auto px-6 py-8">
@@ -155,109 +182,173 @@ export default function Furnisher() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Panel - Input Form */}
+          {/* Left Panel - Upload */}
           <Card className="card-premium">
             <CardContent className="space-y-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Image Upload */}
-                <div className="space-y-3">
-                  <Label className="text-text-primary">Slike *</Label>
+              {/* Image Upload */}
+              <div className="space-y-3">
+                <Label className="text-helper text-text-muted">Slike prostora *</Label>
+                <div className="stage-upload-zone">
                   <ImageUploader
                     images={images}
                     onImagesChange={setImages}
                     maxImages={2}
                   />
-                  <p className="text-helper text-text-muted">
-                    Uvek šaljemo polja <b>image1</b> i <b>image2</b>. Ako ne izaberete drugu sliku,
-                    <b> image2</b> se šalje prazno (radi doslednosti u scenariju).
-                  </p>
                 </div>
+                <p className="text-helper text-text-muted">
+                  Najbolji rezultati sa prirodnim osvetljenjem
+                </p>
+              </div>
 
-                {/* Instructions Textarea */}
-                <div className="space-y-3">
-                  <Label htmlFor="instructions" className="text-text-primary">
-                    Instrukcije
-                  </Label>
-                  <Textarea
-                    id="instructions"
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                    placeholder="npr. 'Namesti ovaj prazan dnevni boravak u skandinavskom stilu'"
-                    rows={4}
-                    disabled={isProcessing}
-                    className="focus-ring rounded-xl"
-                  />
-                </div>
+              <div className="hairline-divider"></div>
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={images.length === 0 || isProcessing}
-                >
-                  {isProcessing ? 'Generisanje…' : 'Generiši sliku'}
-                </Button>
-              </form>
+              {/* Instructions */}
+              <div className="space-y-3">
+                <Label htmlFor="instructions" className="text-helper text-text-muted">
+                  Instrukcije za AI
+                </Label>
+                <Textarea
+                  id="instructions"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  placeholder="npr. 'Namesti ovaj prazan dnevni boravak u skandinavskom stilu'"
+                  rows={4}
+                  disabled={isProcessing}
+                  className="focus-ring rounded-xl h-11 resize-none"
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Right Panel - Result Panel */}
-          <Card className="card-premium">
-            <CardContent>
-              <h2 className="text-text-primary mb-6">Rezultat</h2>
-              <div className="min-h-[400px] flex items-center justify-center">
+          {/* Right Panel - Result */}
+          <Card className="card-premium relative">
+            <CardContent className="p-0">
+              <div className="aspect-square relative overflow-hidden rounded-2xl bg-muted shadow-deep border border-border/20">
                 {!resultImage && !isProcessing && (
-                  <div className="text-center text-text-muted bg-muted rounded-xl p-8 border-2 border-dashed border-border">
-                    <p className="text-helper">Rezultat će biti prikazan ovde</p>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-muted-dark/50 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-text-muted/20"></div>
+                      </div>
+                      <p className="text-helper text-text-muted">Vaš rezultat će biti prikazan ovde</p>
+                    </div>
                   </div>
                 )}
 
                 {isProcessing && (
-                  <div className="text-center space-y-4">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                    <p className="text-text-muted text-helper">Generisanje u toku...</p>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                      {/* Progress dots */}
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.2s]"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.4s]"></div>
+                      </div>
+                      <p className="text-helper text-text-muted">Generisanje u toku...</p>
+                    </div>
                   </div>
                 )}
 
                 {resultImage && (
-                  <div className="w-full space-y-4">
-                    <div className="relative rounded-xl overflow-hidden bg-muted shadow-premium">
-                      <img
-                        src={resultImage}
-                        alt="Generated result"
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => {
-                          const a = document.createElement('a');
-                          a.href = resultImage;
-                          a.download = 'generated-interior.jpg';
-                          a.click();
-                        }}
-                        variant="outline"
-                        className="flex-1"
+                  <>
+                    {/* Main result image */}
+                    <img
+                      src={resultImage}
+                      alt="Generated result"
+                      className="w-full h-full object-cover transition-opacity duration-150 animate-fade-in"
+                    />
+                    
+                    {/* Before/After comparison overlay */}
+                    {showComparison && images[0] && (
+                      <div className="absolute inset-0">
+                        <div className="absolute inset-0 overflow-hidden">
+                          <img
+                            src={URL.createObjectURL(images[0])}
+                            alt="Original"
+                            className="w-full h-full object-cover"
+                            style={{ clipPath: 'inset(0 50% 0 0)' }}
+                          />
+                        </div>
+                        {/* Slider handle */}
+                        <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white shadow-lg">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-glass border border-white/20 backdrop-blur-sm flex items-center justify-center">
+                            <div className="w-1 h-4 bg-white/60 rounded-full"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Toolbar */}
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button
+                        onClick={handleRedo}
+                        className="w-8 h-8 rounded-full bg-glass backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                        title="Nova generacija"
                       >
-                        Preuzmi
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setResultImage(null);
-                          setJobId(null);
-                        }}
-                        variant="outline" 
-                        className="flex-1"
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={copyToClipboard}
+                        className="w-8 h-8 rounded-full bg-glass backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                        title="Kopiraj link"
                       >
-                        Nova generacija
-                      </Button>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={downloadImage}
+                        className="w-8 h-8 rounded-full bg-glass backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                        title="Preuzmi"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </button>
+                      {images[0] && (
+                        <button
+                          onClick={() => setShowComparison(!showComparison)}
+                          className={`w-8 h-8 rounded-full backdrop-blur-sm border border-white/20 flex items-center justify-center transition-colors ${
+                            showComparison ? 'bg-accent text-white' : 'bg-glass text-white/80 hover:text-white'
+                          }`}
+                          title={showComparison ? 'Sakrij poređenje' : 'Pokaži poređenje'}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Primary action button - bottom right */}
+        <div className="fixed bottom-8 right-8">
+          <Button
+            onClick={handleSubmit}
+            className="h-14 px-8 rounded-full shadow-premium"
+            size="lg"
+            disabled={images.length === 0 || isProcessing}
+          >
+            {isProcessing ? (
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse [animation-delay:0.2s]"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse [animation-delay:0.4s]"></div>
+                </div>
+                Generisanje…
+              </div>
+            ) : (
+              'Generiši sliku'
+            )}
+          </Button>
         </div>
       </main>
     </div>
