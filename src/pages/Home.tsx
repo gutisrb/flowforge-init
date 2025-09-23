@@ -4,6 +4,7 @@ import { StickyButton } from '@/components/StickyButton';
 import { ReelPreviewModal } from '@/components/ReelPreviewModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
 import { Zap, Type, Music, Shuffle, Sparkles, FolderOpen } from 'lucide-react';
 export default function Home() {
@@ -305,31 +306,43 @@ export default function Home() {
 
       <section id="faq" className="container mx-auto px-4 py-20 bg-muted/50">
         <h2 className="text-3xl font-bold text-center mb-12">Česta pitanja</h2>
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Da li ovo zamenjuje portale?</h3>
-            <p className="text-muted-foreground">Ne — društvene mreže dodaju domet.</p>
-          </div>
-          <div className="bg-background p-6 rounded-xl shadow-sm">
+        <div className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Da li zamenjujete oglasne portale?</AccordionTrigger>
+              <AccordionContent>
+                Ne. Reel Studio i AI Nameštanje dopunjuju portale – pravimo sadržaj za mreže kako biste došli do dodatnih kupaca.
+              </AccordionContent>
+            </AccordionItem>
             
-            <p className="text-muted-foreground">Ne trenutno; izlaz je automatski iz podataka iz oglasa.</p>
-          </div>
-          <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Garantujete viral?</h3>
-            <p className="text-muted-foreground">Ne; format je po best-practice-u (vertikalno, rani hook, titlovi) radi bolje gledanosti.</p>
-          </div>
-          <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Hoće li videi izgledati generički?</h3>
-            <p className="text-muted-foreground">Tvoj logo/vodeni žig se dodaje pri set-upu.</p>
-          </div>
-          <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Muzika?</h3>
-            <p className="text-muted-foreground">AI instrumentali; ako menjaš zvuk u platformi, koristi njihove komercijalne biblioteke.</p>
-          </div>
-          <div className="bg-background p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-3">Za koga je?</h3>
-            <p className="text-muted-foreground">Agencije koje spajaju vlasnike i kupce/zakupce.</p>
-          </div>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Šta mi je potrebno da napravim prvi video?</AccordionTrigger>
+              <AccordionContent>
+                Osnovne informacije o listingu i jedna ili dve fotografije. Aplikacija radi ostalo.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Da li glas zvuči prirodno?</AccordionTrigger>
+              <AccordionContent>
+                Da – generiše se naracija na srpskom, prilagođena formatu reela i titlovima.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-4">
+              <AccordionTrigger>Mogu li da uradim pre/posle video?</AccordionTrigger>
+              <AccordionContent>
+                Da. Učitajte početnu i završnu sliku (npr. prazna vs nameštena soba) i dobićete tranziciju između njih.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-5">
+              <AccordionTrigger>Da li mogu direktno da objavljujem?</AccordionTrigger>
+              <AccordionContent>
+                Možete preuzeti video ili, nakon povezivanja naloga, objaviti na mreže direktno iz panela.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
     </div>;
