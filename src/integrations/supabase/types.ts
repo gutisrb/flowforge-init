@@ -173,3 +173,12 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+export interface Profile {
+  id: string;
+  org_name: string;
+  webhook_url: string;
+  tier: 'starter' | 'pro' | 'scale'; // <-- DODAJ OVO
+  video_credits_remaining: number;   // <-- DODAJ OVO
+  image_credits_remaining: number;   // <-- DODAJ OVO
+}
