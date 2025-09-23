@@ -133,44 +133,62 @@ export default function Home() {
 
       <section id="funkcije" className="container mx-auto px-4 py-20">
         <h2 className="text-3xl font-bold text-center mb-12">Funkcije</h2>
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           
-          <FeatureModal
-            icon={<Zap className="h-6 w-6" />}
-            title="Hook u prvim sekundama"
-            description="AI automatski kreira privlačan početak videa koji zadržava pažnju gledaoca u prvih 3 sekunde. Koristi se kombinacija dinamičnih prelaza, atraktivnih kadrova i vizuelnih efekata koji odmah privlače pogled na društvenim mrežama."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_1 */}
+            <h3 className="text-lg font-semibold mb-3">AI generacija video-reelova</h3>
+          </div>
           
-          <FeatureModal
-            icon={<Type className="h-6 w-6" />}
-            title="Titlovi (gledanje bez zvuka)"
-            description="Automatski generirani titlovi omogućavaju gledanje videa bez zvuka, što je ključno jer većina korisnika na društvenim mrežama gleda sadržaj sa isključenim zvukom. Titlovi su stilizovani i pozicionirani za maksimalnu čitljivost."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_2 */}
+            <h3 className="text-lg font-semibold mb-3">Dinamična kamera i tranzicije</h3>
+          </div>
           
-          <FeatureModal
-            icon={<Music className="h-6 w-6" />}
-            title="AI muzika u pozadini"
-            description="Pažljivo odabrana pozadinska muzika koja odgovara stilu nekretnine i ciljnoj publici. AI bira melodije koje pojačavaju atmosferu prostora bez ometanja govora ili narušavanja profesionalnog tona prezentacije."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_3 */}
+            <h3 className="text-lg font-semibold mb-3">Glasovni narator na srpskom</h3>
+          </div>
           
-          <FeatureModal
-            icon={<Shuffle className="h-6 w-6" />}
-            title="Frame-to-frame tranzicije"
-            description="Glatki prelazi između fotografija koji kreiraju osećaj kontinuiteta i prirodnog kretanja kroz prostor. AI analizira slike i kreira tranzicije koje naglašavaju najbolje karakteristike svakog kadra."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_4 */}
+            <h3 className="text-lg font-semibold mb-3">Automatski titlovi i opis objave</h3>
+          </div>
           
-          <FeatureModal
-            icon={<Sparkles className="h-6 w-6" />}
-            title="AI Furnisher (pre/posle)"
-            description="Virtuelno nameštanje praznih prostora pomoću AI tehnologije. Kreira realistične prikaze kako bi prostor mogao da izgleda kada je namešten, pomoćući klijentima da lakše vizualizuju potencijal nekretnine."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_5 */}
+            <h3 className="text-lg font-semibold mb-3">Muzika optimizovana za mreže</h3>
+          </div>
           
-          <FeatureModal
-            icon={<FolderOpen className="h-6 w-6" />}
-            title="Moja biblioteka"
-            description="Centralizovano mesto za čuvanje svih vaših video projekata, fotografija i materijala. Omogućava lakše organizovanje, pretragu i ponovnu upotrebu sadržaja za buduće projekte sa naprednim sistemom tagovanja."
-          />
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_6 */}
+            <h3 className="text-lg font-semibold mb-3">Virtuelno nameštanje i uređivanje slika</h3>
+          </div>
           
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_7 */}
+            <h3 className="text-lg font-semibold mb-3">Format 9:16, spreman za Instagram/TikTok</h3>
+          </div>
+          
+          <div className="p-6 bg-muted/30 rounded-xl shadow-sm">
+            {/* TODO: FEATURE_ICON_8 */}
+            <h3 className="text-lg font-semibold mb-3">Preuzimanje ili direktno objavljivanje*</h3>
+          </div>
+          
+        </div>
+        
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            *Direktno objavljivanje dostupno nakon povezivanja naloga. (Bez integracije u ovoj verziji stranice.)
+          </p>
+        </div>
+        
+        <div className="mt-8 max-w-md mx-auto">
+          <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+            <p className="text-sm text-muted-foreground">
+              <strong>Saveti za hook</strong> – pre/posle, lik u kadru, neočekivani objekat.
+            </p>
+          </div>
         </div>
       </section>
 
