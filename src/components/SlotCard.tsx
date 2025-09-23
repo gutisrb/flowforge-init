@@ -72,7 +72,7 @@ export function SlotCard({
   return (
     <>
       <div
-        className={`bg-white rounded-xl border-2 transition-all duration-200 h-full min-h-[320px] flex flex-col shadow-sm hover:shadow-md ${
+        className={`bg-card rounded-xl border-2 transition-all duration-200 h-full min-h-[280px] sm:min-h-[320px] flex flex-col shadow-sm hover:shadow-md ${
           isDragOver && canAcceptDrop 
             ? "border-primary shadow-lg shadow-primary/20 bg-primary/5" 
             : isDragging && canAcceptDrop
@@ -91,19 +91,19 @@ export function SlotCard({
         onDrop={onDrop}
       >
         {/* Header */}
-        <div className="p-4 pb-3 border-b border-border/50">
+        <div className="p-3 sm:p-4 pb-3 border-b border-border/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Slot {slotIndex + 1}</span>
             {images.length >= 2 && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-3 text-xs"
+                className="h-7 sm:h-8 px-2 sm:px-3 text-xs"
                 onClick={swap}
                 title="Zameni redosled slika"
               >
-                <ArrowLeftRight className="h-3 w-3 mr-1" />
-                Swap
+                <ArrowLeftRight className="h-3 w-3 sm:mr-1" />
+                <span className="hidden sm:inline">Swap</span>
               </Button>
             )}
           </div>
@@ -117,25 +117,25 @@ export function SlotCard({
         </div>
 
         {/* Body */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-3 sm:p-4">
           {images.length === 0 ? (
-            <label className={`flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
+            <label className={`flex h-40 sm:h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
               isDragOver && canAcceptDrop
                 ? "border-primary bg-primary/10 text-primary"
                 : isDragging && canAcceptDrop
                 ? "border-primary/50 bg-primary/5 text-primary/70"
                 : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
             }`}>
-              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <span className="text-2xl">📸</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted/50 flex items-center justify-center mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl">📸</span>
               </div>
-              <span className="font-medium">
+              <span className="font-medium text-xs sm:text-sm">
                 {isDragOver && canAcceptDrop ? "Otpusti ovde" : "Dodaj 1-2 fotografije"}
               </span>
-              <span className="text-xs mt-1 opacity-75">
+              <span className="text-xs mt-1 opacity-75 hidden sm:block">
                 {isDragOver && canAcceptDrop ? "Slika će biti dodana" : "Jedna slika = statična / Dve slike = animacija"}
               </span>
-              <span className="text-xs mt-1 opacity-60">
+              <span className="text-xs mt-1 opacity-60 hidden sm:block">
                 Povuci ovde ili klikni za izbor
               </span>
               <input
@@ -177,7 +177,7 @@ export function SlotCard({
                         setIsDragOver(false);
                       }
                     }}
-                    className={`group relative rounded-lg overflow-hidden aspect-[3/2] bg-muted border-2 transition-all cursor-move ${
+                    className={`group relative rounded-lg overflow-hidden aspect-[3/2] bg-muted border-2 transition-all cursor-move touch-manipulation ${
                       isBeingDragged
                         ? "border-primary/50 opacity-50 scale-95"
                         : canDropHere

@@ -16,10 +16,6 @@ interface Props {
   onSlotsChange: (slots: SlotData[]) => void;
   totalImages: number;
   clipCount: 5 | 6;
-  setClipCount: (n: 5 | 6) => void;
-  onGenerate: () => void;
-  isGenerateEnabled: boolean;
-  isLoading: boolean;
 }
 
 export function ImageSlots({
@@ -27,10 +23,6 @@ export function ImageSlots({
   onSlotsChange,
   totalImages,
   clipCount,
-  setClipCount,
-  onGenerate,
-  isGenerateEnabled,
-  isLoading,
 }: Props) {
   const maxImages = clipCount * 2;
 
@@ -106,42 +98,10 @@ export function ImageSlots({
         </div>
       </div>
 
-      {/* Footer with 5/6 selector and generate button */}
-      <div className="border-t pt-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              Popunjeno: {slots.filter(s => s.images.length >= 1).length}/{clipCount}
-            </div>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1 cursor-pointer text-sm">
-                <input
-                  type="radio"
-                  name="clipCount"
-                  checked={clipCount === 5}
-                  onChange={() => setClipCount(5)}
-                />
-                5 klipova
-              </label>
-              <label className="flex items-center gap-1 cursor-pointer text-sm">
-                <input
-                  type="radio"
-                  name="clipCount"
-                  checked={clipCount === 6}
-                  onChange={() => setClipCount(6)}
-                />
-                6 klipova
-              </label>
-            </div>
-          </div>
-
-          <Button
-            onClick={onGenerate}
-            disabled={!isGenerateEnabled || isLoading}
-            className="min-h-[44px] text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 font-semibold"
-          >
-            {isLoading ? "Generiše..." : "Generiši"}
-          </Button>
+      {/* Status indicator */}
+      <div className="text-center">
+        <div className="text-sm text-muted-foreground">
+          Popunjeno: {slots.filter(s => s.images.length >= 1).length}/{clipCount} slotova
         </div>
       </div>
     </div>
