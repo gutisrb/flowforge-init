@@ -7,7 +7,8 @@ import { AuthWrapper } from "@/components/AuthWrapper";
 import { AppShell } from "@/components/AppShell";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ProgressProvider, useProgress } from "@/contexts/ProgressContext";
+import { ProgressProvider } from "@/contexts/ProgressContext";
+import { WizardProvider } from "@/contexts/WizardContext";
 import Home from "./pages/Home";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -77,7 +78,9 @@ export default function AppRoot() {
         <Toaster />
         <Sonner />
         <ProgressProvider>
-          <App />
+          <WizardProvider>
+            <App />
+          </WizardProvider>
         </ProgressProvider>
       </TooltipProvider>
     </QueryClientProvider>

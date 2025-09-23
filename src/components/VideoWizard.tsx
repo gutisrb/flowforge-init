@@ -7,7 +7,7 @@ import { PreviewStep } from '@/components/wizard/PreviewStep';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
-import { SlotData } from '@/components/ImageSlots';
+import { useWizard } from '@/contexts/WizardContext';
 import { MAKE_VIDEO_URL } from '@/config/make';
 
 interface VideoWizardProps {
@@ -15,54 +15,23 @@ interface VideoWizardProps {
   session: Session;
 }
 
-export interface FormData {
-  title: string;
-  price: string;
-  location: string;
-  size?: string;
-  beds?: string;
-  baths?: string;
-  sprat?: string;
-  extras?: string;
-}
-
-export interface WizardData {
-  formData: FormData;
-  slots: SlotData[];
-  clipCount: 5 | 6;
-}
-
 export const VideoWizard = ({ user, session }: VideoWizardProps) => {
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
-  const [wizardData, setWizardData] = useState<WizardData>({
-    formData: { title: '', price: '', location: '' },
-    slots: Array.from({ length: 5 }, (_, i) => ({
-      id: `slot-${i}`,
-      mode: 'image-to-video' as const,
-      images: []
-    })),
-    clipCount: 5 as const,
-  });
   const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile(user);
   const { progress, setProgress } = useProgress();
+  const { 
+    wizardData, 
+    updateFormData, 
+    updateSlots, 
+    updateClipCount, 
+    setCurrentStep,
+    resetWizard
+  } = useWizard();
 
-  const updateFormData = useCallback((data: FormData) => {
-    setWizardData(prev => ({ ...prev, formData: data }));
-  }, []);
-
-  const updateSlots = useCallback((slots: SlotData[]) => {
-    setWizardData(prev => ({ ...prev, slots }));
-  }, []);
-
-  const updateClipCount = useCallback((count: 5 | 6) => {
-    setWizardData(prev => ({ ...prev, clipCount: count }));
-  }, []);
-
-  const nextStep = () => setCurrentStep(prev => (prev < 3 ? (prev + 1) as 1 | 2 | 3 : 3));
-  const prevStep = () => setCurrentStep(prev => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : 1));
+  const nextStep = () => setCurrentStep(wizardData.currentStep < 3 ? (wizardData.currentStep + 1) as 1 | 2 | 3 : 3);
+  const prevStep = () => setCurrentStep(wizardData.currentStep > 1 ? (wizardData.currentStep - 1) as 1 | 2 | 3 : 1);
 
   const canProceedToStep2 = () => !!(wizardData.formData.title && wizardData.formData.price && wizardData.formData.location);
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
@@ -139,16 +108,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
       
       // Reset wizard after successful submit
       setTimeout(() => {
-        setWizardData({
-          formData: { title: '', price: '', location: '' },
-          slots: Array.from({ length: 5 }, (_, i) => ({
-            id: `slot-${i}`,
-            mode: 'image-to-video' as const,
-            images: []
-          })),
-          clipCount: 5 as const,
-        });
-        setCurrentStep(1);
+        resetWizard();
         setProgress(0);
       }, 1200);
     } catch (e) {
@@ -177,10 +137,10 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
           </p>
         </div>
 
-        <Stepper currentStep={currentStep} />
+        <Stepper currentStep={wizardData.currentStep} />
 
         <div className="mt-8">
-          {currentStep === 1 && (
+          {wizardData.currentStep === 1 && (
             <DetailsStep
               formData={wizardData.formData}
               updateFormData={updateFormData}
@@ -190,7 +150,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
             />
           )}
 
-          {currentStep === 2 && (
+          {wizardData.currentStep === 2 && (
             <PhotosStep
               slots={wizardData.slots}
               onSlotsChange={updateSlots}
@@ -202,7 +162,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
             />
           )}
           
-          {currentStep === 3 && (
+          {wizardData.currentStep === 3 && (
             <PreviewStep
               wizardData={wizardData}
               onPrev={prevStep}

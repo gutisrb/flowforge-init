@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Play, Save, Sparkles } from 'lucide-react';
-import { WizardData } from '@/components/VideoWizard';
+import { WizardData } from '@/contexts/WizardContext';
 interface PreviewStepProps {
   wizardData: WizardData;
   onPrev: () => void;
