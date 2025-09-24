@@ -74,14 +74,12 @@ export function SlotCard({
   return (
     <>
       <div
-        className={`bg-surface rounded-2xl border-2 parallax-card h-full flex flex-col ${
-          isHero ? "min-h-[360px]" : "min-h-[320px]"
-        } ${
+        className={`uniform-slot-card parallax-card h-full flex flex-col transition-all duration-200 ${
           isDragOver && canAcceptDrop 
             ? "border-primary shadow-2xl shadow-primary/30 bg-gradient-to-br from-primary/10 to-accent/5" 
             : isDragging && canAcceptDrop
             ? "border-primary/50 shadow-lg"
-            : "border-border"
+            : "border-border hover:shadow-md hover:-translate-y-0.5"
         }`}
         onDragOver={(e) => { 
           e.preventDefault(); 
@@ -95,58 +93,28 @@ export function SlotCard({
         onDrop={onDrop}
       >
         {/* Header */}
-        <div className="p-4 border-b border-border/30">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">
-                {isHero ? "Hero" : `Slot ${slotIndex + 1}`}
-              </span>
-              {images.length === 2 && (
-                <Badge className="badge-glass rounded-full px-2 py-0.5 text-xs text-primary/90 border-primary/20">
-                  Početak/Kraj
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              {images.length >= 2 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 hover:bg-primary/10"
-                  onClick={swap}
-                  title="Zameni redosled slika"
-                >
-                  <ArrowLeftRight className="h-3.5 w-3.5" />
-                </Button>
-              )}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <GripVertical className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </div>
+        <div className="p-3 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">
+              Slot {slotIndex + 1}
+            </span>
+            {images.length === 2 && (
+              <Badge className="glass-badge text-xs px-2 py-1 rounded-full">
+                Početak/Kraj
+              </Badge>
+            )}
           </div>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 p-3 sm:p-4">
+        {/* Media area */}
+        <div className="flex-1 p-3">
           {images.length === 0 ? (
-            <label className={`flex h-40 sm:h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed text-center text-sm transition-colors ${
-              isDragOver && canAcceptDrop
-                ? "border-primary bg-primary/10 text-primary"
-                : isDragging && canAcceptDrop
-                ? "border-primary/50 bg-primary/5 text-primary/70"
-                : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
-            }`}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted/50 flex items-center justify-center mb-2 sm:mb-3">
-                <span className="text-xl sm:text-2xl">📸</span>
+            <label className="uniform-media-area cursor-pointer flex flex-col items-center justify-center text-center">
+              <div className="w-10 h-10 rounded-full bg-muted/30 flex items-center justify-center mb-2">
+                <span className="text-2xl">+</span>
               </div>
-              <span className="font-medium text-xs sm:text-sm">
-                {isDragOver && canAcceptDrop ? "Otpusti ovde" : "Dodaj 1-2 fotografije"}
-              </span>
-              <span className="text-xs mt-1 opacity-75 hidden sm:block">
-                {isDragOver && canAcceptDrop ? "Slika će biti dodana" : "Jedna slika = statična / Dve slike = animacija"}
-              </span>
-              <span className="text-xs mt-1 opacity-60 hidden sm:block">
-                Povuci ovde ili klikni za izbor
+              <span className="text-sm font-medium text-foreground mb-1">
+                Dodaj 1-2 fotografije
               </span>
               <input
                 type="file"
@@ -161,141 +129,66 @@ export function SlotCard({
               />
             </label>
           ) : (
-            <div className="flex flex-col gap-3">
-              {images.map((image, idx) => {
-                const isBeingDragged = isDragging && draggedImage?.fromSlot === slotIndex && draggedImage?.imageIndex === idx;
-                const canDropHere = isDragging && draggedImage && !(draggedImage.fromSlot === slotIndex && draggedImage.imageIndex === idx);
-                
-                return (
-                  <div
-                    key={idx}
-                    draggable
-                    onDragStart={(e) => {
-                      const payload = { fromSlot: slotIndex, imageIndex: idx };
-                      setDragState(true, payload);
-                      e.dataTransfer.setData(
-                        "text/x-smartflow-image",
-                        JSON.stringify(payload)
-                      );
-                      e.dataTransfer.effectAllowed = "move";
-                    }}
-                    onDragEnd={() => setDragState(false)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={onDropIntoIndex(idx)}
-                    onDragLeave={(e) => {
-                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                        setIsDragOver(false);
-                      }
-                    }}
-                    className={`group relative rounded-lg overflow-hidden aspect-[3/2] bg-muted border-2 transition-all cursor-move touch-manipulation ${
-                      isBeingDragged
-                        ? "border-primary/50 opacity-50 scale-95"
-                        : canDropHere
-                        ? "border-primary/50 shadow-md"
-                        : "border-transparent hover:border-primary/30"
-                    }`}
-                  >
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt=""
-                      className="w-full h-full object-cover pointer-events-none parallax-image"
-                    />
-                    
-                    {/* Drag indicator */}
-                    <div
-                      className="absolute top-2 left-2 p-1 bg-white/90 rounded drag-handle transition-opacity shadow-sm pointer-events-none"
-                      title="Povuci za prebacivanje"
-                    >
-                      <GripVertical className="h-4 w-4 text-gray-600" />
-                    </div>
-                  
-                    {/* Drop overlay */}
-                    {canDropHere && (
-                      <div className="absolute inset-0 bg-primary/20 border-2 border-primary border-dashed rounded-lg flex items-center justify-center">
-                        <div className="bg-white/90 px-3 py-1 rounded-md text-xs font-medium text-primary">
-                          Zameni poziciju
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Overlay with controls */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
-                      {/* Position badge */}
-                      <div className="absolute top-2 right-2">
-                        <Badge 
-                          className="badge-glass text-xs px-2 py-1 text-gray-800 transition-all hover:shadow-sm hover:bg-white/95 border border-primary/20" 
-                        >
-                          {idx === 0 ? "Početak" : "Kraj"}
-                        </Badge>
-                      </div>
-                      
-                      {/* Action buttons */}
-                      <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="h-7 w-7 p-0 bg-white/90 hover:bg-white border-0 shadow-sm"
-                        onClick={() => setPreviewUrl(URL.createObjectURL(image))}
-                        title="Pregled"
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="h-7 w-7 p-0 bg-white/90 hover:bg-red-500 hover:text-white border-0 shadow-sm text-red-600"
-                        onClick={() => removeAt(idx)}
-                        title="Obriši"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              
-              {/* Add second image slot when only one image */}
-              {images.length === 1 && (
-                <div
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={onDropIntoIndex(1)}
-                  onDragLeave={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                      setIsDragOver(false);
-                    }
-                  }}
-                  className={`rounded-lg border-2 border-dashed aspect-[3/2] flex items-center justify-center text-sm transition-colors cursor-pointer ${
-                    canAcceptDrop
-                      ? "border-primary/50 bg-primary/5 text-primary"
-                      : "border-muted-foreground/25 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
-                  }`}
-                  onClick={() => document.getElementById(`slot-${slotIndex}-add`)?.click()}
-                >
-                  <div className="text-center">
-                    <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-2">
-                      <span className="text-lg">+</span>
-                    </div>
-                    <span className="text-xs font-medium">
-                      {canAcceptDrop ? "Otpusti ovde" : "Dodaj drugu sliku"}
-                    </span>
-                    <span className="text-xs opacity-75 mt-1 block">
-                      Za animaciju
-                    </span>
-                  </div>
-                  <input
-                    id={`slot-${slotIndex}-add`}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
-                      if (files.length) addFiles(files);
-                      (e.target as HTMLInputElement).value = "";
-                    }}
+            <div>
+              <div className="uniform-media-area relative">
+                {images.length === 1 ? (
+                  <img
+                    src={URL.createObjectURL(images[0])}
+                    alt=""
+                    className="w-full h-full object-cover rounded-lg transition-transform duration-200 hover:scale-105"
                   />
+                ) : (
+                  <div className="w-full h-full relative rounded-lg overflow-hidden">
+                    <img
+                      src={URL.createObjectURL(images[0])}
+                      alt=""
+                      className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                    />
+                    {/* Mini thumbs strip */}
+                    <div className="absolute bottom-2 right-2 flex gap-1">
+                      {images.slice(0, 2).map((img, idx) => (
+                        <div key={idx} className="w-6 h-6 rounded border border-white/40 overflow-hidden">
+                          <img
+                            src={URL.createObjectURL(img)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                      <Badge className="glass-badge text-xs px-1.5 py-0.5 ml-1">
+                        2/2
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Control row */}
+              <div className="p-3 border-t border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {images.length >= 2 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs hover:bg-white/10"
+                      onClick={swap}
+                    >
+                      Zameni
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs hover:bg-white/10 text-destructive"
+                    onClick={() => onImagesChange([])}
+                  >
+                    Ukloni
+                  </Button>
                 </div>
-              )}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
             </div>
           )}
         </div>

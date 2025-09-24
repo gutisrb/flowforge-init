@@ -26,9 +26,9 @@ export const PhotosStep = ({
   const totalImages = slots.reduce((acc, slot) => acc + slot.images.length, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground animated-underline">
           Fotografije za video
         </h2>
         <p className="text-muted-foreground">
@@ -36,8 +36,8 @@ export const PhotosStep = ({
         </p>
       </div>
 
-      <div className="mb-8 text-center">
-        <div className="inline-flex bg-border/30 rounded-full p-1 mb-4">
+      <div className="mb-6 text-center">
+        <div className="inline-flex bg-border/30 rounded-full p-1">
           <Button
             variant={clipCount === 5 ? "default" : "ghost"}
             size="sm"
@@ -70,6 +70,9 @@ export const PhotosStep = ({
         onSlotsChange={onSlotsChange}
         totalImages={totalImages}
         clipCount={clipCount}
+        onNext={onNext}
+        onPrev={onPrev}
+        canProceed={canProceed}
       />
     </div>
   );

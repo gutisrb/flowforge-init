@@ -879,3 +879,81 @@ label {
   background: rgba(255, 255, 255, 0.18);
   box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
 }
+
+/* Grid Drop Zone */
+.grid-drop-zone.drag-over {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.05), transparent);
+  box-shadow: 0 10px 25px hsl(var(--primary) / 0.1);
+}
+
+/* Uniform Slots Grid */
+.uniform-slots-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (min-width: 768px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1440px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Uniform Slot Card */
+.uniform-slot-card {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  border: 1px solid #E7EDF3;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.showtime .uniform-slot-card {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(8px);
+  border: 1px solid #E7EDF3;
+}
+
+/* Uniform Media Area */
+.uniform-media-area {
+  aspect-ratio: 4/5;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: hsl(var(--muted) / 0.1);
+}
+
+/* Glass Badge */
+.glass-badge {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.2);
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+/* Progress Rail */
+.progress-rail {
+  width: 4rem;
+  height: 0.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+  transition: all 0.3s ease;
+}

@@ -16,6 +16,9 @@ interface Props {
   onSlotsChange: (slots: SlotData[]) => void;
   totalImages: number;
   clipCount: 5 | 6;
+  onNext: () => void;
+  onPrev: () => void;
+  canProceed: boolean;
 }
 
 export function ImageSlots({
@@ -23,6 +26,9 @@ export function ImageSlots({
   onSlotsChange,
   totalImages,
   clipCount,
+  onNext,
+  onPrev,
+  canProceed,
 }: Props) {
   const maxImages = clipCount * 2;
 
@@ -49,42 +55,111 @@ export function ImageSlots({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with counter */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <h3 className="text-xl font-semibold text-foreground">Fotografije</h3>
-          <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium border border-primary/20">
-            Dodato {totalImages}/12
-          </div>
+    <div className="space-y-6 relative">
+      {/* Compact toolbar header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col">
+          <h3 className="text-lg font-semibold text-foreground">Fotografije</h3>
+          <span className="text-sm text-muted-foreground">Dodato {totalImages}/12</span>
         </div>
-        {totalImages > 0 && (
+        <div className="flex items-center gap-2">
           <Button 
-            onClick={handleRefreshAll} 
-            variant="ghost" 
+            onClick={handleAddPhotos}
+            variant="default" 
             size="sm"
-            className="text-muted-foreground hover:text-destructive"
+            className="h-8 px-3 text-sm"
           >
-            Obriši sve
+            Dodaj
           </Button>
-        )}
+          {totalImages > 0 && (
+            <Button 
+              onClick={handleRefreshAll} 
+              variant="secondary" 
+              size="sm"
+              className="h-8 px-3 text-sm"
+            >
+              Osvježi
+            </Button>
+          )}
+          <span className="text-xs text-muted-foreground ml-2">JPG, PNG</span>
+        </div>
       </div>
 
-      <div className="space-y-6">
-        <BulkDropZone
-          onFilesSelected={handleBulkAdd}
-          maxImages={maxImages - totalImages}
-        />
+      {/* Hidden bulk input */}
+      <input
+        id="bulk-file-input"
+        type="file"
+        multiple
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+          if (files.length) handleBulkAdd(files);
+          (e.target as HTMLInputElement).value = "";
+        }}
+      />
 
+      {/* Drop-anywhere grid */}
+      <div 
+        className="grid-drop-zone transition-all duration-200"
+        onDragOver={(e) => {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).classList.add('drag-over');
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            (e.currentTarget as HTMLElement).classList.remove('drag-over');
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).classList.remove('drag-over');
+          const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+          if (files.length) handleBulkAdd(files);
+        }}
+      >
         <SlotsGrid
           slots={slots}
           onSlotsChange={onSlotsChange}
+          clipCount={clipCount}
         />
       </div>
 
-      {/* Status */}
-      <div className="text-center text-13 text-muted-foreground">
-        Popunjeno {slots.filter(s => s.images.length >= 1).length}/{clipCount} slotova
+      {/* Sticky action bar */}
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-lg px-4">
+        <div className="glass-bar h-14 px-6 flex items-center justify-between rounded-full border border-white/20">
+          <Button
+            onClick={onPrev}
+            variant="ghost"
+            size="sm"
+            className="text-sm font-medium hover:bg-white/10"
+          >
+            Nazad
+          </Button>
+          
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Popunjeno:</span>
+            <div className="progress-rail">
+              <div 
+                className="progress-fill"
+                style={{ 
+                  width: `${(slots.filter(s => s.images.length >= 1).length / clipCount) * 100}%` 
+                }}
+              />
+            </div>
+            <span>{slots.filter(s => s.images.length >= 1).length}/{clipCount}</span>
+          </div>
+
+          <Button
+            onClick={onNext}
+            disabled={!canProceed}
+            variant="default"
+            size="sm"
+            className="text-sm px-4 py-2 h-8 rounded-full gradient-primary disabled:opacity-50"
+          >
+            Sledeći korak
+          </Button>
+        </div>
       </div>
     </div>
   );

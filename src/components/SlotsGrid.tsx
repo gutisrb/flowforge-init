@@ -6,9 +6,10 @@ import { DragProvider } from "./DragContext";
 interface SlotsGridProps {
   slots: SlotData[];
   onSlotsChange: (slots: SlotData[]) => void;
+  clipCount: 5 | 6;
 }
 
-export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
+export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
   const moveImage = (fromSlot: number, imageIndex: number, toSlot: number, toIndex?: number) => {
     const next = slots.map(s => ({...s, images: [...s.images]}));
     const src = next[fromSlot];
@@ -45,13 +46,13 @@ export function SlotsGrid({ slots, onSlotsChange }: SlotsGridProps) {
 
     return (
       <DragProvider>
-        <div className="bento-grid">
-          {slots.map((slot, index) => (
+        <div className="uniform-slots-grid">
+          {slots.slice(0, clipCount).map((slot, index) => (
             <SlotCard
               key={slot.id}
               slotIndex={index}
               images={slot.images}
-              isHero={index === 0}
+              isHero={false}
               onImagesChange={(images: File[]) => {
                 const newSlots = [...slots];
                 newSlots[index] = { ...slot, images };
