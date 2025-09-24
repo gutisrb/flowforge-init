@@ -176,41 +176,43 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
           )}
 
           {/* Sticky Action Bar */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-glass backdrop-blur-lg border-t border-white/10 px-6 py-4">
-            <div className="container mx-auto flex justify-between items-center">
-              {wizardData.currentStep > 1 && (
-                <Button variant="ghost" onClick={prevStep} className="text-muted-foreground">
-                  Nazad
-                </Button>
-              )}
-              <div className="flex-1"></div>
-              {wizardData.currentStep === 1 && (
-                <Button 
-                  onClick={nextStep} 
-                  disabled={!canProceedToStep2() || isLoading}
-                  className="gradient-primary text-white hover-sheen"
-                >
-                  Sledeći korak
-                </Button>
-              )}
-              {wizardData.currentStep === 2 && (
-                <Button 
-                  onClick={nextStep} 
-                  disabled={!canProceedToStep3()}
-                  className="gradient-primary text-white hover-sheen"
-                >
-                  Sledeći korak
-                </Button>
-              )}
-              {wizardData.currentStep === 3 && (
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={isLoading}
-                  className="gradient-primary text-white hover-sheen"
-                >
-                  {isLoading ? "Generišem..." : "Generiši video"}
-                </Button>
-              )}
+          <div className={`sticky-cta ${wizardData.currentStep > 0 ? 'visible' : ''}`}>
+            <div className="p-4">
+              <div className="container mx-auto flex justify-between items-center">
+                {wizardData.currentStep > 1 && (
+                  <Button variant="ghost" onClick={prevStep} className="text-muted-foreground">
+                    Nazad
+                  </Button>
+                )}
+                <div className="flex-1"></div>
+                {wizardData.currentStep === 1 && (
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={!canProceedToStep2() || isLoading}
+                    className="gradient-primary text-white hover-sheen"
+                  >
+                    Sledeći korak
+                  </Button>
+                )}
+                {wizardData.currentStep === 2 && (
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={!canProceedToStep3()}
+                    className="gradient-primary text-white hover-sheen"
+                  >
+                    Sledeći korak
+                  </Button>
+                )}
+                {wizardData.currentStep === 3 && (
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={isLoading}
+                    className="gradient-primary text-white hover-sheen"
+                  >
+                    {isLoading ? "Generišem..." : "Generiši video"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

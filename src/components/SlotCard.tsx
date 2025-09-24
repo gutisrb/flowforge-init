@@ -74,7 +74,7 @@ export function SlotCard({
   return (
     <>
       <div
-        className={`bg-surface rounded-2xl border-2 transition-all duration-200 h-full flex flex-col shadow-card hover:shadow-hover hover:-translate-y-1 hover:scale-[1.02] ${
+        className={`bg-surface rounded-2xl border-2 parallax-card h-full flex flex-col ${
           isHero ? "min-h-[360px]" : "min-h-[320px]"
         } ${
           isDragOver && canAcceptDrop 
@@ -198,12 +198,12 @@ export function SlotCard({
                     <img
                       src={URL.createObjectURL(image)}
                       alt=""
-                      className="w-full h-full object-cover pointer-events-none"
+                      className="w-full h-full object-cover pointer-events-none parallax-image"
                     />
                     
                     {/* Drag indicator */}
                     <div
-                      className="absolute top-2 left-2 p-1 bg-white/90 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-sm pointer-events-none"
+                      className="absolute top-2 left-2 p-1 bg-white/90 rounded drag-handle transition-opacity shadow-sm pointer-events-none"
                       title="Povuci za prebacivanje"
                     >
                       <GripVertical className="h-4 w-4 text-gray-600" />
@@ -223,7 +223,7 @@ export function SlotCard({
                       {/* Position badge */}
                       <div className="absolute top-2 right-2">
                         <Badge 
-                          className="badge-glass text-xs px-2 py-1 text-gray-800" 
+                          className="badge-glass text-xs px-2 py-1 text-gray-800 transition-all hover:shadow-sm hover:bg-white/95 border border-primary/20" 
                         >
                           {idx === 0 ? "Početak" : "Kraj"}
                         </Badge>

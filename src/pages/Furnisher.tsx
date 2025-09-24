@@ -224,7 +224,7 @@ export default function Furnisher() {
           {/* Right Panel - Result */}
           <Card className="card-premium relative">
             <CardContent className="p-0">
-              <div className="aspect-square relative overflow-hidden rounded-2xl bg-muted shadow-deep border border-border/20">
+              <div className="aspect-square relative overflow-hidden rounded-2xl canvas-spotlight shadow-deep border border-border/20">
                 {!resultImage && !isProcessing && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center space-y-4">
@@ -239,13 +239,11 @@ export default function Furnisher() {
                 {isProcessing && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center space-y-4">
-                      {/* Progress dots */}
-                      <div className="flex gap-2">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.2s]"></div>
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.4s]"></div>
-                      </div>
-                      <p className="text-helper text-text-muted">Generisanje u toku...</p>
+                      {/* Skeleton shimmer */}
+                      <div className="w-16 h-16 rounded-2xl skeleton-shimmer"></div>
+                      <div className="w-32 h-3 rounded-lg skeleton-shimmer"></div>
+                      <div className="w-24 h-2 rounded skeleton-shimmer"></div>
+                      <p className="text-helper text-white/60 mt-4">Generisanje u toku...</p>
                     </div>
                   </div>
                 )}
@@ -256,7 +254,7 @@ export default function Furnisher() {
                     <img
                       src={resultImage}
                       alt="Generated result"
-                      className="w-full h-full object-cover transition-opacity duration-150 animate-fade-in"
+                      className="w-full h-full object-cover reveal-animation"
                     />
                     
                     {/* Before/After comparison overlay */}
@@ -271,9 +269,8 @@ export default function Furnisher() {
                           />
                         </div>
                         {/* Slider handle */}
-                        <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white shadow-lg">
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-glass border border-white/20 backdrop-blur-sm flex items-center justify-center">
-                            <div className="w-1 h-4 bg-white/60 rounded-full"></div>
+                        <div className="absolute inset-y-0 left-1/2 w-0.5 aurora-slider-line shadow-lg">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full glass-slider-handle flex items-center justify-center">
                           </div>
                         </div>
                       </div>
@@ -283,7 +280,7 @@ export default function Furnisher() {
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button
                         onClick={handleRedo}
-                        className="w-8 h-8 rounded-full bg-glass backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                         className="w-9 h-9 rounded-full toolbar-glass flex items-center justify-center text-white/80 hover:text-white"
                         title="Nova generacija"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +298,7 @@ export default function Furnisher() {
                       </button>
                       <button
                         onClick={downloadImage}
-                        className="w-8 h-8 rounded-full bg-glass backdrop-blur-sm border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                         className="w-9 h-9 rounded-full toolbar-glass flex items-center justify-center text-white/80 hover:text-white"
                         title="Preuzmi"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,9 +308,9 @@ export default function Furnisher() {
                       {images[0] && (
                         <button
                           onClick={() => setShowComparison(!showComparison)}
-                          className={`w-8 h-8 rounded-full backdrop-blur-sm border border-white/20 flex items-center justify-center transition-colors ${
-                            showComparison ? 'bg-accent text-white' : 'bg-glass text-white/80 hover:text-white'
-                          }`}
+                           className={`w-9 h-9 rounded-full toolbar-glass flex items-center justify-center transition-colors ${
+                             showComparison ? 'text-white shadow-lg' : 'text-white/80 hover:text-white'
+                           }`}
                           title={showComparison ? 'Sakrij poređenje' : 'Pokaži poređenje'}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
