@@ -129,7 +129,8 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-background">
+    <div className="showtime min-h-[calc(100vh-64px)] bg-background">
+      <div className="grain-overlay"></div>
       <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="aurora text-text-primary">Kreiranje video oglasa</h1>

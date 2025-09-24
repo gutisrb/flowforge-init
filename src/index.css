@@ -469,3 +469,93 @@ label {
 .bg-surface {
   background-color: hsl(var(--surface-calm));
 }
+
+/* Showtime visual skin */
+.showtime {
+  position: relative;
+  min-height: 100vh;
+}
+
+.showtime::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -3;
+  background: radial-gradient(ellipse at top left, #101827 0%, #0B1324 50%, #061120 100%);
+}
+
+.showtime::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -2;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.25) 40%, transparent 70%),
+    radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.25) 40%, transparent 70%),
+    radial-gradient(circle at 40% 40%, rgba(0, 0, 0, 0.25) 40%, transparent 70%),
+    linear-gradient(135deg, rgba(59, 91, 255, 0.18) 0%, rgba(18, 214, 197, 0.18) 100%);
+}
+
+.showtime .card-premium,
+.showtime .bg-card,
+.showtime .bg-white {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid #E7EDF3;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.showtime .glass-nav {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.showtime .glass-nav .nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+}
+
+.showtime .nav-item {
+  position: relative;
+}
+
+/* Film grain overlay */
+.showtime .grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  opacity: 0.03;
+  background-image: 
+    radial-gradient(circle at 20% 50%, transparent 20%, rgba(255, 255, 255, 0.3) 21%, rgba(255, 255, 255, 0.3) 34%, transparent 35%, transparent),
+    linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0.05) 76%, transparent 77%, transparent);
+  background-size: 3px 3px, 1px 1px;
+  animation: grain 8s steps(10) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-1px, 1px); }
+  20% { transform: translate(1px, 0); }
+  30% { transform: translate(-1px, -1px); }
+  40% { transform: translate(1px, 1px); }
+  50% { transform: translate(-1px, 0); }
+  60% { transform: translate(1px, -1px); }
+  70% { transform: translate(0, 1px); }
+  80% { transform: translate(-1px, -1px); }
+  90% { transform: translate(1px, 0); }
+}
