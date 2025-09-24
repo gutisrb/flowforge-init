@@ -44,25 +44,25 @@ export function BulkDropZone({
 
   return (
       <div
-        className={`
-          relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer
-          min-h-[240px] flex flex-col items-center justify-center overflow-hidden
-          ${isDragOver 
-            ? "border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-2xl shadow-primary/30 scale-[1.02]" 
-            : "border-border hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
-          }
-          ${maxImages <= 0 ? "opacity-50 cursor-not-allowed" : ""}
-          ${className}
-        `}
+        className={cn(
+          "dropzone-enhanced relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer",
+          "min-h-[240px] flex flex-col items-center justify-center overflow-hidden",
+          isDragOver 
+            ? "border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-2xl shadow-primary/30 scale-[1.02] drag-over" 
+            : "border-border hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg",
+          maxImages <= 0 ? "opacity-50 cursor-not-allowed" : "",
+          className
+        )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => maxImages > 0 && document.getElementById("bulk-file-input")?.click()}
       >
         {/* Upload Icon */}
-        <div className={`w-20 h-20 rounded-full mb-6 flex items-center justify-center transition-all duration-300 ${
+        <div className={cn(
+          "w-20 h-20 rounded-full mb-6 flex items-center justify-center transition-all duration-300 dropzone-icon",
           isDragOver ? "bg-primary/20 scale-110" : "bg-muted/50"
-        }`}>
+        )}>
           <span className="text-3xl">📸</span>
         </div>
 

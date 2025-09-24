@@ -102,7 +102,7 @@ export function SlotCard({
                 {isHero ? "Hero" : `Slot ${slotIndex + 1}`}
               </span>
               {images.length === 2 && (
-                <Badge className="rounded-full px-2 py-0.5 text-xs bg-primary/10 text-primary border-primary/20">
+                <Badge className="badge-glass rounded-full px-2 py-0.5 text-xs text-primary/90 border-primary/20">
                   Početak/Kraj
                 </Badge>
               )}
@@ -223,8 +223,7 @@ export function SlotCard({
                       {/* Position badge */}
                       <div className="absolute top-2 right-2">
                         <Badge 
-                          variant="secondary" 
-                          className="text-xs bg-white/90 text-gray-900 border-0 shadow-sm"
+                          className="badge-glass text-xs px-2 py-1 text-gray-800" 
                         >
                           {idx === 0 ? "Početak" : "Kraj"}
                         </Badge>

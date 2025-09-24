@@ -378,12 +378,21 @@ label {
     transparent 100%);
 }
 
-/* Aurora stripe under H1s */
+/* Aurora stripe under H1s - animated */
 .aurora-stripe {
   height: 2px;
   width: 120px;
   background: var(--gradient-primary);
   border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: aurora-expand 400ms ease-out 200ms forwards;
+}
+
+@keyframes aurora-expand {
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* Glass effect for action bars */
@@ -558,4 +567,119 @@ label {
   70% { transform: translate(0, 1px); }
   80% { transform: translate(-1px, -1px); }
   90% { transform: translate(1px, 0); }
+}
+
+/* Enhanced Animations */
+@keyframes stepper-glow-pulse {
+  0% { box-shadow: 0 0 0 0 hsla(var(--primary), 0.3); }
+  100% { box-shadow: 0 0 0 8px hsla(var(--primary), 0); }
+}
+
+@keyframes progress-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes button-sheen {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes dropzone-glow {
+  0% { 
+    border-color: hsl(var(--border));
+    box-shadow: none;
+  }
+  100% {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2), 0 0 20px hsl(var(--primary) / 0.1);
+  }
+}
+
+/* Stepper enhancements */
+.stepper-pill-done {
+  animation: stepper-glow-pulse 220ms ease-out;
+}
+
+.progress-line-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: progress-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Enhanced button styles */
+.btn-primary-enhanced {
+  background: var(--gradient-primary);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary-enhanced::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: none;
+}
+
+.btn-primary-enhanced:hover::after {
+  animation: button-sheen 1.2s ease-out;
+}
+
+/* Enhanced dropzone styles */
+.dropzone-enhanced {
+  transition: all 0.2s ease-out;
+}
+
+.dropzone-enhanced.drag-over {
+  animation: dropzone-glow 200ms ease-out forwards;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--primary-glow) / 0.05));
+}
+
+.dropzone-enhanced.drag-over .dropzone-icon {
+  transform: scale(1.04) translateY(-4px);
+  transition: transform 200ms ease-out;
+}
+
+/* Glass badge styles */
+.badge-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.badge-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: var(--gradient-primary);
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: subtract;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: source-out;
+}
+
+.badge-glass:hover {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Enhanced focus rings */
+.focus-ring-enhanced:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 2px var(--gradient-primary),
+    inset 0 0 0 1px rgba(255,255,255,0.8);
 }

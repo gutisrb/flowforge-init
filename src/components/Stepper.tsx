@@ -39,7 +39,7 @@ export const Stepper: React.FC<StepperProps> = ({
               <div
                 className={[
                   "flex items-center justify-center w-12 h-12 rounded-full text-sm font-semibold transition-all duration-200 border-2",
-                  isDone ? "gradient-primary text-white border-transparent shadow-lg" :
+                  isDone ? "gradient-primary text-white border-transparent shadow-lg stepper-pill-done" :
                   isActive ? "gradient-border bg-surface text-primary border-transparent shadow-md" :
                   "bg-surface text-muted-foreground border-border"
                 ].join(" ")}
@@ -73,7 +73,7 @@ export const Stepper: React.FC<StepperProps> = ({
                 <div 
                   className={[
                     "absolute top-0 left-0 h-[2px] rounded-full transition-all duration-300 ease-out",
-                    isDone ? "w-full gradient-primary" :
+                    isDone ? "w-full gradient-primary progress-line-shimmer" :
                     isActive ? "w-8 gradient-primary opacity-60" :
                     "w-0"
                   ].join(" ")}

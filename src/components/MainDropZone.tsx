@@ -39,9 +39,9 @@ export function MainDropZone({ onFilesSelected, isDragOver = false, className }:
   return (
     <div
       className={cn(
-        "relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-200 cursor-pointer",
-        "hover:border-primary/50 hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-        isDragOver ? "border-primary bg-primary/10" : "border-border",
+        "dropzone-enhanced relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-200 cursor-pointer",
+        "hover:border-primary/50 hover:bg-primary/5 focus:outline-none focus-ring-enhanced",
+        isDragOver ? "border-primary bg-primary/10 drag-over" : "border-border",
         className
       )}
       onClick={handleClick}
@@ -65,7 +65,7 @@ export function MainDropZone({ onFilesSelected, isDragOver = false, className }:
       />
       
       <div className="flex flex-col items-center gap-4">
-        <div className="p-4 rounded-full bg-primary/10">
+        <div className="p-4 rounded-full bg-primary/10 dropzone-icon">
           <ImageIcon className="h-12 w-12 text-primary" />
         </div>
         <div className="space-y-2">
