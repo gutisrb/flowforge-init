@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2, ArrowLeftRight, GripVertical } from "lucide-react";
+import { Eye, Trash2, ArrowLeftRight, GripVertical, ArrowUpDown, Sparkles } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
 import { useDrag } from "./DragContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface SlotCardProps {
   slotIndex: number;
@@ -24,7 +29,11 @@ export function SlotCard({
 }: SlotCardProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
+  const [slotPickerOpen, setSlotPickerOpen] = useState(false);
   const { isDragging, draggedImage, setDragState } = useDrag();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const addFiles = (files: File[]) => {
     const next = [...images, ...files].slice(0, 2);
@@ -67,6 +76,43 @@ export function SlotCard({
     if (images.length === 2) onImagesChange([images[1], images[0]]);
   };
 
+  const moveImageToSlot = (imageIndex: number, targetSlot: number) => {
+    if (targetSlot === slotIndex) return;
+    onReceiveInternalImage({ fromSlot: slotIndex, imageIndex, toIndex: undefined });
+  };
+
+  const editImage = (imageIndex: number) => {
+    const imageUrl = URL.createObjectURL(images[imageIndex]);
+    localStorage.setItem('stagingInputImage', imageUrl);
+    navigate('/stage-studio');
+  };
+
+  const handleDragStart = (e: React.DragEvent, imageIndex: number) => {
+    e.dataTransfer.setData("text/x-smartflow-image", JSON.stringify({ fromSlot: slotIndex, imageIndex }));
+    setDragState(true, { fromSlot: slotIndex, imageIndex });
+  };
+
+  const handleDragEnd = () => {
+    setDragState(false);
+  };
+
+  const handleImageDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const payload = e.dataTransfer.getData("text/x-smartflow-image");
+    if (!payload) return;
+    
+    try {
+      const data = JSON.parse(payload) as { fromSlot: number; imageIndex: number };
+      if (data.fromSlot === slotIndex) {
+        // Reorder within same slot
+        const newImages = [...images];
+        const [movedImage] = newImages.splice(data.imageIndex, 1);
+        newImages.splice(targetIndex, 0, movedImage);
+        onImagesChange(newImages);
+      }
+    } catch {}
+  };
+
   const canAcceptDrop = isDragging && draggedImage && (
     draggedImage.fromSlot !== slotIndex || images.length < 2
   );
@@ -98,11 +144,6 @@ export function SlotCard({
             <span className="text-sm font-medium text-foreground">
               Slot {slotIndex + 1}
             </span>
-            {images.length === 2 && (
-              <Badge className="glass-badge text-xs px-2 py-1 rounded-full">
-                Početak/Kraj
-              </Badge>
-            )}
           </div>
         </div>
 
@@ -132,30 +173,132 @@ export function SlotCard({
             <div>
               <div className="uniform-media-area relative">
                 {images.length === 1 ? (
-                  <img
-                    src={URL.createObjectURL(images[0])}
-                    alt=""
-                    className="w-full h-full object-cover rounded-lg transition-transform duration-200 hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full relative rounded-lg overflow-hidden">
+                  <div 
+                    className="relative w-full h-full group cursor-grab active:cursor-grabbing"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 0)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => handleImageDrop(e, 0)}
+                    onMouseEnter={() => setHoveredImageIndex(0)}
+                    onMouseLeave={() => setHoveredImageIndex(null)}
+                  >
                     <img
                       src={URL.createObjectURL(images[0])}
                       alt=""
-                      className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                      className="w-full h-full object-cover rounded-lg transition-all duration-200 group-hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      tabIndex={0}
                     />
-                    {/* Mini thumbs strip */}
-                    <div className="absolute bottom-2 right-2 flex gap-1">
-                      {images.slice(0, 2).map((img, idx) => (
-                        <div key={idx} className="w-6 h-6 rounded border border-white/40 overflow-hidden">
-                          <img
-                            src={URL.createObjectURL(img)}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
+                    {/* Start/End pill */}
+                    <div className="absolute top-2 left-2">
+                      <div className="h-4 px-2 bg-gradient-to-r from-indigo-600 to-teal-500 text-white text-xs font-semibold rounded-full flex items-center shadow-lg">
+                        Početak/Kraj
+                      </div>
+                    </div>
+                    {/* Status rail */}
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-teal-500 rounded-b-lg" />
+                    {/* Quick actions overlay */}
+                    {hoveredImageIndex === 0 && (
+                      <div className="absolute top-2 right-2 flex gap-1 animate-in fade-in duration-200">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
+                          onClick={() => editImage(0)}
+                          title="Uredi"
+                        >
+                          <Sparkles className="h-3 w-3 text-white" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-full h-full grid grid-cols-2 gap-1 rounded-lg overflow-hidden">
+                    {images.map((img, idx) => (
+                      <div 
+                        key={idx}
+                        className="relative group cursor-grab active:cursor-grabbing"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleImageDrop(e, idx)}
+                        onMouseEnter={() => setHoveredImageIndex(idx)}
+                        onMouseLeave={() => setHoveredImageIndex(null)}
+                      >
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt=""
+                          className="w-full h-full object-cover transition-all duration-200 group-hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          tabIndex={0}
+                        />
+                        {/* Start/End pill */}
+                        <div className={`absolute top-1 ${idx === 0 ? 'left-1' : 'right-1'}`}>
+                          <div className="h-4 px-2 bg-gradient-to-r from-indigo-600 to-teal-500 text-white text-xs font-semibold rounded-full flex items-center shadow-lg">
+                            {idx === 0 ? 'Početak' : 'Kraj'}
+                          </div>
                         </div>
-                      ))}
-                      <Badge className="glass-badge text-xs px-1.5 py-0.5 ml-1">
+                        {/* Status rail */}
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-teal-500" />
+                        {/* Quick actions overlay */}
+                        {hoveredImageIndex === idx && (
+                          <div className="absolute top-1 left-1/2 transform -translate-x-1/2 flex gap-1 animate-in fade-in duration-200">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
+                              onClick={swap}
+                              title="Zameni"
+                            >
+                              <ArrowLeftRight className="h-3 w-3 text-white" />
+                            </Button>
+                            <Popover open={slotPickerOpen} onOpenChange={setSlotPickerOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
+                                  title="Premesti"
+                                >
+                                  <ArrowUpDown className="h-3 w-3 text-white" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-32 p-2">
+                                <div className="grid grid-cols-3 gap-1">
+                                  {[0, 1, 2, 3, 4, 5].map((slot) => (
+                                    <Button
+                                      key={slot}
+                                      size="sm"
+                                      variant={slot === slotIndex ? "default" : "ghost"}
+                                      className="h-8 text-xs"
+                                      onClick={() => {
+                                        moveImageToSlot(idx, slot);
+                                        setSlotPickerOpen(false);
+                                      }}
+                                      disabled={slot === slotIndex}
+                                    >
+                                      {slot + 1}
+                                    </Button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
+                              onClick={() => editImage(idx)}
+                              title="Uredi"
+                            >
+                              <Sparkles className="h-3 w-3 text-white" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {/* 2/2 badge */}
+                    <div className="absolute bottom-2 right-2">
+                      <Badge className="glass-badge text-xs px-1.5 py-0.5">
                         2/2
                       </Badge>
                     </div>
