@@ -84,7 +84,7 @@ export function SlotCard({
   const editImage = (imageIndex: number) => {
     const imageUrl = URL.createObjectURL(images[imageIndex]);
     localStorage.setItem('stagingInputImage', imageUrl);
-    navigate('/stage-studio');
+    navigate('/app/stage');
   };
 
   const handleDragStart = (e: React.DragEvent, imageIndex: number) => {
