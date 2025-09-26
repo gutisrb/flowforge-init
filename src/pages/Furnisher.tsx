@@ -1,5 +1,5 @@
 // src/pages/Furnisher.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,28 @@ export default function Furnisher() {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [showComparison, setShowComparison] = useState(false);
+
+  // Auto-load image from localStorage when component mounts
+  useEffect(() => {
+    const loadStagedImage = async () => {
+      const stagedImageUrl = localStorage.getItem('stagingInputImage');
+      if (stagedImageUrl) {
+        try {
+          const response = await fetch(stagedImageUrl);
+          const blob = await response.blob();
+          const file = new File([blob], 'staged-image.jpg', { type: blob.type });
+          setImages([file]);
+          localStorage.removeItem('stagingInputImage'); // Clean up
+          toast.success('Slika je učitana iz Reel Studio-a');
+        } catch (error) {
+          console.error('Failed to load staged image:', error);
+          localStorage.removeItem('stagingInputImage'); // Clean up on error
+        }
+      }
+    };
+    
+    loadStagedImage();
+  }, []);
 
   const checkStatus = async (jobId: string) => {
     try {
