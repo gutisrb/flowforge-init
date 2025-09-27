@@ -8,6 +8,9 @@
   --input-radius: 12px;
   --pill-radius: 999px;
   
+  /* Brand gradients */
+  --brand-grad: linear-gradient(135deg, #3E37F2 0%, #12D6C5 100%);
+  
   /* Brand Gradient: #3B5BFF → #12D6C5 */
   --primary: 227 100% 62%;          /* #3B5BFF */
   --primary-glow: 172 84% 47%;      /* #12D6C5 */
@@ -230,7 +233,76 @@ label {
 }
 
 .glass-nav {
-  @apply bg-background/80 backdrop-blur-xl border-b border-border/50;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  height: 64px;
+  transition: height 0.2s ease-out;
+}
+
+.glass-nav.scrolled {
+  height: 56px;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  transition: all 0.16s ease-out;
+}
+
+.glass-pill.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid;
+  border-image: var(--brand-grad) 1;
+}
+
+.glass-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.brand-focus-ring:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px var(--brand-grad);
+}
+
+.gradient-cta {
+  background: var(--brand-grad);
+  height: 48px;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+}
+
+.gradient-cta:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: sheen 0.6s ease-out;
+}
+
+@keyframes sheen {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.marketing-nav {
+  background: transparent;
+  border-bottom: 1px solid rgba(62, 55, 242, 0.35);
+}
+
+.marketing-nav .nav-text {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .glass-tab {
