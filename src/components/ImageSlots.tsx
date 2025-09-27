@@ -33,23 +33,28 @@ export function ImageSlots({
   const maxImages = clipCount * 2;
 
   const handleBulkAdd = (files: File[]) => {
-    console.log('🔄 Bulk upload started:', files.length, 'files');
-    console.log('📁 Current slots before:', slots.map(s => s.images.length));
-    
     const next = slots.map(s => ({...s, images: [...s.images]}));
     let fileIndex = 0;
+    let totalCapacity = clipCount * 2;
+    let currentTotal = next.reduce((sum, slot) => sum + slot.images.length, 0);
     
-    // Fill all available slots sequentially
+    // Check if we have capacity
+    if (currentTotal >= totalCapacity) {
+      // Show toast that no slots available
+      return;
+    }
+    
+    // Fill all available slots sequentially, max 2 per slot
     for (let slotIndex = 0; slotIndex < clipCount && fileIndex < files.length; slotIndex++) {
-      console.log(`🎯 Processing slot ${slotIndex}, has ${next[slotIndex].images.length} images`);
       while (next[slotIndex].images.length < 2 && fileIndex < files.length) {
         next[slotIndex].images.push(files[fileIndex++]);
-        console.log(`✅ Added file ${fileIndex} to slot ${slotIndex}`);
       }
     }
     
-    console.log('📁 Slots after processing:', next.map(s => s.images.length));
-    console.log('🏁 Calling onSlotsChange with new slots');
+    // If we couldn't fit all files, could show a toast here
+    if (fileIndex < files.length) {
+      // Toast: "Nema slobodnih slotova za sve fajlove"
+    }
     
     onSlotsChange(next);
   };
