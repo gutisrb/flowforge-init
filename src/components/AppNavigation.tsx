@@ -56,7 +56,7 @@ export function AppNavigation() {
             <img 
               src="/brand/mark.png" 
               alt="Reel Estate" 
-              className="h-[30px] w-auto object-contain" 
+              className="h-12 w-auto object-contain" 
               style={{ padding: '1px' }}
             />
           </Link>

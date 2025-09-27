@@ -19,13 +19,13 @@ export function MarketingNav() {
             <img 
               src="/brand/wordmark.png" 
               alt="Reel Estate" 
-              className="hidden sm:block h-8 w-auto object-contain nav-text" 
+              className="hidden sm:block h-12 w-auto object-contain nav-text" 
             />
             {/* Mobile: Show mark only */}
             <img 
               src="/brand/mark.png" 
               alt="Reel Estate" 
-              className="block sm:hidden h-7 w-auto object-contain nav-text" 
+              className="block sm:hidden h-10 w-auto object-contain nav-text" 
             />
           </Link>
 
