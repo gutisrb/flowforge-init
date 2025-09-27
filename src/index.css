@@ -983,31 +983,50 @@ label {
 
 /* Grid Drop Zone */
 .grid-drop-zone.drag-over {
-  background: linear-gradient(135deg, hsl(var(--primary) / 0.05), transparent);
-  box-shadow: 0 10px 25px hsl(var(--primary) / 0.1);
+  background: hsl(var(--primary) / 0.05);
+  outline: 2px dashed hsl(var(--primary) / 0.3);
+  outline-offset: 8px;
+  border-radius: 12px;
 }
 
-/* Uniform Slots Grid */
+/* Uniform Slots Grid - Auto-fit responsive */
 .uniform-slots-grid {
-  @apply grid gap-4;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
 }
 
-@media (min-width: 768px) {
+/* Responsive breakpoints */
+@media (min-width: 1600px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  }
+}
+
+@media (max-width: 1599px) and (min-width: 1200px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 1199px) and (min-width: 900px) {
+  .uniform-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
   .uniform-slots-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 640px) {
   .uniform-slots-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1440px) {
-  .uniform-slots-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
@@ -1018,6 +1037,16 @@ label {
   border-radius: 1rem;
   border: 1px solid #E7EDF3;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: all 0.2s ease;
+}
+
+.uniform-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.uniform-slot-card:hover .group-hover\:opacity-100 {
+  opacity: 1;
 }
 
 .showtime .uniform-slot-card {
@@ -1057,4 +1086,109 @@ label {
   height: 100%;
   background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
   transition: all 0.3s ease;
+}
+
+/* Photo Tile Styles */
+.photo-tile {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.photo-tile:hover {
+  transform: scale(1.01);
+}
+
+.photo-tile:active {
+  cursor: grabbing;
+}
+
+.photo-tile.dragging {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradient Pills */
+.gradient-pill {
+  height: 16px;
+  padding: 0 8px;
+  background: linear-gradient(135deg, #4f46e5, #14b8a6);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Add Second Photo Link */
+.add-second-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted) / 0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.add-second-link:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+/* New Action Button */
+.new-action-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  height: 20px;
+  padding: 0 6px;
+  background: linear-gradient(135deg, #4f46e5, #14b8a6);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-action-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.new-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Focus styles for accessibility */
+.photo-tile:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.add-second-link:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.new-action-btn:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
 }

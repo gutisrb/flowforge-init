@@ -44,6 +44,19 @@ export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
     onSlotsChange(next);
   };
 
+  const handleDuplicateToNext = (slotIndex: number) => (imageFile: File) => {
+    const nextSlotIndex = slotIndex + 1;
+    if (nextSlotIndex >= clipCount) return;
+
+    const next = slots.map(s => ({...s, images: [...s.images]}));
+    const nextSlot = next[nextSlotIndex];
+
+    if (nextSlot.images.length < 2) {
+      nextSlot.images.unshift(imageFile); // Add as first image (start frame)
+      onSlotsChange(next);
+    }
+  };
+
     return (
       <DragProvider>
         <div className="uniform-slots-grid">
@@ -53,6 +66,7 @@ export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
               slotIndex={index}
               images={slot.images}
               isHero={false}
+              totalSlots={clipCount}
               onImagesChange={(images: File[]) => {
                 const newSlots = [...slots];
                 newSlots[index] = { ...slot, images };
@@ -61,6 +75,7 @@ export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
               onReceiveInternalImage={({ fromSlot, imageIndex, toIndex }) =>
                 moveImage(fromSlot, imageIndex, index, toIndex)
               }
+              onDuplicateToNext={handleDuplicateToNext(index)}
             />
           ))}
         </div>
