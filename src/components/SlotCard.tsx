@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, GripVertical, Plus } from "lucide-react";
+import { ArrowLeftRight, GripVertical, Plus, Move } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ interface SlotCardProps {
   onImagesChange: (images: File[]) => void;
   onReceiveInternalImage: (payload: { fromSlot: number; imageIndex: number; toIndex?: number }) => void;
   onDuplicateToNext?: (imageFile: File) => void;
+  onReorderSlot?: (fromSlot: number, toSlot: number) => void;
   totalSlots: number;
 }
 
@@ -27,6 +28,7 @@ export function SlotCard({
   onImagesChange,
   onReceiveInternalImage,
   onDuplicateToNext,
+  onReorderSlot,
   totalSlots,
 }: SlotCardProps) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -282,6 +284,40 @@ export function SlotCard({
                       <ArrowLeftRight className="h-3 w-3 mr-1" />
                       Zameni
                     </Button>
+                  )}
+                  {onReorderSlot && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:bg-white/10"
+                          title="Premesti slot"
+                        >
+                          <Move className="h-3 w-3 mr-1" />
+                          Premesti
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-2" align="start">
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-muted-foreground px-2 py-1">
+                            Premesti u:
+                          </div>
+                          {Array.from({ length: totalSlots }, (_, i) => i).map((targetSlot) => (
+                            <Button
+                              key={targetSlot}
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-start h-7 px-2 text-xs"
+                              disabled={targetSlot === slotIndex}
+                              onClick={() => onReorderSlot(slotIndex, targetSlot)}
+                            >
+                              Slot {targetSlot + 1}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   )}
                   <Button
                     variant="ghost"

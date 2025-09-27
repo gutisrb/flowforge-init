@@ -57,6 +57,16 @@ export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
     }
   };
 
+  const handleReorderSlot = (fromSlot: number, toSlot: number) => {
+    if (fromSlot === toSlot) return;
+
+    const next = [...slots];
+    const [movedSlot] = next.splice(fromSlot, 1);
+    next.splice(toSlot, 0, movedSlot);
+    
+    onSlotsChange(next);
+  };
+
     return (
       <DragProvider>
         <div className="uniform-slots-grid">
@@ -76,6 +86,7 @@ export function SlotsGrid({ slots, onSlotsChange, clipCount }: SlotsGridProps) {
                 moveImage(fromSlot, imageIndex, index, toIndex)
               }
               onDuplicateToNext={handleDuplicateToNext(index)}
+              onReorderSlot={handleReorderSlot}
             />
           ))}
         </div>
