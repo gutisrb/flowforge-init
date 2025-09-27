@@ -186,7 +186,7 @@ export function SlotCard({
                     <img
                       src={URL.createObjectURL(images[0])}
                       alt=""
-                      className="w-full h-full object-cover rounded-lg transition-all duration-200 group-hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="w-full h-full object-cover object-center rounded-lg transition-all duration-200 group-hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       tabIndex={0}
                     />
                     {/* Start/End pill */}
@@ -213,11 +213,11 @@ export function SlotCard({
                     )}
                   </div>
                 ) : (
-                  <div className="w-full h-full grid grid-cols-2 gap-1 rounded-lg overflow-hidden">
+                  <div className="w-full h-full grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
                     {images.map((img, idx) => (
                       <div 
                         key={idx}
-                        className="relative group cursor-grab active:cursor-grabbing"
+                        className="relative group cursor-grab active:cursor-grabbing aspect-[4/5] overflow-hidden rounded-md"
                         draggable
                         onDragStart={(e) => handleDragStart(e, idx)}
                         onDragEnd={handleDragEnd}
@@ -229,7 +229,7 @@ export function SlotCard({
                         <img
                           src={URL.createObjectURL(img)}
                           alt=""
-                          className="w-full h-full object-cover transition-all duration-200 group-hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          className="w-full h-full object-cover object-center transition-all duration-200 group-hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           tabIndex={0}
                         />
                         {/* Start/End pill */}

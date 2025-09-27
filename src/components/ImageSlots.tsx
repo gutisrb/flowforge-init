@@ -34,15 +34,15 @@ export function ImageSlots({
 
   const handleBulkAdd = (files: File[]) => {
     const next = slots.map(s => ({...s, images: [...s.images]}));
-    let i = 0;
-    // Fill 1 per slot, then second per slot
-    for (let pass = 0; pass < 2; pass++) {
-      for (let s = 0; s < clipCount && i < files.length; s++) {
-        if (next[s].images.length === pass) {
-          next[s].images.push(files[i++]);
-        }
+    let fileIndex = 0;
+    
+    // Fill all available slots sequentially
+    for (let slotIndex = 0; slotIndex < clipCount && fileIndex < files.length; slotIndex++) {
+      while (next[slotIndex].images.length < 2 && fileIndex < files.length) {
+        next[slotIndex].images.push(files[fileIndex++]);
       }
     }
+    
     onSlotsChange(next);
   };
 

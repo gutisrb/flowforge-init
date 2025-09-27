@@ -1028,7 +1028,7 @@ label {
 
 /* Uniform Media Area */
 .uniform-media-area {
-  aspect-ratio: 4/5;
+  aspect-ratio: 16/10;
   border-radius: 0.5rem;
   overflow: hidden;
   background: hsl(var(--muted) / 0.1);
