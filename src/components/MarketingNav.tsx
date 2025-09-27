@@ -19,7 +19,7 @@ export function MarketingNav() {
             <img 
               src="/brand/wordmark.png" 
               alt="Reel Estate" 
-              className="hidden sm:block h-12 w-auto object-contain nav-text" 
+              className="hidden sm:block h-16 w-auto object-contain nav-text" 
             />
             {/* Mobile: Show mark only */}
             <img 
