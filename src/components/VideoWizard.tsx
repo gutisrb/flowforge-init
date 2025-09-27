@@ -37,57 +37,54 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   const canProceedToStep2 = () => !!(wizardData.formData.title && wizardData.formData.price && wizardData.formData.location);
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
-  const createMultipartFormData = () => {
-    const form = new FormData();
-    
-    // Add form fields
-    form.append("title", wizardData.formData.title);
-    form.append("price", wizardData.formData.price);
-    form.append("location", wizardData.formData.location);
-    form.append("size", wizardData.formData.size || "");
-    form.append("beds", wizardData.formData.beds || "");
-    form.append("baths", wizardData.formData.baths || "");
-    form.append("sprat", wizardData.formData.sprat || "");
-    form.append("extras", wizardData.formData.extras || "");
+ const createMultipartFormData = () => {
+  const form = new FormData();
 
-    const grouping: any[] = [];
-    let imageIndex = 0;
+  // Form fields
+  form.append("title", wizardData.formData.title);
+  form.append("price", wizardData.formData.price);
+  form.append("location", wizardData.formData.location);
+  form.append("size", wizardData.formData.size || "");
+  form.append("beds", wizardData.formData.beds || "");
+  form.append("baths", wizardData.formData.baths || "");
+  form.append("sprat", wizardData.formData.sprat || "");
+  form.append("extras", wizardData.formData.extras || "");
 
-    wizardData.slots.forEach((slot, i) => {
-      if (slot.mode === 'image-to-video') {
-        for (let j = 0; j < slot.images.length; j++) {
-          form.append(`image_${imageIndex}`, slot.images[j]);
-          grouping.push({
-            type: "single",
-            index: imageIndex
-          });
-          imageIndex++;
-        }
-      } else if (slot.mode === 'frame-to-frame') {
-        if (slot.images.length < 2) return;
-        const firstIndex = imageIndex;
-        form.append(`image_${imageIndex}`, slot.images[0]);
-        imageIndex++;
-        form.append(`image_${imageIndex}`, slot.images[1]);
-        grouping.push({
-          type: "frame-to-frame",
-          files: [firstIndex, imageIndex],
-          first_index: firstIndex,
-          second_index: imageIndex
-        });
-        imageIndex++;
-      }
-    });
+  const grouping: any[] = [];
+  let imageIndex = 0;
 
-    form.append("grouping", JSON.stringify(grouping));
-    form.append("slot_mode_info", JSON.stringify(grouping));
-    form.append("total_images", String(imageIndex));
+  wizardData.slots.forEach((slot) => {
+    if (slot.images.length === 0) return;
 
-    // IMPORTANT: attach user_id for Make credit checks
-    form.append("user_id", user.id);
+    if (slot.images.length >= 2) {
+      // Frame-to-frame: pair the two images
+      const firstIndex = imageIndex;
+      form.append(`image_${imageIndex}`, slot.images[0]); imageIndex++;
+      form.append(`image_${imageIndex}`, slot.images[1]);
 
-    return form;
-  };
+      grouping.push({
+        type: "frame-to-frame",
+        files: [firstIndex, imageIndex],
+        first_index: firstIndex,
+        second_index: imageIndex
+      });
+      imageIndex++;
+    } else {
+      // Single image clip
+      form.append(`image_${imageIndex}`, slot.images[0]);
+      grouping.push({ type: "single", index: imageIndex });
+      imageIndex++;
+    }
+  });
+
+  form.append("grouping", JSON.stringify(grouping));
+  form.append("slot_mode_info", JSON.stringify(grouping)); // (left as-is)
+  form.append("total_images", String(imageIndex));
+  form.append("user_id", user.id); // you already had this
+
+  return form;
+};
+
 
   const handleGenerate = async () => {
     setIsLoading(true);
