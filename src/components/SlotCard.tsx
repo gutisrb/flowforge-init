@@ -81,6 +81,14 @@ export function SlotCard({
     onReceiveInternalImage({ fromSlot: slotIndex, imageIndex, toIndex: undefined });
   };
 
+  const moveSlotToPosition = (targetSlot: number) => {
+    if (targetSlot === slotIndex || images.length === 0) return;
+    // Move all images from this slot to target slot
+    images.forEach((_, imageIndex) => {
+      onReceiveInternalImage({ fromSlot: slotIndex, imageIndex: 0, toIndex: undefined });
+    });
+  };
+
   const editImage = (imageIndex: number) => {
     const imageUrl = URL.createObjectURL(images[imageIndex]);
     localStorage.setItem('stagingInputImage', imageUrl);
@@ -247,46 +255,6 @@ export function SlotCard({
                               size="sm"
                               variant="ghost"
                               className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
-                              onClick={swap}
-                              title="Zameni"
-                            >
-                              <ArrowLeftRight className="h-3 w-3 text-white" />
-                            </Button>
-                            <Popover open={slotPickerOpen} onOpenChange={setSlotPickerOpen}>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
-                                  title="Premesti"
-                                >
-                                  <ArrowUpDown className="h-3 w-3 text-white" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-32 p-2">
-                                <div className="grid grid-cols-3 gap-1">
-                                  {[0, 1, 2, 3, 4, 5].map((slot) => (
-                                    <Button
-                                      key={slot}
-                                      size="sm"
-                                      variant={slot === slotIndex ? "default" : "ghost"}
-                                      className="h-8 text-xs"
-                                      onClick={() => {
-                                        moveImageToSlot(idx, slot);
-                                        setSlotPickerOpen(false);
-                                      }}
-                                      disabled={slot === slotIndex}
-                                    >
-                                      {slot + 1}
-                                    </Button>
-                                  ))}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 w-6 p-0 bg-black/20 backdrop-blur-sm border border-white/20 rounded-full hover:bg-black/30"
                               onClick={() => editImage(idx)}
                               title="Uredi"
                             >
@@ -315,10 +283,48 @@ export function SlotCard({
                       size="sm"
                       className="h-7 px-2 text-xs hover:bg-white/10"
                       onClick={swap}
+                      title="Zameni pozicije slika"
                     >
+                      <ArrowLeftRight className="h-3 w-3 mr-1" />
                       Zameni
                     </Button>
                   )}
+                  {images.length > 0 && (
+                    <Popover open={slotPickerOpen} onOpenChange={setSlotPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs hover:bg-white/10"
+                          title="Premesti slot"
+                        >
+                          <ArrowUpDown className="h-3 w-3 mr-1" />
+                          Premesti
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-32 p-2">
+                        <div className="grid grid-cols-3 gap-1">
+                          {[0, 1, 2, 3, 4, 5].map((slot) => (
+                            <Button
+                              key={slot}
+                              size="sm"
+                              variant={slot === slotIndex ? "default" : "ghost"}
+                              className="h-8 text-xs"
+                              onClick={() => {
+                                moveSlotToPosition(slot);
+                                setSlotPickerOpen(false);
+                              }}
+                              disabled={slot === slotIndex}
+                            >
+                              {slot + 1}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -327,9 +333,9 @@ export function SlotCard({
                   >
                     Ukloni
                   </Button>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
               </div>
             </div>
