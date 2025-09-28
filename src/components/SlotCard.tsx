@@ -175,7 +175,7 @@ export function SlotCard({
   const handleUrediClick = (image: File) => {
     // Navigate to Stage Studio with image
     const imageUrl = URL.createObjectURL(image);
-    localStorage.setItem('furnisher_image', imageUrl);
+    localStorage.setItem('stagingInputImage', imageUrl);
     navigate('/app/stage');
   };
 
