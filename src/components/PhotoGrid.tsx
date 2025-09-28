@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { MainDropZone } from "./MainDropZone";
 import { PhotoThumbnail } from "./PhotoThumbnail";
 import { PhotoHeader } from "./PhotoHeader";
+import { ImagePreviewModal } from "./ImagePreviewModal";
 import { cn } from "@/lib/utils";
 
 interface Photo {
@@ -32,6 +33,8 @@ export function PhotoGrid({
   className 
 }: PhotoGridProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = window.innerWidth < 768;
 
@@ -101,6 +104,16 @@ export function PhotoGrid({
     event.target.value = ''; // Reset input
   };
 
+  const handlePreviewPhoto = (file: File) => {
+    setPreviewFile(file);
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setPreviewFile(null);
+  };
+
   return (
     <div className={cn("flex flex-col h-full", className)}>
       <input
@@ -161,6 +174,7 @@ export function PhotoGrid({
                   onSetMainPhoto={() => handleSetMainPhoto(index)}
                   onRemove={() => handleRemovePhoto(index)}
                   onDuplicate={() => handleDuplicatePhoto(index)}
+                  onPreview={() => handlePreviewPhoto(photo.file)}
                 />
               ))}
               
@@ -186,6 +200,12 @@ export function PhotoGrid({
           </div>
         )}
       </div>
+      
+      <ImagePreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+        file={previewFile}
+      />
     </div>
   );
 }
