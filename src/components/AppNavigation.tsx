@@ -61,7 +61,7 @@ export function AppNavigation() {
             />
           </Link>
 
-          {/* Navigation Items */}
+          {/* Desktop Navigation Items */}
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -77,6 +77,28 @@ export function AppNavigation() {
                   >
                     <Icon className="h-4 w-4" />
                     <span>{item.name}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile Navigation Items */}
+          <div className="flex md:hidden items-center space-x-1 overflow-x-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.href} to={item.href}>
+                  <div
+                    className={cn(
+                      "glass-pill flex items-center justify-center p-2 brand-focus-ring min-w-[40px]",
+                      isActive(item.href)
+                        ? "active text-primary"
+                        : "text-text-muted hover:text-text-primary"
+                    )}
+                    title={item.name}
+                  >
+                    <Icon className="h-4 w-4" />
                   </div>
                 </Link>
               );
