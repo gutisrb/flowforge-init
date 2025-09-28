@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDrag } from "./DragContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function SlotCard({
   const [movePopoverOpen, setMovePopoverOpen] = useState(false);
   const { setDragState } = useDrag();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const addFiles = (files: File[]) => {
     const next = [...images, ...files].slice(0, 2);
@@ -171,11 +173,10 @@ export function SlotCard({
   };
 
   const handleUrediClick = (image: File) => {
-    // Deep link to Stage Studio with image
+    // Navigate to Stage Studio with image
     const imageUrl = URL.createObjectURL(image);
     localStorage.setItem('furnisher_image', imageUrl);
-    // Could also use query param: window.open(`/furnisher?imageUrl=${encodeURIComponent(imageUrl)}`)
-    window.open('/furnisher', '_blank');
+    navigate('/app/stage');
   };
 
   const handleNoviClick = (image: File) => {
