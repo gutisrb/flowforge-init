@@ -14,24 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
+      assets: {
+        Row: {
+          created_at: string
+          duration: number | null
+          height: number | null
+          id: string
+          inputs: Json | null
+          job_id: string | null
+          kind: string
+          posted_to: Json | null
+          prompt: string | null
+          source: string
+          src_url: string | null
+          status: string
+          thumb_url: string | null
+          title: string | null
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          height?: number | null
+          id?: string
+          inputs?: Json | null
+          job_id?: string | null
+          kind: string
+          posted_to?: Json | null
+          prompt?: string | null
+          source?: string
+          src_url?: string | null
+          status?: string
+          thumb_url?: string | null
+          title?: string | null
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          height?: number | null
+          id?: string
+          inputs?: Json | null
+          job_id?: string | null
+          kind?: string
+          posted_to?: Json | null
+          prompt?: string | null
+          source?: string
+          src_url?: string | null
+          status?: string
+          thumb_url?: string | null
+          title?: string | null
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
           id: string
+          image_credits_remaining: number | null
           org_name: string | null
+          review_first: boolean
+          tier: string | null
+          video_credits_remaining: number | null
           webhook_url: string
         }
         Insert: {
           created_at?: string | null
           id: string
+          image_credits_remaining?: number | null
           org_name?: string | null
+          review_first?: boolean
+          tier?: string | null
+          video_credits_remaining?: number | null
           webhook_url: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          image_credits_remaining?: number | null
           org_name?: string | null
+          review_first?: boolean
+          tier?: string | null
+          video_credits_remaining?: number | null
           webhook_url?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string | null
+          duration_seconds: number | null
+          error_text: string | null
+          id: string
+          luma_generation_id: string | null
+          meta: Json | null
+          posted_channels_json: Json
+          status: string | null
+          thumbnail_url: string | null
+          title: string | null
+          type: string | null
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_seconds?: number | null
+          error_text?: string | null
+          id?: string
+          luma_generation_id?: string | null
+          meta?: Json | null
+          posted_channels_json?: Json
+          status?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_seconds?: number | null
+          error_text?: string | null
+          id?: string
+          luma_generation_id?: string | null
+          meta?: Json | null
+          posted_channels_json?: Json
+          status?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -40,7 +168,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      set_tier_and_reset: {
+        Args: { p_tier: string; p_user: string }
+        Returns: undefined
+      }
+      spend_image_credit: {
+        Args: { p_user: string }
+        Returns: number
+      }
+      spend_video_credit: {
+        Args: { p_user: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
@@ -173,12 +312,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
-export interface Profile {
-  id: string;
-  org_name: string;
-  webhook_url: string;
-  tier: 'starter' | 'pro' | 'scale'; // <-- DODAJ OVO
-  video_credits_remaining: number;   // <-- DODAJ OVO
-  image_credits_remaining: number;   // <-- DODAJ OVO
-}
