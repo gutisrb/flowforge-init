@@ -1,6 +1,6 @@
 // AI Furnisher Widget
 // Configure these webhook endpoints and API key:
-const MAKE_CREATE_URL = "https://hook.eu2.make.com/xs8wm6vpjjadt7biarkihp4kpixnxj93";
+const MAKE_CREATE_URL = "https://hook.eu2.make.com/4xfjeqve2vggj272duh7n2ht1k98e1mw";
 const MAKE_STATUS_URL = "https://hook.eu2.make.com/c2whxklnfgfc6435ddqty6pl0jyw2484";
 const MAKE_API_KEY = "bager155";
 
