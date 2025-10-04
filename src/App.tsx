@@ -16,7 +16,7 @@ import Login from "./pages/Login";
 import VideoGenerator from "./pages/VideoGenerator";
 import Furnisher from "./pages/Furnisher";
 import Assets from "./pages/Assets";
-import { Library } from "./pages/app/Library";
+import { Galerija } from "./pages/app/Galerija";
 import { Docs } from "./pages/app/Docs";
 import { Profile } from "./pages/app/Profile";
 import NotFound from "./pages/NotFound";
@@ -33,8 +33,10 @@ function AppContent() {
         {(user, session) => (
           <Routes>
             <Route path="/app" element={<AppShell />}>
-              <Route index element={<Library />} />
-              <Route path="library" element={<Library />} />
+              <Route index element={<Galerija />} />
+              <Route path="galerija" element={<Galerija />} />
+              <Route path="galerija/:id" element={<Galerija />} />
+              <Route path="library" element={<Galerija />} /> {/* Redirect */}
               <Route path="reel" element={<VideoGenerator user={user} session={session} />} />
               <Route path="stage" element={<Furnisher />} />
               <Route path="docs" element={<Docs />} />

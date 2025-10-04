@@ -8,8 +8,8 @@ import { useState, useEffect } from 'react';
 
 const navItems = [
   {
-    name: 'Moja biblioteka',
-    href: '/app/library',
+    name: 'Moja galerija',
+    href: '/app/galerija',
     icon: Library,
   },
   {
