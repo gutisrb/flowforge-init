@@ -249,6 +249,16 @@ export function Galerija() {
                           />
                         )}
 
+                        {/* Processing overlay */}
+                        {asset.status === 'processing' && (
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                            <div className="text-center text-white">
+                              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                              <p className="text-sm font-medium">Obrada u toku…</p>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Status badge */}
                         <div className="absolute top-3 left-3">
                           <Badge
@@ -297,6 +307,7 @@ export function Galerija() {
                             className="flex-1"
                             disabled={asset.status !== 'ready'}
                             onClick={() => handleDownload(asset)}
+                            title={asset.status !== 'ready' ? 'Download će biti omogućen kad je spremno' : 'Preuzmi'}
                           >
                             <Download className="h-4 w-4 mr-1" />
                             Preuzmi
@@ -305,6 +316,7 @@ export function Galerija() {
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(`/app/galerija/${asset.id}`)}
+                            title="Prikaži detalje"
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>

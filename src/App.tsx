@@ -17,6 +17,7 @@ import VideoGenerator from "./pages/VideoGenerator";
 import Furnisher from "./pages/Furnisher";
 import Assets from "./pages/Assets";
 import { Galerija } from "./pages/app/Galerija";
+import { GalerijaDetail } from "./pages/app/GalerijaDetail";
 import { Docs } from "./pages/app/Docs";
 import { Profile } from "./pages/app/Profile";
 import NotFound from "./pages/NotFound";
@@ -35,7 +36,7 @@ function AppContent() {
             <Route path="/app" element={<AppShell />}>
               <Route index element={<Galerija />} />
               <Route path="galerija" element={<Galerija />} />
-              <Route path="galerija/:id" element={<Galerija />} />
+              <Route path="galerija/:id" element={<GalerijaDetail />} />
               <Route path="library" element={<Galerija />} /> {/* Redirect */}
               <Route path="reel" element={<VideoGenerator user={user} session={session} />} />
               <Route path="stage" element={<Furnisher />} />
