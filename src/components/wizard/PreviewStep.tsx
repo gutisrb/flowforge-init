@@ -134,32 +134,5 @@ export const PreviewStep = ({
       {/* Preview player placeholder */}
       
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between pt-6 border-t">
-        <Button variant="outline" onClick={onPrev} disabled={isLoading} className="px-8">
-          <ArrowLeft className="mr-2 w-4 h-4" />
-          Nazad
-        </Button>
-      </div>
-
-      {/* Sticky footer */}
-      <div className="sticky bottom-0 bg-card border-t border-border p-6 -mx-8 -mb-8 rounded-b-2xl">
-        <div className="flex flex-col sm:flex-row gap-3 justify-end">
-          <Button variant="ghost" onClick={onSaveDraft} disabled={isLoading} className="px-6">
-            <Save className="mr-2 w-4 h-4" />
-            Sačuvaj nacrt
-          </Button>
-          
-          <Button onClick={onGenerate} disabled={isLoading} className="gradient-accent text-white px-8">
-            {isLoading ? <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Generisanje u toku...
-              </> : <>
-                <Sparkles className="mr-2 w-4 h-4" />
-                Generiši video
-              </>}
-          </Button>
-        </div>
-      </div>
     </div>;
 };

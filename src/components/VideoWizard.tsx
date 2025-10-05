@@ -201,10 +201,10 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
                   </Button>
                 )}
                 {wizardData.currentStep === 3 && (
-                  <Button 
-                    onClick={handleGenerate} 
+                  <Button
+                    onClick={handleGenerate}
                     disabled={isLoading}
-                    className="gradient-primary text-white hover-sheen"
+                    className="btn-primary-enhanced focus-ring-enhanced h-12 px-6 py-3 gradient-primary text-white hover-sheen"
                   >
                     {isLoading ? "Generišem..." : "Generiši video"}
                   </Button>
