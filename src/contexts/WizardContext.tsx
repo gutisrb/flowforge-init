@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { SlotData } from '@/components/ImageSlots';
 
 export interface FormData {
@@ -29,6 +29,8 @@ interface WizardContextType {
   resetWizard: () => void;
 }
 
+const STORAGE_KEY = 'wizard-draft';
+
 const defaultWizardData: WizardData = {
   formData: { title: '', price: '', location: '' },
   slots: Array.from({ length: 5 }, (_, i) => ({
@@ -42,8 +44,89 @@ const defaultWizardData: WizardData = {
 
 const WizardContext = createContext<WizardContextType | undefined>(undefined);
 
+const serializeWizardData = async (data: WizardData): Promise<string> => {
+  const serialized = {
+    formData: data.formData,
+    clipCount: data.clipCount,
+    currentStep: data.currentStep,
+    slots: await Promise.all(data.slots.map(async (slot) => ({
+      id: slot.id,
+      mode: slot.mode,
+      images: await Promise.all(slot.images.map(async (file) => {
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        return {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          lastModified: file.lastModified,
+          data: base64
+        };
+      }))
+    })))
+  };
+  return JSON.stringify(serialized);
+};
+
+const deserializeWizardData = async (json: string): Promise<WizardData> => {
+  const parsed = JSON.parse(json);
+  const slots = await Promise.all(parsed.slots.map(async (slot: any) => ({
+    id: slot.id,
+    mode: slot.mode,
+    images: await Promise.all(slot.images.map(async (img: any) => {
+      const response = await fetch(img.data);
+      const blob = await response.blob();
+      return new File([blob], img.name, { type: img.type, lastModified: img.lastModified });
+    }))
+  })));
+
+  return {
+    formData: parsed.formData,
+    clipCount: parsed.clipCount,
+    currentStep: parsed.currentStep,
+    slots
+  };
+};
+
 export function WizardProvider({ children }: { children: ReactNode }) {
   const [wizardData, setWizardData] = useState<WizardData>(defaultWizardData);
+  const [isRestored, setIsRestored] = useState(false);
+
+  useEffect(() => {
+    const restoreData = async () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const restored = await deserializeWizardData(stored);
+          setWizardData(restored);
+        }
+      } catch (error) {
+        console.error('Failed to restore wizard data:', error);
+      } finally {
+        setIsRestored(true);
+      }
+    };
+    restoreData();
+  }, []);
+
+  useEffect(() => {
+    if (!isRestored) return;
+
+    const saveData = async () => {
+      try {
+        const serialized = await serializeWizardData(wizardData);
+        localStorage.setItem(STORAGE_KEY, serialized);
+      } catch (error) {
+        console.error('Failed to save wizard data:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(saveData, 500);
+    return () => clearTimeout(timeoutId);
+  }, [wizardData, isRestored]);
 
   const updateFormData = (data: FormData) => {
     setWizardData(prev => ({ ...prev, formData: data }));
@@ -78,6 +161,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   const resetWizard = () => {
     setWizardData(defaultWizardData);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
