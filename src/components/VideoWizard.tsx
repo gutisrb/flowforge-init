@@ -10,6 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
 import { useWizard } from '@/contexts/WizardContext';
 import { MAKE_VIDEO_URL } from '@/config/make';
+import { compressMappedEntries } from '@/lib/compressWebhookImage';
 
 interface VideoWizardProps {
   user: User;
@@ -37,19 +38,9 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   const canProceedToStep2 = () => !!(wizardData.formData.title && wizardData.formData.price && wizardData.formData.location);
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
- const createMultipartFormData = () => {
-  const form = new FormData();
-
-  // Form fields
-  form.append("title", wizardData.formData.title);
-  form.append("price", wizardData.formData.price);
-  form.append("location", wizardData.formData.location);
-  form.append("size", wizardData.formData.size || "");
-  form.append("beds", wizardData.formData.beds || "");
-  form.append("baths", wizardData.formData.baths || "");
-  form.append("sprat", wizardData.formData.sprat || "");
-  form.append("extras", wizardData.formData.extras || "");
-
+ const createMultipartFormData = async () => {
+  // First, collect all images with their intended keys
+  const imageEntries: { key: string; file: File }[] = [];
   const grouping: any[] = [];
   let imageIndex = 0;
 
@@ -59,8 +50,9 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     if (slot.images.length >= 2) {
       // Frame-to-frame: pair the two images
       const firstIndex = imageIndex;
-      form.append(`image_${imageIndex}`, slot.images[0]); imageIndex++;
-      form.append(`image_${imageIndex}`, slot.images[1]);
+      imageEntries.push({ key: `image_${imageIndex}`, file: slot.images[0] });
+      imageIndex++;
+      imageEntries.push({ key: `image_${imageIndex}`, file: slot.images[1] });
 
       grouping.push({
         type: "frame-to-frame",
@@ -71,18 +63,49 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
       imageIndex++;
     } else {
       // Single image clip
-      form.append(`image_${imageIndex}`, slot.images[0]);
+      imageEntries.push({ key: `image_${imageIndex}`, file: slot.images[0] });
       grouping.push({ type: "single", index: imageIndex });
       imageIndex++;
     }
   });
 
-  form.append("grouping", JSON.stringify(grouping));
-  form.append("slot_mode_info", JSON.stringify(grouping)); // (left as-is)
-  form.append("total_images", String(imageIndex));
-  form.append("user_id", user.id); // you already had this
+  // Compress images to stay under budget
+  const originalCount = imageEntries.length;
+  const compressedEntries = await compressMappedEntries(imageEntries, {
+    maxW: 1280,
+    maxH: 1280,
+    quality: 0.72,
+    budgetBytes: 4.9 * 1024 * 1024
+  });
 
-  return form;
+  // Build FormData with compressed images
+  const form = new FormData();
+  
+  // Form fields
+  form.append("title", wizardData.formData.title);
+  form.append("price", wizardData.formData.price);
+  form.append("location", wizardData.formData.location);
+  form.append("size", wizardData.formData.size || "");
+  form.append("beds", wizardData.formData.beds || "");
+  form.append("baths", wizardData.formData.baths || "");
+  form.append("sprat", wizardData.formData.sprat || "");
+  form.append("extras", wizardData.formData.extras || "");
+
+  // Append compressed images
+  let totalSize = 0;
+  compressedEntries.forEach(({ key, file }) => {
+    form.append(key, file);
+    totalSize += file.size;
+  });
+
+  console.log(`📦 Payload size: ${(totalSize / 1024 / 1024).toFixed(2)} MB (${compressedEntries.length} images)`);
+
+  form.append("grouping", JSON.stringify(grouping));
+  form.append("slot_mode_info", JSON.stringify(grouping));
+  form.append("total_images", String(compressedEntries.length));
+  form.append("user_id", user.id);
+
+  return { form, originalCount, compressedCount: compressedEntries.length };
 };
 
 
@@ -93,7 +116,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     try {
       const webhookUrl = MAKE_VIDEO_URL;
 
-      const multipartData = createMultipartFormData();
+      const { form: multipartData, originalCount, compressedCount } = await createMultipartFormData();
       setProgress(55);
 
       const res = await fetch(webhookUrl, { method: "POST", body: multipartData });
@@ -101,7 +124,17 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      toast({ title: "Uspešno!", description: "Započeli smo generisanje videa." });
+      // Show warning if images were dropped
+      if (compressedCount < originalCount) {
+        toast({ 
+          title: "Uspešno poslato!", 
+          description: `Fotografije su velike; poslali smo prvih ${compressedCount} fotografija da bismo izbegli grešku. Dodajte manje ili manje fotografija za sledeći put.`,
+          duration: 6000
+        });
+      } else {
+        toast({ title: "Uspešno!", description: "Započeli smo generisanje videa." });
+      }
+      
       setProgress(100);
       
       // Reset wizard after successful submit
