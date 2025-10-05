@@ -9,7 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
 import { useWizard } from '@/contexts/WizardContext';
-import { MAKE_VIDEO_URL } from '@/config/make';
+import { compressMappedEntries } from '@/lib/compressWebhookImages';
+import { MAKE_VIDEO_WEBHOOK } from '@/config/make';
 
 interface VideoWizardProps {
   user: User;
@@ -37,53 +38,33 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   const canProceedToStep2 = () => !!(wizardData.formData.title && wizardData.formData.price && wizardData.formData.location);
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
- const createMultipartFormData = () => {
-  const form = new FormData();
+  const createMultipartFormData = (
+    entries: { key: string; file: File }[],
+    grouping: any[],
+  ) => {
+    const form = new FormData();
 
-  // Form fields
-  form.append("title", wizardData.formData.title);
-  form.append("price", wizardData.formData.price);
-  form.append("location", wizardData.formData.location);
-  form.append("size", wizardData.formData.size || "");
-  form.append("beds", wizardData.formData.beds || "");
-  form.append("baths", wizardData.formData.baths || "");
-  form.append("sprat", wizardData.formData.sprat || "");
-  form.append("extras", wizardData.formData.extras || "");
+    // Form fields
+    form.append("title", wizardData.formData.title);
+    form.append("price", wizardData.formData.price);
+    form.append("location", wizardData.formData.location);
+    form.append("size", wizardData.formData.size || "");
+    form.append("beds", wizardData.formData.beds || "");
+    form.append("baths", wizardData.formData.baths || "");
+    form.append("sprat", wizardData.formData.sprat || "");
+    form.append("extras", wizardData.formData.extras || "");
 
-  const grouping: any[] = [];
-  let imageIndex = 0;
-
-  wizardData.slots.forEach((slot) => {
-    if (slot.images.length === 0) return;
-
-    if (slot.images.length >= 2) {
-      // Frame-to-frame: pair the two images
-      const firstIndex = imageIndex;
-      form.append(`image_${imageIndex}`, slot.images[0]); imageIndex++;
-      form.append(`image_${imageIndex}`, slot.images[1]);
-
-      grouping.push({
-        type: "frame-to-frame",
-        files: [firstIndex, imageIndex],
-        first_index: firstIndex,
-        second_index: imageIndex
-      });
-      imageIndex++;
-    } else {
-      // Single image clip
-      form.append(`image_${imageIndex}`, slot.images[0]);
-      grouping.push({ type: "single", index: imageIndex });
-      imageIndex++;
+    for (const { key, file } of entries) {
+      form.append(key, file, file.name);
     }
-  });
 
-  form.append("grouping", JSON.stringify(grouping));
-  form.append("slot_mode_info", JSON.stringify(grouping)); // (left as-is)
-  form.append("total_images", String(imageIndex));
-  form.append("user_id", user.id); // you already had this
+    form.append("grouping", JSON.stringify(grouping));
+    form.append("slot_mode_info", JSON.stringify(grouping)); // (left as-is)
+    form.append("total_images", String(entries.length));
+    form.append("user_id", user.id); // you already had this
 
-  return form;
-};
+    return form;
+  };
 
 
   const handleGenerate = async () => {
@@ -91,19 +72,90 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
     setProgress(20);
 
     try {
-      const webhookUrl = MAKE_VIDEO_URL;
+      const slotTypes: ("pair" | "single")[] = [];
+      const mapped: { key: string; file: File }[] = [];
+      let imageIndex = 0;
 
-      const multipartData = createMultipartFormData();
+      for (const slot of wizardData.slots) {
+        if (slot.images.length === 0) {
+          continue;
+        }
+
+        if (slot.images.length >= 2) {
+          mapped.push({ key: `image_${imageIndex}`, file: slot.images[0] });
+          imageIndex++;
+          mapped.push({ key: `image_${imageIndex}`, file: slot.images[1] });
+          imageIndex++;
+          slotTypes.push("pair");
+        } else {
+          mapped.push({ key: `image_${imageIndex}`, file: slot.images[0] });
+          imageIndex++;
+          slotTypes.push("single");
+        }
+      }
+
+      const compressedEntries = await compressMappedEntries(mapped, {
+        maxW: 1280,
+        maxH: 1280,
+        quality: 0.72,
+        budgetBytes: 4.9 * 1024 * 1024,
+      });
+
+      if (compressedEntries.length === 0) {
+        alert("Fotografije su prevelike čak i nakon kompresije. Smanjite broj ili rezoluciju i pokušajte ponovo.");
+        setProgress(0);
+        return;
+      }
+      if (compressedEntries.length < mapped.length) {
+        console.warn(`Poslato ${compressedEntries.length}/${mapped.length} slika zbog ograničenja veličine zahteva (<5MB).`);
+      }
+
+      const grouping: any[] = [];
+      let pointer = 0;
+
+      for (const slotType of slotTypes) {
+        if (pointer >= compressedEntries.length) {
+          break;
+        }
+
+        if (slotType === "pair") {
+          const remaining = compressedEntries.length - pointer;
+          if (remaining >= 2) {
+            const firstIndex = pointer;
+            const secondIndex = pointer + 1;
+            grouping.push({
+              type: "frame-to-frame",
+              files: [firstIndex, secondIndex],
+              first_index: firstIndex,
+              second_index: secondIndex
+            });
+            pointer += 2;
+          } else {
+            grouping.push({ type: "single", index: pointer });
+            pointer += 1;
+          }
+        } else {
+          grouping.push({ type: "single", index: pointer });
+          pointer += 1;
+        }
+      }
+
+      const multipartData = createMultipartFormData(compressedEntries, grouping);
       setProgress(55);
 
-      const res = await fetch(webhookUrl, { method: "POST", body: multipartData });
+      const res = await fetch(MAKE_VIDEO_WEBHOOK, { method: "POST", body: multipartData });
       setProgress(90);
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        console.error("Webhook failed:", res.status, t);
+        alert("Neuspešno slanje na automatizaciju (webhook). Pokušajte ponovo.");
+        return;
+      }
 
       toast({ title: "Uspešno!", description: "Započeli smo generisanje videa." });
       setProgress(100);
-      
+
       // Reset wizard after successful submit
       setTimeout(() => {
         resetWizard();
@@ -111,10 +163,10 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
       }, 1200);
     } catch (e) {
       console.error(e);
-      toast({ 
-        title: "Greška", 
-        description: "Došlo je do greške prilikom slanja.", 
-        variant: "destructive" 
+      toast({
+        title: "Greška",
+        description: "Došlo je do greške prilikom slanja.",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
