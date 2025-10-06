@@ -68,13 +68,23 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
     const saveData = async () => {
       try {
-        await saveWizardDraft(wizardData);
+        // Calculate total size of images
+        const totalSize = wizardData.slots.reduce((sum, slot) => 
+          sum + slot.images.reduce((imgSum, img) => imgSum + img.size, 0), 0
+        );
+        
+        // Only save if total size is under 50MB to prevent crashes
+        if (totalSize < 50 * 1024 * 1024) {
+          await saveWizardDraft(wizardData);
+        } else {
+          console.warn('Skipping auto-save: images too large', totalSize / 1024 / 1024, 'MB');
+        }
       } catch (error) {
         console.error('Failed to save wizard data:', error);
       }
     };
 
-    const timeoutId = setTimeout(saveData, 500);
+    const timeoutId = setTimeout(saveData, 2000);
     return () => clearTimeout(timeoutId);
   }, [wizardData, isRestored]);
 
