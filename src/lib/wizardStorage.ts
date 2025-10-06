@@ -33,6 +33,11 @@ export const saveWizardDraft = async (data: WizardData): Promise<void> => {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
 
+    console.log('🔷 Saving wizard data, slots:', data.slots.length);
+    data.slots.forEach((slot, idx) => {
+      console.log(`  Slot ${idx}: ${slot.images.length} images`);
+    });
+
     const serialized = {
       formData: data.formData,
       clipCount: data.clipCount,
@@ -55,10 +60,21 @@ export const saveWizardDraft = async (data: WizardData): Promise<void> => {
       timestamp: Date.now(),
     };
 
+    console.log('🔷 Serialized slots:', serialized.slots.length);
+    serialized.slots.forEach((slot, idx) => {
+      console.log(`  Serialized slot ${idx}: ${slot.images.length} images`);
+    });
+
     return new Promise((resolve, reject) => {
       const request = store.put(serialized, DRAFT_KEY);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        console.log('✅ Successfully saved to IndexedDB');
+        resolve();
+      };
+      request.onerror = () => {
+        console.error('❌ Failed to save to IndexedDB:', request.error);
+        reject(request.error);
+      };
     });
   } catch (error) {
     console.error('Failed to save wizard draft:', error);
@@ -78,7 +94,15 @@ export const loadWizardDraft = async (): Promise<WizardData | null> => {
       request.onerror = () => reject(request.error);
     });
 
-    if (!data) return null;
+    if (!data) {
+      console.log('📭 No saved draft found');
+      return null;
+    }
+
+    console.log('📬 Loading wizard data, slots:', data.slots.length);
+    data.slots.forEach((slot: any, idx: number) => {
+      console.log(`  Slot ${idx}: ${slot.images.length} images`);
+    });
 
     const slots = await Promise.all(
       data.slots.map(async (slot: any) => ({
@@ -95,6 +119,11 @@ export const loadWizardDraft = async (): Promise<WizardData | null> => {
         ),
       }))
     );
+
+    console.log('📬 Restored slots:', slots.length);
+    slots.forEach((slot, idx) => {
+      console.log(`  Restored slot ${idx}: ${slot.images.length} images`);
+    });
 
     return {
       formData: data.formData,
