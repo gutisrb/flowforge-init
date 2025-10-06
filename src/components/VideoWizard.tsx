@@ -39,6 +39,11 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   const canProceedToStep3 = () => wizardData.slots.some(s => s.images.length > 0);
 
  const createMultipartFormData = async () => {
+  // Generate video_id
+  const videoId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+    ? crypto.randomUUID() 
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+
   // First, collect all images with their intended keys
   const imageEntries: { key: string; file: File }[] = [];
   const grouping: any[] = [];
@@ -104,6 +109,7 @@ export const VideoWizard = ({ user, session }: VideoWizardProps) => {
   form.append("slot_mode_info", JSON.stringify(grouping));
   form.append("total_images", String(compressedEntries.length));
   form.append("user_id", user.id);
+  form.append("video_id", videoId);
 
   return { form, originalCount, compressedCount: compressedEntries.length };
 };
