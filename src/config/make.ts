@@ -9,4 +9,4 @@ export const MAKE_STATUS_URL = "https://hook.eu2.make.com/c2whxklnfgfc6435ddqty6
 
 export const MAKE_API_KEY = "bager155";
 // src/config/make.ts
-export const MAKE_VIDEO_URL = "https://hook.eu2.make.com/fsm7opdcp5jl8ngckqq9nb21rafwuslg";
+export const MAKE_VIDEO_URL = "https://hook.eu2.make.com/2c6a9zs30ahk4267gjdfkb74kcwtluau";
