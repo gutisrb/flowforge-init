@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDrag } from "./DragContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -6,6 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, ArrowRight, Move, MoreHorizontal, Edit3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Helper component to manage object URLs for File previews
+function ImagePreview({ 
+  image, 
+  index, 
+  children 
+}: { 
+  image: File; 
+  index: number; 
+  children: (url: string) => React.ReactNode;
+}) {
+  const [url, setUrl] = useState<string>('');
+
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(image);
+    setUrl(objectUrl);
+    
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [image]);
+
+  if (!url) return null;
+  
+  return <>{children(url)}</>;
+}
 
 interface SlotCardProps {
   slotIndex: number;
@@ -224,25 +250,25 @@ export function SlotCard({
         ) : (
           <div className={`media-rail ${images.length === 1 ? 'single-photo' : ''}`}>
             {images.map((image, index) => {
-              const url = URL.createObjectURL(image);
               const isBeingDragged = draggedImageIndex === index;
               
               return (
-                <Dialog key={index}>
-                  <DialogTrigger asChild>
-                    <div 
-                      className={`photo-tile ${isBeingDragged ? 'dragging' : ''}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDrop={(e) => handleImageDrop(e, index)}
-                      onDragOver={(e) => e.preventDefault()}
-                    >
-                      <img 
-                        src={url} 
-                        alt={`Image ${index + 1}`}
-                        onLoad={() => URL.revokeObjectURL(url)}
-                      />
+                <ImagePreview key={index} image={image} index={index}>
+                  {(url) => (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div 
+                          className={`photo-tile ${isBeingDragged ? 'dragging' : ''}`}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, index)}
+                          onDragEnd={handleDragEnd}
+                          onDrop={(e) => handleImageDrop(e, index)}
+                          onDragOver={(e) => e.preventDefault()}
+                        >
+                          <img 
+                            src={url} 
+                            alt={`Image ${index + 1}`}
+                          />
                       
                       {/* Frame Pills */}
                       {images.length === 2 ? (
@@ -281,16 +307,18 @@ export function SlotCard({
                           Novi
                         </div>
                       )}
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <img 
-                      src={url} 
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-auto rounded-lg"
-                    />
-                  </DialogContent>
-                </Dialog>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl">
+                        <img 
+                          src={url} 
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-auto rounded-lg"
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </ImagePreview>
               );
             })}
           </div>
