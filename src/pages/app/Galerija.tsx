@@ -231,22 +231,50 @@ export function Galerija() {
                   <Card key={asset.id} className="hover-lift overflow-hidden">
                     <CardContent className="p-0">
                       {/* Media */}
-                      <div className="relative aspect-video bg-muted">
+                      <div className="relative aspect-video bg-muted flex items-center justify-center">
                         {asset.kind === 'image' ? (
-                          <img
-                            src={asset.thumb_url || asset.src_url || ''}
-                            alt={asset.prompt || 'Image'}
-                            className="w-full h-full object-cover"
-                          />
+                          (asset.thumb_url || asset.src_url) ? (
+                            <img
+                              src={asset.thumb_url || asset.src_url || ''}
+                              alt={asset.prompt || 'Image'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Failed to load image:', asset.id);
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '<div class="text-muted-foreground text-sm">Slika nije dostupna</div>';
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div className="text-muted-foreground text-sm">
+                              {asset.status === 'processing' ? 'Obrada u toku...' : 'Slika nije dostupna'}
+                            </div>
+                          )
                         ) : (
-                          <video
-                            src={asset.src_url || ''}
-                            poster={asset.thumb_url || ''}
-                            controls
-                            muted
-                            loop
-                            className="w-full h-full object-cover"
-                          />
+                          (asset.src_url) ? (
+                            <video
+                              src={asset.src_url}
+                              poster={asset.thumb_url || ''}
+                              controls
+                              muted
+                              loop
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Failed to load video:', asset.id);
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '<div class="text-muted-foreground text-sm">Video nije dostupan</div>';
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div className="text-muted-foreground text-sm">
+                              {asset.status === 'processing' ? 'Obrada u toku...' : 'Video nije dostupan'}
+                            </div>
+                          )
                         )}
 
                         {/* Processing overlay */}

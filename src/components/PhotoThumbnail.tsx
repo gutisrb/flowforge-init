@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Star, Trash2, MoreHorizontal, Shuffle, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -33,6 +33,17 @@ export function PhotoThumbnail({
   className 
 }: PhotoThumbnailProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>('');
+
+  // Create and cleanup object URL
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
+    
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
 
   return (
     <div 
@@ -48,11 +59,17 @@ export function PhotoThumbnail({
       onClick={onPreview}
       tabIndex={0}
     >
-      <img
-        src={URL.createObjectURL(file)}
-        alt={`Fotografija ${index + 1}`}
-        className="w-full h-full object-cover"
-      />
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={`Fotografija ${index + 1}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            console.error('Failed to load thumbnail:', file.name);
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      )}
       
       {/* Main photo badge */}
       {isMainPhoto && (

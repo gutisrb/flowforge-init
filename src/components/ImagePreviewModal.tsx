@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,23 @@ export function ImagePreviewModal({
   file, 
   title = "Pregled fotografije" 
 }: ImagePreviewModalProps) {
+  const [imageUrl, setImageUrl] = useState<string>('');
+
+  // Create and cleanup object URL
+  useEffect(() => {
+    if (!file) {
+      setImageUrl('');
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
+    
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
   if (!file) return null;
 
   return (
@@ -41,11 +58,16 @@ export function ImagePreviewModal({
         </DialogHeader>
         
         <div className="flex justify-center p-4">
-          <img
-            src={URL.createObjectURL(file)}
-            alt="Preview"
-            className="max-w-full max-h-[70vh] object-contain rounded-lg"
-          />
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              onError={(e) => {
+                console.error('Failed to load preview image:', file.name);
+              }}
+            />
+          )}
         </div>
         
         <div className="p-4 pt-0 text-sm text-muted-foreground text-center">
