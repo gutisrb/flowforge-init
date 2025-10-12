@@ -287,6 +287,16 @@ export function Galerija() {
                           </div>
                         )}
 
+                        {/* Error overlay for ready status but missing URLs */}
+                        {asset.status === 'ready' && !asset.src_url && !asset.thumb_url && (
+                          <div className="absolute inset-0 bg-amber-500/10 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="text-center text-amber-700 dark:text-amber-300">
+                              <p className="text-sm font-medium">Greška pri učitavanju</p>
+                              <p className="text-xs mt-1">Fajl nije sačuvan u bazu</p>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Status badge */}
                         <div className="absolute top-3 left-3">
                           <Badge
