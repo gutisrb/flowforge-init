@@ -227,73 +227,67 @@ export function Galerija() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {assets.map((asset) => (
+                {assets.map((asset) => {
+                  const displayUrl = asset.thumb_url || asset.src_url || null;
+                  const fallbackUrl = asset.inputs?.image_urls?.[0] || null;
+                  
+                  return (
                   <Card key={asset.id} className="hover-lift overflow-hidden">
                     <CardContent className="p-0">
                       {/* Media */}
                       <div className="relative aspect-video bg-muted flex items-center justify-center">
-                        {asset.kind === 'image' ? (
-                          (asset.thumb_url || asset.src_url) ? (
-                            <img
-                              src={asset.thumb_url || asset.src_url || ''}
-                              alt={asset.prompt || 'Image'}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.error('Failed to load image:', asset.id);
-                                e.currentTarget.style.display = 'none';
-                                const parent = e.currentTarget.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = '<div class="text-muted-foreground text-sm">Slika nije dostupna</div>';
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="text-muted-foreground text-sm">
-                              {asset.status === 'processing' ? 'Obrada u toku...' : 'Slika nije dostupna'}
-                            </div>
-                          )
-                        ) : (
-                          (asset.src_url) ? (
-                            <video
-                              src={asset.src_url}
-                              poster={asset.thumb_url || ''}
-                              controls
-                              muted
-                              loop
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.error('Failed to load video:', asset.id);
-                                e.currentTarget.style.display = 'none';
-                                const parent = e.currentTarget.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = '<div class="text-muted-foreground text-sm">Video nije dostupan</div>';
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="text-muted-foreground text-sm">
-                              {asset.status === 'processing' ? 'Obrada u toku...' : 'Video nije dostupan'}
-                            </div>
-                          )
-                        )}
-
-                        {/* Processing overlay */}
-                        {asset.status === 'processing' && (
+                        {asset.status === 'processing' ? (
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
                             <div className="text-center text-white">
                               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                               <p className="text-sm font-medium">Obrada u toku…</p>
                             </div>
                           </div>
-                        )}
-
-                        {/* Error overlay for ready status but missing URLs */}
-                        {asset.status === 'ready' && !asset.src_url && !asset.thumb_url && (
-                          <div className="absolute inset-0 bg-amber-500/10 backdrop-blur-sm flex items-center justify-center p-4">
-                            <div className="text-center text-amber-700 dark:text-amber-300">
-                              <p className="text-sm font-medium">Greška pri učitavanju</p>
-                              <p className="text-xs mt-1">Fajl nije sačuvan u bazu</p>
-                            </div>
+                        ) : asset.status === 'ready' && !displayUrl ? (
+                          <>
+                            {fallbackUrl ? (
+                              <>
+                                <img
+                                  src={fallbackUrl}
+                                  alt={asset.prompt || 'Image'}
+                                  className="w-full h-full object-cover opacity-60"
+                                />
+                                <div className="absolute inset-0 bg-amber-500/10 backdrop-blur-sm flex items-center justify-center p-4">
+                                  <div className="text-center text-amber-700 dark:text-amber-300">
+                                    <p className="text-xs font-medium">Privremeni prikaz iz izvornog URL-a</p>
+                                    <p className="text-xs mt-1">Fajl nije sačuvan u bazu</p>
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="absolute inset-0 bg-amber-500/10 backdrop-blur-sm flex items-center justify-center p-4">
+                                <div className="text-center text-amber-700 dark:text-amber-300">
+                                  <p className="text-sm font-medium">Greška pri učitavanju</p>
+                                  <p className="text-xs mt-1">Fajl nije sačuvan u bazu</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : displayUrl ? (
+                          asset.kind === 'image' ? (
+                            <img
+                              src={displayUrl}
+                              alt={asset.prompt || 'Image'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <video
+                              src={displayUrl}
+                              poster={asset.thumb_url || ''}
+                              controls
+                              muted
+                              loop
+                              className="w-full h-full object-cover"
+                            />
+                          )
+                        ) : (
+                          <div className="text-muted-foreground text-sm">
+                            Sadržaj nije dostupan
                           </div>
                         )}
 
@@ -343,9 +337,9 @@ export function Galerija() {
                             variant="outline"
                             size="sm"
                             className="flex-1"
-                            disabled={asset.status !== 'ready'}
+                            disabled={!displayUrl}
                             onClick={() => handleDownload(asset)}
-                            title={asset.status !== 'ready' ? 'Download će biti omogućen kad je spremno' : 'Preuzmi'}
+                            title={!displayUrl ? 'Download će biti omogućen kada se fajl sačuva' : 'Preuzmi'}
                           >
                             <Download className="h-4 w-4 mr-1" />
                             Preuzmi
@@ -362,7 +356,8 @@ export function Galerija() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Infinite scroll trigger */}

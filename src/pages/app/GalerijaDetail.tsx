@@ -71,22 +71,39 @@ export function GalerijaDetail() {
     fetchAsset();
   }, [id]);
 
-  // Auto-refresh for processing items
+  // Realtime subscription
   useEffect(() => {
-    if (asset?.status !== 'processing') return;
+    if (!id) return;
 
-    const interval = setInterval(() => {
-      fetchAsset();
-    }, 7000); // 7 seconds
+    const channel = (supabase as any)
+      .channel(`asset-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'assets',
+          filter: `id=eq.${id}`,
+        },
+        (payload: any) => {
+          setAsset(payload.new as Asset);
+        }
+      )
+      .subscribe();
 
-    return () => clearInterval(interval);
-  }, [asset?.status, id]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
+
+  const displayUrl = asset?.thumb_url || asset?.src_url || null;
+  const fallbackUrl = asset?.inputs?.image_urls?.[0] || null;
 
   const handleDownload = async () => {
-    if (!asset || asset.status !== 'ready' || !asset.src_url) return;
+    if (!displayUrl) return;
 
     try {
-      const response = await fetch(asset.src_url);
+      const response = await fetch(displayUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -106,8 +123,8 @@ export function GalerijaDetail() {
   };
 
   const handleCopyUrl = () => {
-    if (!asset?.src_url) return;
-    navigator.clipboard.writeText(asset.src_url);
+    if (!displayUrl) return;
+    navigator.clipboard.writeText(displayUrl);
     toast({
       title: 'Kopirano',
       description: 'URL je kopiran u clipboard',
@@ -178,20 +195,54 @@ export function GalerijaDetail() {
         <div className="lg:col-span-2">
           <Card>
             <CardContent className="p-0">
-              <div className="relative bg-muted rounded-lg overflow-hidden">
-                {asset.kind === 'image' ? (
-                  <img
-                    src={asset.thumb_url || asset.src_url || ''}
-                    alt={asset.prompt || 'Image'}
-                    className="w-full h-auto object-contain max-h-[70vh]"
-                  />
+              <div className="relative bg-muted rounded-lg overflow-hidden min-h-[400px] flex items-center justify-center">
+                {asset.status === 'processing' ? (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                    <p className="text-text-muted">Obrada u toku…</p>
+                  </div>
+                ) : asset.status === 'ready' && !displayUrl ? (
+                  fallbackUrl ? (
+                    <div className="relative w-full">
+                      <img
+                        src={fallbackUrl}
+                        alt={asset.prompt || 'Image'}
+                        className="w-full h-auto object-contain max-h-[70vh] opacity-60"
+                      />
+                      <div className="absolute top-4 left-4 right-4">
+                        <Alert className="border-amber-500/20 bg-amber-500/10">
+                          <AlertDescription className="text-amber-700 dark:text-amber-300 text-sm">
+                            Privremeni prikaz iz izvornog URL-a. Fajl nije sačuvan u bazu.
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 px-4">
+                      <Alert variant="destructive" className="max-w-md">
+                        <AlertDescription>
+                          Fajl nije sačuvan u bazu. Download i Copy URL nisu dostupni.
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  )
+                ) : displayUrl ? (
+                  asset.kind === 'image' ? (
+                    <img
+                      src={displayUrl}
+                      alt={asset.prompt || 'Image'}
+                      className="w-full h-auto object-contain max-h-[70vh]"
+                    />
+                  ) : (
+                    <video
+                      src={displayUrl}
+                      poster={asset.thumb_url || ''}
+                      controls
+                      className="w-full h-auto object-contain max-h-[70vh]"
+                    />
+                  )
                 ) : (
-                  <video
-                    src={asset.src_url || ''}
-                    poster={asset.thumb_url || ''}
-                    controls
-                    className="w-full h-auto object-contain max-h-[70vh]"
-                  />
+                  <div className="text-muted-foreground">Sadržaj nije dostupan</div>
                 )}
               </div>
             </CardContent>
@@ -229,13 +280,29 @@ export function GalerijaDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted p-4 rounded-lg max-h-60 overflow-y-auto">
-                <pre className="text-xs text-text-primary whitespace-pre-wrap font-mono">
-                  {asset.kind === 'image'
-                    ? asset.prompt || 'Nema prompt podataka'
-                    : JSON.stringify(asset.inputs || {}, null, 2)}
-                </pre>
-              </div>
+              {asset.kind === 'image' ? (
+                <div className="space-y-3">
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-text-primary whitespace-pre-wrap">
+                      {asset.prompt || 'Nema prompt podataka'}
+                    </p>
+                  </div>
+                  {asset.inputs?.instructions && (
+                    <div className="bg-muted/50 p-3 rounded-lg">
+                      <p className="text-xs text-text-muted mb-1 font-medium">Instrukcije:</p>
+                      <p className="text-xs text-text-muted whitespace-pre-wrap">
+                        {asset.inputs.instructions}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-muted p-4 rounded-lg max-h-60 overflow-y-auto">
+                  <pre className="text-xs text-text-primary whitespace-pre-wrap font-mono">
+                    {JSON.stringify(asset.inputs || {}, null, 2)}
+                  </pre>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -267,7 +334,7 @@ export function GalerijaDetail() {
                 onClick={handleCopyUrl}
                 variant="outline"
                 className="w-full"
-                disabled={!asset.src_url}
+                disabled={!displayUrl}
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Kopiraj URL
@@ -276,7 +343,7 @@ export function GalerijaDetail() {
                 onClick={handleDownload}
                 variant="outline"
                 className="w-full"
-                disabled={asset.status !== 'ready' || !asset.src_url}
+                disabled={!displayUrl}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Preuzmi
