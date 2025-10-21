@@ -51,11 +51,11 @@ export function GalerijaDetail() {
         .from('assets')
         .select('id, user_id, kind, status, src_url, thumb_url, prompt, inputs, posted_to, created_at, width, height, duration')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      setAsset(data as Asset);
+      setAsset(data);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -166,8 +166,8 @@ export function GalerijaDetail() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Nazad na galeriju
         </Button>
-        <Alert variant="destructive">
-          <AlertDescription>Sadržaj nije pronađen</AlertDescription>
+        <Alert>
+          <AlertDescription>Nije pronađeno</AlertDescription>
         </Alert>
       </div>
     );
