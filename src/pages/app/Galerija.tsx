@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, ExternalLink, Loader2, Share2 } from 'lucide-react';
+import { Download, ExternalLink, Loader2, Share2, PlayCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -540,7 +540,11 @@ export function Galerija() {
                   })();
 
                   return (
-                    <Card key={video.id} className="hover-lift overflow-hidden">
+                    <Card 
+                      key={video.id} 
+                      className="hover-lift overflow-hidden cursor-pointer"
+                      onClick={() => !isProcessing && displayUrl && navigate(`/app/galerija/${video.id}`)}
+                    >
                       <CardContent className="p-0">
                         {/* Media */}
                         <div className="relative aspect-video bg-muted flex items-center justify-center">
@@ -552,14 +556,16 @@ export function Galerija() {
                               </div>
                             </div>
                           ) : displayUrl ? (
-                            <video
-                              src={displayUrl}
-                              poster={video.thumbnail_url || ''}
-                              controls
-                              muted
-                              loop
-                              className="w-full h-full object-cover"
-                            />
+                            <>
+                              <img
+                                src={video.thumbnail_url || displayUrl}
+                                alt={video.title || 'Video thumbnail'}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+                                <PlayCircle className="h-16 w-16 text-white drop-shadow-lg" />
+                              </div>
+                            </>
                           ) : (
                             <div className="text-muted-foreground text-sm">
                               Sadržaj nije dostupan
@@ -610,7 +616,10 @@ export function Galerija() {
                                 variant="default"
                                 size="sm"
                                 className="flex-1"
-                                onClick={() => postVideo(video)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  postVideo(video);
+                                }}
                                 disabled={isPosting}
                               >
                                 <Share2 className="h-4 w-4 mr-1" />
@@ -622,7 +631,10 @@ export function Galerija() {
                               size="sm"
                               className={showPostButton ? '' : 'flex-1'}
                               disabled={!displayUrl}
-                              onClick={() => handleDownload({ ...video, kind: 'video', status: isProcessing ? 'processing' : 'ready', src_url: video.video_url, thumb_url: video.thumbnail_url, prompt: video.title, inputs: null, posted_to: video.posted_channels_json } as Asset)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload({ ...video, kind: 'video', status: isProcessing ? 'processing' : 'ready', src_url: video.video_url, thumb_url: video.thumbnail_url, prompt: video.title, inputs: null, posted_to: video.posted_channels_json } as Asset);
+                              }}
                               title={!displayUrl ? 'Download će biti omogućen kada se fajl sačuva' : 'Preuzmi'}
                             >
                               <Download className="h-4 w-4 mr-1" />
@@ -631,7 +643,10 @@ export function Galerija() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/app/galerija/${video.id}`)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/app/galerija/${video.id}`);
+                              }}
                               title="Prikaži detalje"
                             >
                               <ExternalLink className="h-4 w-4" />
