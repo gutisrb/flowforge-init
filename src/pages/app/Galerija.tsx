@@ -21,6 +21,17 @@ interface Asset {
   created_at: string;
 }
 
+interface Video {
+  id: string;
+  user_id: string;
+  title: string | null;
+  status: string | null;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  posted_channels_json: any;
+  created_at: string;
+}
+
 const PAGE_SIZE = 24;
 
 const statusColors = {
@@ -37,6 +48,7 @@ const platformIcons: Record<string, string> = {
 
 export function Galerija() {
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
@@ -46,29 +58,46 @@ export function Galerija() {
 
   const fetchAssets = useCallback(async (offset = 0, append = false) => {
     try {
-      let query = (supabase as any)
+      // Fetch assets (images only, since videos come from videos table)
+      let assetsQuery = (supabase as any)
         .from('assets')
         .select('id, user_id, kind, status, src_url, thumb_url, prompt, inputs, posted_to, created_at')
         .order('created_at', { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1);
 
-      if (filter !== 'all') {
-        query = query.eq('kind', filter);
+      if (filter === 'image') {
+        assetsQuery = assetsQuery.eq('kind', 'image');
+      } else if (filter === 'video') {
+        assetsQuery = assetsQuery.eq('kind', 'video');
       }
 
-      const { data, error } = await query;
+      const { data: assetsData, error: assetsError } = await assetsQuery;
+      if (assetsError) throw assetsError;
 
-      if (error) throw error;
+      const typedAssets = (assetsData || []) as Asset[];
 
-      const typedData = (data || []) as Asset[];
+      // Fetch videos from videos table
+      let videosData: Video[] = [];
+      if (filter === 'all' || filter === 'video') {
+        const { data: vids, error: vidsError } = await (supabase as any)
+          .from('videos')
+          .select('id, user_id, title, status, video_url, thumbnail_url, posted_channels_json, created_at')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + PAGE_SIZE - 1);
+
+        if (vidsError) throw vidsError;
+        videosData = (vids || []) as Video[];
+      }
 
       if (append) {
-        setAssets(prev => [...prev, ...typedData]);
+        setAssets(prev => [...prev, ...typedAssets]);
+        setVideos(prev => [...prev, ...videosData]);
       } else {
-        setAssets(typedData);
+        setAssets(typedAssets);
+        setVideos(videosData);
       }
 
-      setHasMore(typedData.length === PAGE_SIZE);
+      setHasMore(typedAssets.length === PAGE_SIZE || videosData.length === PAGE_SIZE);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -85,7 +114,7 @@ export function Galerija() {
     fetchAssets(0, false);
   }, [filter]);
 
-  // Realtime subscription
+  // Realtime subscription for assets
   useEffect(() => {
     const channel = (supabase as any)
       .channel('assets-changes')
@@ -115,24 +144,56 @@ export function Galerija() {
     };
   }, []);
 
+  // Realtime subscription for videos
+  useEffect(() => {
+    const channel = (supabase as any)
+      .channel('videos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'videos',
+        },
+        (payload: any) => {
+          if (payload.eventType === 'INSERT') {
+            setVideos(prev => [payload.new as Video, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setVideos(prev =>
+              prev.map(video =>
+                video.id === payload.new.id ? (payload.new as Video) : video
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Fallback polling for processing items
   useEffect(() => {
-    const hasProcessing = assets.some(a => a.status === 'processing');
-    if (!hasProcessing) return;
+    const hasProcessingAssets = assets.some(a => a.status === 'processing');
+    const hasProcessingVideos = videos.some(v => !v.video_url);
+    if (!hasProcessingAssets && !hasProcessingVideos) return;
 
     const interval = setInterval(() => {
       fetchAssets(0, false);
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [assets, fetchAssets]);
+  }, [assets, videos, fetchAssets]);
 
   // Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          fetchAssets(assets.length, true);
+          const totalItems = assets.length + videos.length;
+          fetchAssets(totalItems, true);
         }
       },
       { threshold: 0.1 }
@@ -143,7 +204,7 @@ export function Galerija() {
     }
 
     return () => observer.disconnect();
-  }, [assets.length, hasMore, loading, fetchAssets]);
+  }, [assets.length, videos.length, hasMore, loading, fetchAssets]);
 
   const handleDownload = async (asset: Asset) => {
     if (asset.status !== 'ready' || !asset.src_url) return;
@@ -208,11 +269,11 @@ export function Galerija() {
         </TabsList>
 
         <TabsContent value={filter} className="mt-6">
-          {loading && assets.length === 0 ? (
+          {loading && assets.length === 0 && videos.length === 0 ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : assets.length === 0 ? (
+          ) : assets.length === 0 && videos.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <p className="text-text-muted text-lg mb-4">
                 Još uvek nemate sadržaja
@@ -227,6 +288,7 @@ export function Galerija() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {/* Render assets */}
                 {assets.map((asset) => {
                   const displayUrl = asset.thumb_url || asset.src_url || null;
                   const fallbackUrl = asset.inputs?.image_urls?.[0] || null;
@@ -356,6 +418,103 @@ export function Galerija() {
                       </div>
                     </CardContent>
                   </Card>
+                  );
+                })}
+
+                {/* Render videos from videos table */}
+                {videos.map((video) => {
+                  const displayUrl = video.video_url || video.thumbnail_url || null;
+                  const isProcessing = !video.video_url;
+                  
+                  return (
+                    <Card key={video.id} className="hover-lift overflow-hidden">
+                      <CardContent className="p-0">
+                        {/* Media */}
+                        <div className="relative aspect-video bg-muted flex items-center justify-center">
+                          {isProcessing ? (
+                            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                              <div className="text-center text-white">
+                                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                                <p className="text-sm font-medium">Obrada u toku…</p>
+                              </div>
+                            </div>
+                          ) : displayUrl ? (
+                            <video
+                              src={displayUrl}
+                              poster={video.thumbnail_url || ''}
+                              controls
+                              muted
+                              loop
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-muted-foreground text-sm">
+                              Sadržaj nije dostupan
+                            </div>
+                          )}
+
+                          {/* Status badge */}
+                          <div className="absolute top-3 left-3">
+                            <Badge
+                              className={
+                                isProcessing
+                                  ? statusColors.processing
+                                  : statusColors.ready
+                              }
+                            >
+                              {isProcessing ? 'Obrađuje se' : 'Spremno'}
+                            </Badge>
+                          </div>
+
+                          {/* Platform badges */}
+                          {video.posted_channels_json && Array.isArray(video.posted_channels_json) && video.posted_channels_json.length > 0 && (
+                            <div className="absolute top-3 right-3 flex gap-1">
+                              {video.posted_channels_json.map((platform: string) => (
+                                <Badge
+                                  key={platform}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {platformIcons[platform] || platform}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4">
+                          <div className="text-xs text-text-subtle mb-2">
+                            {formatDate(video.created_at)}
+                          </div>
+                          <p className="text-sm text-text-muted line-clamp-2 mb-4">
+                            {video.title || 'Video bez naslova'}
+                          </p>
+
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              disabled={!displayUrl}
+                              onClick={() => handleDownload({ ...video, kind: 'video', status: isProcessing ? 'processing' : 'ready', src_url: video.video_url, thumb_url: video.thumbnail_url, prompt: video.title, inputs: null, posted_to: video.posted_channels_json } as Asset)}
+                              title={!displayUrl ? 'Download će biti omogućen kada se fajl sačuva' : 'Preuzmi'}
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              Preuzmi
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/app/galerija/${video.id}`)}
+                              title="Prikaži detalje"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
