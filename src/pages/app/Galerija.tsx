@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, ExternalLink, Loader2 } from 'lucide-react';
+import { Download, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 
 interface Asset {
   id: string;
@@ -52,9 +53,20 @@ export function Galerija() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
+  const [postingVideoIds, setPostingVideoIds] = useState<Set<string>>(new Set());
+  const [user, setUser] = useState<any>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const previousVideos = useRef<Video[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { profile } = useProfile(user);
+
+  // Fetch current user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+  }, []);
 
   const fetchAssets = useCallback(async (offset = 0, append = false) => {
     try {
@@ -252,6 +264,94 @@ export function Galerija() {
     });
   };
 
+  // Check if video has been posted (has any status entries in posted_channels_json)
+  const hasBeenPosted = (video: Video): boolean => {
+    if (!video.posted_channels_json || typeof video.posted_channels_json !== 'object') return false;
+    const channels = video.posted_channels_json as Record<string, any>;
+    return Object.keys(channels).length > 0;
+  };
+
+  // Post video to social channels via webhook
+  const postVideo = async (video: Video) => {
+    if (postingVideoIds.has(video.id)) return;
+    
+    setPostingVideoIds(prev => new Set(prev).add(video.id));
+
+    try {
+      const webhookUrl = import.meta.env.VITE_MAKE_POST_WEBHOOK_URL;
+      if (!webhookUrl) {
+        throw new Error('Post webhook URL nije konfigurisan');
+      }
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: video.user_id,
+          video_id: video.id,
+          channels: ['instagram', 'tiktok', 'facebook', 'youtube']
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Webhook poziv nije uspeo');
+      }
+
+      // Update posted_channels_json with pending status
+      const updatedChannels = {
+        instagram: { status: 'pending' },
+        tiktok: { status: 'pending' },
+        facebook: { status: 'pending' },
+        youtube: { status: 'pending' }
+      };
+
+      const { error } = await (supabase as any)
+        .from('videos')
+        .update({ posted_channels_json: updatedChannels })
+        .eq('id', video.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Video poslat na objavu',
+        description: 'Video je poslat na društvene mreže',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Greška',
+        description: error.message || 'Nije moguće objaviti video',
+        variant: 'destructive',
+      });
+    } finally {
+      setPostingVideoIds(prev => {
+        const next = new Set(prev);
+        next.delete(video.id);
+        return next;
+      });
+    }
+  };
+
+  // Auto-post when video becomes ready (if review_first is false)
+  useEffect(() => {
+    if (!profile || profile.review_first !== false) return;
+
+    const newlyReadyVideos = videos.filter(video => {
+      const wasProcessing = previousVideos.current.find(prev => 
+        prev.id === video.id && !prev.video_url
+      );
+      const isNowReady = video.video_url !== null;
+      const notPosted = !hasBeenPosted(video);
+      
+      return wasProcessing && isNowReady && notPosted;
+    });
+
+    newlyReadyVideos.forEach(video => {
+      postVideo(video);
+    });
+
+    previousVideos.current = videos;
+  }, [videos, profile]);
+
   return (
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
@@ -425,7 +525,20 @@ export function Galerija() {
                 {videos.map((video) => {
                   const displayUrl = video.video_url || video.thumbnail_url || null;
                   const isProcessing = !video.video_url;
+                  const posted = hasBeenPosted(video);
+                  const isPosting = postingVideoIds.has(video.id);
+                  const showPostButton = profile?.review_first === true && !isProcessing && displayUrl && !posted && !isPosting;
                   
+                  // Parse platform badges from posted_channels_json
+                  const platformBadges = (() => {
+                    if (!video.posted_channels_json || typeof video.posted_channels_json !== 'object') return [];
+                    const channels = video.posted_channels_json as Record<string, any>;
+                    return Object.entries(channels).map(([platform, data]) => ({
+                      platform,
+                      status: data?.status || 'unknown'
+                    }));
+                  })();
+
                   return (
                     <Card key={video.id} className="hover-lift overflow-hidden">
                       <CardContent className="p-0">
@@ -466,13 +579,13 @@ export function Galerija() {
                             </Badge>
                           </div>
 
-                          {/* Platform badges */}
-                          {video.posted_channels_json && Array.isArray(video.posted_channels_json) && video.posted_channels_json.length > 0 && (
-                            <div className="absolute top-3 right-3 flex gap-1">
-                              {video.posted_channels_json.map((platform: string) => (
+                          {/* Platform badges from posted_channels_json */}
+                          {platformBadges.length > 0 && (
+                            <div className="absolute top-3 right-3 flex flex-wrap gap-1">
+                              {platformBadges.map(({ platform, status }) => (
                                 <Badge
                                   key={platform}
-                                  variant="secondary"
+                                  variant={status === 'posted' ? 'default' : status === 'failed' ? 'destructive' : 'secondary'}
                                   className="text-xs"
                                 >
                                   {platformIcons[platform] || platform}
@@ -492,10 +605,22 @@ export function Galerija() {
                           </p>
 
                           <div className="flex gap-2">
+                            {showPostButton && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => postVideo(video)}
+                                disabled={isPosting}
+                              >
+                                <Share2 className="h-4 w-4 mr-1" />
+                                Objavi
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
-                              className="flex-1"
+                              className={showPostButton ? '' : 'flex-1'}
                               disabled={!displayUrl}
                               onClick={() => handleDownload({ ...video, kind: 'video', status: isProcessing ? 'processing' : 'ready', src_url: video.video_url, thumb_url: video.thumbnail_url, prompt: video.title, inputs: null, posted_to: video.posted_channels_json } as Asset)}
                               title={!displayUrl ? 'Download će biti omogućen kada se fajl sačuva' : 'Preuzmi'}
