@@ -19,7 +19,7 @@ interface Video {
   meta: any;
   posted_channels_json: any;
   created_at: string;
-  duration: number | null;
+  duration_seconds: number | null;
 }
 
 const statusColors = {
@@ -50,10 +50,15 @@ export function GalerijaDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile } = useProfile();
+  const [user, setUser] = useState<any>(null);
+  const { profile } = useProfile(user);
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
 
   const fetchVideo = async () => {
     if (!id) return;
@@ -61,7 +66,7 @@ export function GalerijaDetail() {
     try {
       const { data, error } = await (supabase as any)
         .from('videos')
-        .select('id, user_id, status, video_url, thumbnail_url, title, meta, posted_channels_json, created_at, duration')
+        .select('id, user_id, status, video_url, thumbnail_url, title, meta, posted_channels_json, created_at, duration_seconds')
         .eq('id', id)
         .maybeSingle();
 
@@ -398,11 +403,11 @@ export function GalerijaDetail() {
                   <span className="text-text-primary font-medium">{video.title}</span>
                 </div>
               )}
-              {video.duration && (
+              {video.duration_seconds && (
                 <div className="flex justify-between">
                   <span className="text-text-muted">Trajanje:</span>
                   <span className="text-text-primary font-medium">
-                    {formatDuration(video.duration)}
+                    {formatDuration(video.duration_seconds)}
                   </span>
                 </div>
               )}
