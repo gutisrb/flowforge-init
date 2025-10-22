@@ -268,18 +268,18 @@ export function GalerijaDetail() {
           <Card>
             <CardContent className="p-0">
               <div className="relative bg-black rounded-lg overflow-hidden">
-                {video.status === 'processing' ? (
-                  <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-                    <p className="text-text-muted">Obrada u toku…</p>
-                  </div>
-                ) : videoUrl ? (
+                {videoUrl ? (
                   <video
                     src={videoUrl}
                     poster={video.thumbnail_url || ''}
                     controls
                     className="w-full h-auto"
                   />
+                ) : video.status === 'processing' ? (
+                  <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                    <p className="text-text-muted">Obrada u toku…</p>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center py-20 min-h-[400px] text-muted-foreground">
                     Video nije dostupan
