@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Download, Copy, ArrowLeft, Loader2, Clock, Send } from 'lucide-react';
+import { Download, Copy, ArrowLeft, Loader2, Clock, Send, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -157,42 +157,27 @@ export function GalerijaDetail() {
   };
 
   const handlePostEverywhere = async () => {
-    if (!video || !profile) return;
+    if (!video || !profile || !profile.posting_webhook_url) return;
 
     setPosting(true);
     try {
-      const channels = ['instagram', 'tiktok', 'facebook', 'youtube'];
-      const webhookUrl = import.meta.env.VITE_MAKE_POST_WEBHOOK_URL;
-
-      if (!webhookUrl) {
-        throw new Error('Webhook URL nije konfigurisan');
-      }
-
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(profile.posting_webhook_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: video.user_id,
           video_id: video.id,
-          channels,
+          video_url: video.video_url,
+          title: video.title,
+          description: video.meta?.description,
         }),
       });
 
       if (!response.ok) throw new Error('Greška pri objavljivanju');
 
-      const updatedChannels = channels.reduce((acc, ch) => {
-        acc[ch] = 'pending';
-        return acc;
-      }, {} as Record<string, string>);
-
-      await (supabase as any)
-        .from('videos')
-        .update({ posted_channels_json: updatedChannels })
-        .eq('id', video.id);
-
       toast({
         title: 'Uspeh',
-        description: 'Video je poslat na objavu',
+        description: 'Video je poslat na objavu na sve platforme',
       });
     } catch (error: any) {
       toast({
@@ -360,15 +345,16 @@ export function GalerijaDetail() {
               {profile?.review_first && video.status === 'ready' && (
                 <Button
                   onClick={handlePostEverywhere}
-                  className="w-full"
-                  disabled={posting}
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] hover:bg-[position:100%_0] transition-all duration-500 text-white shadow-lg hover:shadow-primary/50 group"
+                  disabled={posting || !profile.posting_webhook_url}
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                   {posting ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin relative z-10" />
                   ) : (
-                    <Send className="h-4 w-4 mr-2" />
+                    <Sparkles className="h-4 w-4 mr-2 relative z-10 animate-pulse" />
                   )}
-                  Objavi svuda
+                  <span className="relative z-10 font-semibold">Objavi svuda</span>
                 </Button>
               )}
               <Button

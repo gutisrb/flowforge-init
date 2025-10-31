@@ -7,6 +7,7 @@ interface Profile {
   webhook_url: string | null;
   org_name: string | null;
   review_first: boolean;
+  posting_webhook_url: string | null;
 }
 
 export const useProfile = (user: User | null) => {
@@ -27,7 +28,7 @@ export const useProfile = (user: User | null) => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, webhook_url, org_name, review_first')
+          .select('id, webhook_url, org_name, review_first, posting_webhook_url')
           .eq('id', user.id)
           .single();
 
@@ -41,7 +42,7 @@ export const useProfile = (user: User | null) => {
                 webhook_url: null,
                 org_name: null,
               })
-              .select('id, webhook_url, org_name, review_first')
+              .select('id, webhook_url, org_name, review_first, posting_webhook_url')
               .single();
 
             if (insertError) {
