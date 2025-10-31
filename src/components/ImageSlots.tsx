@@ -4,6 +4,7 @@ import { SlotsGrid } from "./SlotsGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export interface SlotData {
   id: string;
@@ -30,30 +31,40 @@ export function ImageSlots({
   onPrev,
   canProceed,
 }: Props) {
+  const { toast } = useToast();
   const maxImages = clipCount * 2;
 
   const handleBulkAdd = (files: File[]) => {
     const next = slots.map(s => ({...s, images: [...s.images]}));
-    let fileIndex = 0;
-    let totalCapacity = clipCount * 2;
-    let currentTotal = next.reduce((sum, slot) => sum + slot.images.length, 0);
+    const totalCapacity = 12; // Maximum 12 images total
+    const currentTotal = next.reduce((sum, slot) => sum + slot.images.length, 0);
+    const remainingCapacity = totalCapacity - currentTotal;
     
     // Check if we have capacity
-    if (currentTotal >= totalCapacity) {
-      // Show toast that no slots available
+    if (remainingCapacity <= 0) {
+      toast({
+        title: "Maximum 12 images",
+        description: "Nema više slobodnih slotova",
+        variant: "destructive",
+      });
       return;
     }
     
-    // Fill all available slots sequentially, max 2 per slot
-    for (let slotIndex = 0; slotIndex < clipCount && fileIndex < files.length; slotIndex++) {
-      while (next[slotIndex].images.length < 2 && fileIndex < files.length) {
-        next[slotIndex].images.push(files[fileIndex++]);
-      }
+    // Check if trying to add more than remaining capacity
+    if (files.length > remainingCapacity) {
+      toast({
+        title: "Maximum 12 images",
+        description: `Možete dodati još samo ${remainingCapacity} slika`,
+        variant: "destructive",
+      });
     }
     
-    // If we couldn't fit all files, could show a toast here
-    if (fileIndex < files.length) {
-      // Toast: "Nema slobodnih slotova za sve fajlove"
+    // Fill all available slots sequentially, max 2 per slot
+    let fileIndex = 0;
+    for (let slotIndex = 0; slotIndex < clipCount && fileIndex < files.length && currentTotal + fileIndex < totalCapacity; slotIndex++) {
+      while (next[slotIndex].images.length < 2 && fileIndex < files.length && currentTotal + fileIndex < totalCapacity) {
+        next[slotIndex].images.push(files[fileIndex++]);
+      }
     }
     
     onSlotsChange(next);
