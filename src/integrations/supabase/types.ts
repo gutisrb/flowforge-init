@@ -85,6 +85,7 @@ export type Database = {
           id: string
           image_credits_remaining: number | null
           org_name: string | null
+          posting_webhook_url: string | null
           review_first: boolean
           tier: string | null
           video_credits_remaining: number | null
@@ -95,6 +96,7 @@ export type Database = {
           id: string
           image_credits_remaining?: number | null
           org_name?: string | null
+          posting_webhook_url?: string | null
           review_first?: boolean
           tier?: string | null
           video_credits_remaining?: number | null
@@ -105,6 +107,7 @@ export type Database = {
           id?: string
           image_credits_remaining?: number | null
           org_name?: string | null
+          posting_webhook_url?: string | null
           review_first?: boolean
           tier?: string | null
           video_credits_remaining?: number | null
@@ -172,14 +175,8 @@ export type Database = {
         Args: { p_tier: string; p_user: string }
         Returns: undefined
       }
-      spend_image_credit: {
-        Args: { p_user: string }
-        Returns: number
-      }
-      spend_video_credit: {
-        Args: { p_user: string }
-        Returns: number
-      }
+      spend_image_credit: { Args: { p_user: string }; Returns: number }
+      spend_video_credit: { Args: { p_user: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
