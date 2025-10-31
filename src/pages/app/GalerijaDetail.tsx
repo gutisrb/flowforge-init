@@ -342,11 +342,12 @@ export function GalerijaDetail() {
               <CardTitle className="text-lg">Akcije</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {profile?.review_first && video.status === 'ready' && (
+              {video.status === 'ready' && (
                 <Button
                   onClick={handlePostEverywhere}
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] hover:bg-[position:100%_0] transition-all duration-500 text-white shadow-lg hover:shadow-primary/50 group"
-                  disabled={posting || !profile.posting_webhook_url}
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] hover:bg-[position:100%_0] transition-all duration-500 text-white shadow-lg hover:shadow-primary/50 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!profile?.review_first || posting || !profile?.posting_webhook_url}
+                  title={!profile?.review_first ? 'Automatsko objavljivanje je uključeno' : ''}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                   {posting ? (
@@ -354,7 +355,9 @@ export function GalerijaDetail() {
                   ) : (
                     <Sparkles className="h-4 w-4 mr-2 relative z-10 animate-pulse" />
                   )}
-                  <span className="relative z-10 font-semibold">Objavi svuda</span>
+                  <span className="relative z-10 font-semibold">
+                    {!profile?.review_first ? 'Auto-objava aktivna' : 'Objavi svuda'}
+                  </span>
                 </Button>
               )}
               <Button
